@@ -26,8 +26,8 @@ namespace RozkładJazdyv2.Model
             if (!(InternetConnectionService.IsInternetConnectionAvailable()))
                 return false;
 
-            await TimetableDownloadService.DownloadNewTimetableAsync();
-            return true;
+            bool isTimetableDownloaded = await TimetableDownloadService.DownloadNewTimetableAsync();
+            return isTimetableDownloaded;
         }
     }
 }

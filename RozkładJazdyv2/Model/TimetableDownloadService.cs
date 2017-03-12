@@ -25,11 +25,11 @@ namespace RozkładJazdyv2.Model
 
         private async static Task<List<Line>> GetInfoAboutLinesAsync()
         {
-            using (var document = await GetAngleSharpDocumentOfSiteAsync(_TIMETABLE_URL))
+            using (var htmlDocument = await GetAngleSharpDocumentOfSiteAsync(_TIMETABLE_URL))
             {
-                if (document == null)
+                if (htmlDocument == null)
                     return null;
-                List<Line> lines = GetLinesInfoFromAngleSharpDocument(document);
+                List<Line> lines = GetLinesInfoFromAngleSharpDocument(htmlDocument);
                 if (lines == null || lines.Count() == 0)
                     return null;
                 InvokeOnLinesInfoDownloaded();
@@ -50,6 +50,7 @@ namespace RozkładJazdyv2.Model
                 if (line == null)
                     return null;
                 lines[i] = line;
+                InvokeOnLineDownloaded(line, countOfLines);
             }
             return lines;
         }
@@ -57,27 +58,8 @@ namespace RozkładJazdyv2.Model
         private async static Task<Line> GetLineDetailInfo(Line line)
         {
             string url = string.Format("{0}{1}", _TIMETABLE_BASE_URL, line.Url);
-            var document = (await GetAngleSharpDocumentOfSiteAsync(url)).Children[0];
-            var listOfHtmlSchedules = document.QuerySelectorAll("td")
-                        .Where(p => p.ClassName != null && p.ClassName.Contains("kier")).ToList();
-            if (CheckIfLineHasSchedules(listOfHtmlSchedules))
-            {
-                listOfHtmlSchedules = document.QuerySelectorAll("div").Where(p => p.GetAttribute("id") != null && 
-                                        p.GetAttribute("id").Contains("div_tabelki_tra")).ToList();
-                if (CheckIfScheduleIsFreezed(listOfHtmlSchedules))
-                {
-                    line.Schedules = new List<Schedule>().Add<Schedule>(
-                                        new Schedule() { Name = "linia zawieszona" });
-                    return line;
-                }
-                AddSchedulesToLine(ref line, listOfHtmlSchedules);
-            }
-            else
-                line.Schedules = new List<Schedule>().Add<Schedule>(
-                                new Schedule() { Name = "obecnie obowiązujący", IdOfLine = line.Id,
-                                    Url = url, IsActualSchedule = true });
-            line = await GetSchedulesDetailInfo(line);
-            
+            IElement htmlDocument = (await GetAngleSharpDocumentOfSiteAsync(url)).Children[0];
+            await AddSchedulesToLineAsync(line, htmlDocument, url);
             return line;
         }
 
@@ -85,14 +67,44 @@ namespace RozkładJazdyv2.Model
         {
             foreach(var schedule in line.Schedules)
             {
-                var document = GetAngleSharpDocumentOfSiteAsync(schedule.Url);
+                var htmlDocument = GetAngleSharpDocumentOfSiteAsync(schedule.Url);
                 //todo add downloading track
             }
 
             return line;
         }
 
-        private static void AddSchedulesToLine(ref Line line, IEnumerable<IElement> listOfHtmlSchedules)
+        private static async Task<Line> AddSchedulesToLineAsync(Line line, IElement htmlDocument, string url)
+        {
+            List<IElement> listOfHtmlSchedules = htmlDocument.QuerySelectorAll("td")
+                      .Where(p => p.ClassName != null && p.ClassName.Contains("kier")).ToList();
+
+            if (CheckIfLineHasSchedulesOrIsFreezed(listOfHtmlSchedules))
+            {
+                listOfHtmlSchedules = htmlDocument.QuerySelectorAll("div").Where(p => p.GetAttribute("id") != null &&
+                                        p.GetAttribute("id").Contains("div_tabelki_tra")).ToList();
+                if (CheckIfLineHasSchedulesOrIsFreezed(listOfHtmlSchedules))
+                {
+                    line.Schedules = new List<Schedule>().Add<Schedule>(
+                                        new Schedule() { Name = "linia zawieszona" });
+                    return line;
+                }
+                GetSchedulesDetail(ref line, listOfHtmlSchedules);
+            }
+            else
+                line.Schedules = new List<Schedule>().Add<Schedule>(
+                                new Schedule()
+                                {
+                                    Name = "obecnie obowiązujący",
+                                    IdOfLine = line.Id,
+                                    Url = url,
+                                    IsActualSchedule = true
+                                });
+            line = await GetSchedulesDetailInfo(line);
+            return line;
+        }
+
+        private static void GetSchedulesDetail(ref Line line, IEnumerable<IElement> listOfHtmlSchedules)
         {
             List<Schedule> listOfSchedules = new List<Schedule>();
             var schedules = listOfHtmlSchedules.ElementAt(0).Children[1].QuerySelectorAll("li a");
@@ -108,12 +120,6 @@ namespace RozkładJazdyv2.Model
             }
             line.Schedules = listOfSchedules;
         }
-
-        private static bool CheckIfLineHasSchedules(List<IElement> listOfHtmlSchedules)
-            => listOfHtmlSchedules == null || listOfHtmlSchedules.Count() == 0;
-
-        private static bool CheckIfScheduleIsFreezed(List<IElement> listOfHtmlSchedules)
-            => listOfHtmlSchedules == null || listOfHtmlSchedules.Count() == 0;
 
         private static List<Line> GetLinesInfoFromAngleSharpDocument(IHtmlDocument angleSharpDocument)
         {
@@ -184,5 +190,8 @@ namespace RozkładJazdyv2.Model
                 bit |= 1 << 12;
             return bit;
         }
+
+        private static bool CheckIfLineHasSchedulesOrIsFreezed(List<IElement> listOfHtmlSchedules)
+            => listOfHtmlSchedules == null || listOfHtmlSchedules.Count() == 0;
     }
 }

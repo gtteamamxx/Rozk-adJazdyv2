@@ -69,11 +69,19 @@ namespace RozkładJazdyv2
         private void HookDownloadProgressEvents()
         {
             EventHelper.OnLinesInfoDownloaded += OnLinesInfoDownloaded;
+            EventHelper.OnLineDownloaded += OnLineDownloaded;
         }
 
-        private async void AskToDownloadDatabaseFromInternetAsync()
+        private void OnLineDownloaded(Line line, int linesCount)
         {
-            await Task.Delay(2000);
+            double percent = ((line.Id + 1) * 100.0 / linesCount);
+            DownloadTimetableProgressBar.Value = percent;
+            DownloadTimetableTextBlock.Text = string.Format("Pobieranie linii: {0} [{1:00}%]", line.Name, percent);
+            EditTextInInfoStackPanel(InfoStackPanelTextId.Download_Timetable, "Trwa pobieranie linii: {0} / {1}", line.Id + 1, linesCount);
+        }
+
+        private void AskToDownloadDatabaseFromInternetAsync()
+        {
             ShowAskToDownloadDatabaseFromInternetInfo();
             ShowAndFadeInOnDownloadInfo();
             DownloadTimetableButton.Click += DownloadTimetableButtonClick;
@@ -190,18 +198,18 @@ namespace RozkładJazdyv2
             => AnimationHelper.CraeteFadeInAnimation(MainGrid, 2.0);
 
         #region Adding Info to StackPanelInfo
-        private void AddTextToInfoStackPanelOrEditIfExist(InfoStackPanelTextId index, string text)
+        private void AddTextToInfoStackPanelOrEditIfExist(InfoStackPanelTextId index, string text, params object[] args)
         {
             bool editText = RunInfoStackPanel.Children.Count() - 1 >= (int)index;
 
             if (editText)
-                EditTextInInfoStackPanel(index, text);
+                EditTextInInfoStackPanel(index, string.Format(text, args));
             else
-                AddTextToInfoStackPanel(text);
+                AddTextToInfoStackPanel(string.Format(text, args));
         }
 
-        private void EditTextInInfoStackPanel(InfoStackPanelTextId index, string text)
-            => ((TextBlock)RunInfoStackPanel.Children[(int)index]).Text = text;
+        private void EditTextInInfoStackPanel(InfoStackPanelTextId index, string text, params object[] args)
+            => ((TextBlock)RunInfoStackPanel.Children[(int)index]).Text = args.Length == 0 ? text : string.Format(text, args);
 
         private void AddTextToInfoStackPanel(string text)
             => RunInfoStackPanel.Children
