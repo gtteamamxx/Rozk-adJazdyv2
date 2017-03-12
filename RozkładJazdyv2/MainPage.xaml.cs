@@ -32,8 +32,9 @@ namespace RozkładJazdyv2
         enum InfoStackPanelTextId
         {
             Run_App_Text = 0,
-            Looking_For_Timetable = 1,
-            Download_Timetable = 2
+            Looking_For_Timetable,
+            Download_Timetable,
+            Saving_Timetable
         }
 
         public MainPage()
@@ -68,6 +69,32 @@ namespace RozkładJazdyv2
         {
             EventHelper.OnLinesInfoDownloaded += OnLinesInfoDownloaded;
             EventHelper.OnLineDownloaded += OnLineDownloaded;
+            EventHelper.OnAllLinesDownloaded += OnAllLinesDownloaded;
+            EventHelper.OnSqlSavingChanged += OnSqlSavingChanged;
+            EventHelper.OnSqlSaved += OnSqlSaved;
+        }
+
+        private void OnSqlSaved()
+        {
+            AddTextToInfoStackPanelOrEditIfExist(InfoStackPanelTextId.Saving_Timetable, "Rozkład jazdy zapisany...");
+            HideDownloadInfo();
+            DownloadTimetableProgressBar.Visibility = Visibility.Collapsed;
+            //todo show menu
+        }
+
+        private void OnSqlSavingChanged(int step, int maxSteps)
+        {
+            double percent = ((step * 100.0) / maxSteps);
+            AddTextToInfoStackPanelOrEditIfExist(InfoStackPanelTextId.Saving_Timetable, "Trwa zapisywanie rozkładu...");
+            DownloadTimetableTextBlock.Text = string.Format("Trwa zapisywanie rozkładu [{0:00}%]", percent);
+            DownloadTimetableProgressBar.Value = percent;
+        }
+
+        private void OnAllLinesDownloaded()
+        {
+            EditTextInInfoStackPanel(InfoStackPanelTextId.Download_Timetable, "Pobieranie rozkładu zakończone...");
+            DownloadTimetableProgressBar.Value = 0;
+            DownloadTimetableTextBlock.Text = "Pobieranie rozkładu zakończone. Trwa zapisywanie ...";
         }
 
         private void OnLineDownloaded(Line line, int linesCount)
@@ -98,22 +125,22 @@ namespace RozkładJazdyv2
             //todo timetable loaded
         }
 
-        private async Task DownloadBusTimetableAsync()
+        private async Task<bool> DownloadBusTimetableAsync()
         {
             ShowDownloadBusTimetableInfo();
             bool isTimetableDownloaded = await Timetable.DownloadTimetableFromInternetAsync();
-            if (isTimetableDownloaded)
-            {
-                //todo timetable downloaded
-                return;
-            }
-            CreateRetryDownloadInfo();
+            return isTimetableDownloaded;
         }
 
         private async void DownloadTimetableButtonClick(object sender, RoutedEventArgs e)
         {
             ShowProgressRing();
-            await DownloadBusTimetableAsync();
+            bool isTimetableDownloaded = await DownloadBusTimetableAsync();
+            if(!isTimetableDownloaded)
+                CreateRetryDownloadInfo();
+            else
+                if (!SQLServices.SaveDatabase())
+                    CreateRetryDownloadInfo();
             HideProgressRing();
         }
 

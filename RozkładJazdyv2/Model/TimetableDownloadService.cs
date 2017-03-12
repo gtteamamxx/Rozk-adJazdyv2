@@ -51,7 +51,10 @@ namespace RozkładJazdyv2.Model
             List<Line> lines = await GetInfoAboutLinesAsync();
             bool areLinesDownloadedCorrectly = !(lines == null || lines.Count() == 0);
             if (areLinesDownloadedCorrectly)
+            {
                 Timetable.Instance.Lines = lines;
+                InvokeOnAllLinesDownloaded();
+            }
             return areLinesDownloadedCorrectly;
         }
 
