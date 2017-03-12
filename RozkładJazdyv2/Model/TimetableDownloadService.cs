@@ -65,13 +65,20 @@ namespace RozkładJazdyv2.Model
 
         private async static Task<Line> GetSchedulesDetailInfo(Line line)
         {
-            foreach(var schedule in line.Schedules)
+            int countOfSchedules = line.Schedules.Count();
+            for(int i = 0; i < countOfSchedules; i++)
             {
-                var htmlDocument = GetAngleSharpDocumentOfSiteAsync(schedule.Url);
-                //todo add downloading track
+                Schedule schedule = line.Schedules[i];
+                var htmlDocument = await GetAngleSharpDocumentOfSiteAsync(schedule.Url);
+                await GetTracksOfScheduleAngleSharpDocument(htmlDocument);
             }
 
             return line;
+        }
+
+        private async static Task<List<Track>> GetTracksOfScheduleAngleSharpDocument(IHtmlDocument htmlDocument)
+        {
+            throw new NotImplementedException();
         }
 
         private static async Task<Line> AddSchedulesToLineAsync(Line line, IElement htmlDocument, string url)
@@ -108,10 +115,12 @@ namespace RozkładJazdyv2.Model
         {
             List<Schedule> listOfSchedules = new List<Schedule>();
             var schedules = listOfHtmlSchedules.ElementAt(0).Children[1].QuerySelectorAll("li a");
+            int id = 0;
             foreach(var schedule in schedules)
             {
-                listOfSchedules.Add(new Schedule(true)
+                listOfSchedules.Add(new Schedule()
                 {
+                    Id = id++,
                     IdOfLine = line.Id,
                     IsActualSchedule = schedule.TextContent.Contains("obecnie"),
                     Name = schedule.TextContent,
@@ -138,14 +147,16 @@ namespace RozkładJazdyv2.Model
         {
             List<Line> listOfLines = new List<Line>();
             int type = 1 << 0;
+            int id = 0;
             foreach (var element in collection)
             {
                 type = GetLineSumBitFromType(element.FirstElementChild.ClassName);
                 if ((type & (1 << 12)) == (1 << 12)) //if is 'koleje'
                     continue;
 
-                Line line = new Line(true)
+                Line line = new Line()
                 {
+                    Id = id++,
                     Url = @element.GetAttribute("href"),
                     Name = element.FirstElementChild.TextContent,
                     Type = type

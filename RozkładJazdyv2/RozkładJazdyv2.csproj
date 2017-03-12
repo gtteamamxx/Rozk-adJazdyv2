@@ -110,6 +110,7 @@
     <Compile Include="Model\StoryboardExtension.cs" />
     <Compile Include="Model\Timetable.cs" />
     <Compile Include="Model\TimetableDownloadService.cs" />
+    <Compile Include="Model\Track.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

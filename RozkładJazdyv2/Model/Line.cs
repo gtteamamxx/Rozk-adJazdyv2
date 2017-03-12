@@ -9,16 +9,9 @@ namespace RozkładJazdyv2.Model
 {
     public class Line
     {
-        private static int _Id;
-        public Line(bool increment = false)
-        {
-            if (increment)
-                Id = _Id++;
-        }
-
         [PrimaryKey]
         [Indexed]
-        public int Id { get; }
+        public int Id { get; set; }
         [Ignore]
         public string Url { get; set; }
         public string Name { get; set; }
