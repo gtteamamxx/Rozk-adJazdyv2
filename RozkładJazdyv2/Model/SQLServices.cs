@@ -16,7 +16,7 @@ namespace RozkładJazdyv2.Model
         private static readonly string _SQLTempFileName = "Timetable_T.sqlite";
 
         private static string _SQLFilePath = Path.Combine(ApplicationData.Current.LocalFolder.Path, _SQLFileName);
-        private static string _SQLTempFilePath => Path.Combine(ApplicationData.Current.LocalFolder.Path, _SQLTempFilePath);
+        private static string _SQLTempFilePath => Path.Combine(ApplicationData.Current.LocalFolder.Path, _SQLTempFileName);
 
         private static SQLiteConnection _SQLConnection;
 
