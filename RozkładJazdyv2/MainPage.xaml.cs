@@ -132,6 +132,7 @@ namespace RozkładJazdyv2
                 "Nie można pobrać rozkładu jazdy...");
             DownloadTimetableTextBlock.Text =
                 "Wystąpił problem podczas pobierania. Sprawdź połączenie z internetem i spróbuj ponownie.";
+            DownloadTimetableProgressBar.Visibility = Visibility.Collapsed;
             DownloadTimetableTextBlock.Visibility = Visibility.Visible;
         }
 

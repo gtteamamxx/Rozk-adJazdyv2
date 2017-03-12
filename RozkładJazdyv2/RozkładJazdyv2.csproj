@@ -100,7 +100,11 @@
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Model\AnimationHelper.cs" />
+    <Compile Include="Model\BusStop.cs" />
+    <Compile Include="Model\BusStopName.cs" />
     <Compile Include="Model\EventHelper.cs" />
+    <Compile Include="Model\Hour.cs" />
+    <Compile Include="Model\HourName.cs" />
     <Compile Include="Model\HtmlService.cs" />
     <Compile Include="Model\InternetConnectionService.cs" />
     <Compile Include="Model\Line.cs" />
@@ -111,6 +115,7 @@
     <Compile Include="Model\Timetable.cs" />
     <Compile Include="Model\TimetableDownloadService.cs" />
     <Compile Include="Model\Track.cs" />
+    <Compile Include="Model\TrackName.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

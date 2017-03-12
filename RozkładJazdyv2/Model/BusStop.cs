@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace RozkładJazdyv2.Model
 {
-    public class Track
+    public class BusStop
     {
         [PrimaryKey]
         [Indexed]
@@ -15,11 +15,16 @@ namespace RozkładJazdyv2.Model
         public int IdOfName { get; set; }
         public int IdOfLine { get; set; }
         public int IdOfSchedule { get; set; }
-        [Ignore]
-        public string Name { get { return Timetable.Instance.TracksNames.First(p => p.Id == this.IdOfName).Name; } }
+        public int IdOfTrack { get; set; }
         [Ignore]
         public string Url { get; set; }
+        public bool IsVariant { get; set; }
         [Ignore]
-        public List<BusStop> BusStops { get; set; }
+        public bool IsOnDemand { get { return Name.Contains("n/ż"); } }
+        public bool IsBusStopZone { get; set; }
+        [Ignore]
+        public string Name { get { return Timetable.Instance.BusStopsNames.First(p => p.Id == this.IdOfName).Name; } } //todo
+        [Ignore]
+        public List<Hour> Hours { get; set; }
     }
 }

@@ -9,21 +9,49 @@ using System.Threading.Tasks;
 
 namespace RozkładJazdyv2.Model
 {
-    public class TimetableDownloadService : EventHelper
+    public class TimetableDownloadService : Timetable
     {
         private const string _TIMETABLE_URL = "http://rozklady.kzkgop.pl/index.php?co=rozklady";
         private const string _TIMETABLE_BASE_URL = "http://rozklady.kzkgop.pl/";
 
         private TimetableDownloadService() { }
 
-        public async static Task<bool> DownloadNewTimetableAsync()
+        private static int _LineId;
+        private static int _ScheduleId;
+        private static int _TrackId;
+        private static int _StopId;
+        private static int _TrackNameId;
+        private static int _StopNameId;
+        private static int _HourNameId;
+
+        private static void ResetIdentyficators()
         {
+            Timetable.Instance = new Timetable()
+            {
+                BusStopsNames = new List<BusStopName>(),
+                TracksNames = new List<TrackName>(),
+                HoursNames = new List<HourName>()
+            };
+            _LineId = 0;
+            _ScheduleId = 0;
+            _TrackId = 0;
+            _StopId = 0;
+            _TrackNameId = 0;
+            _StopNameId = 0;
+            _HourNameId = 0;
+        }
+
+        public static async Task<bool> DownloadNewTimetableAsync()
+        {
+            ResetIdentyficators();
             List<Line> lines = await GetInfoAboutLinesAsync();
             bool areLinesDownloadedCorrectly = !(lines == null || lines.Count() == 0);
+            if (areLinesDownloadedCorrectly)
+                Timetable.Instance.Lines = lines;
             return areLinesDownloadedCorrectly;
         }
 
-        private async static Task<List<Line>> GetInfoAboutLinesAsync()
+        private static async Task<List<Line>> GetInfoAboutLinesAsync()
         {
             using (var htmlDocument = await GetAngleSharpDocumentOfSiteAsync(_TIMETABLE_URL))
             {
@@ -33,20 +61,20 @@ namespace RozkładJazdyv2.Model
                 if (lines == null || lines.Count() == 0)
                     return null;
                 InvokeOnLinesInfoDownloaded();
-                lines = await GetAllLinesDetailFromLinesInfo(lines);
+                lines = await GetAllLinesDetailFromLinesInfoAsync(lines);
                 if (lines == null || lines.Count() == 0)
                     return null;
                 return lines;
             }
         }
 
-        private async static Task<List<Line>> GetAllLinesDetailFromLinesInfo(List<Line> lines)
+        private static async Task<List<Line>> GetAllLinesDetailFromLinesInfoAsync(List<Line> lines)
         {
             int countOfLines = lines.Count();
             for (int i = 0; i < countOfLines; i++)
             {
                 Line line = lines[i];
-                line = await GetLineDetailInfo(line);
+                line = await GetLineDetailInfoAsync(line);
                 if (line == null)
                     return null;
                 lines[i] = line;
@@ -55,42 +83,202 @@ namespace RozkładJazdyv2.Model
             return lines;
         }
 
-        private async static Task<Line> GetLineDetailInfo(Line line)
+        private static async Task<Line> GetLineDetailInfoAsync(Line line)
         {
             string url = string.Format("{0}{1}", _TIMETABLE_BASE_URL, line.Url);
-            IElement htmlDocument = (await GetAngleSharpDocumentOfSiteAsync(url)).Children[0];
-            await AddSchedulesToLineAsync(line, htmlDocument, url);
+            var angSharpDocument = (await GetAngleSharpDocumentOfSiteAsync(url));
+            if (angSharpDocument == null)
+                return null;
+            var htmlDocument = angSharpDocument.Children[0];
+            line = await AddSchedulesToLineAsync(line, htmlDocument, url);
             return line;
         }
 
-        private async static Task<Line> GetSchedulesDetailInfo(Line line)
+        private static async Task<Line> GetSchedulesDetailInfoAsync(Line line)
         {
             int countOfSchedules = line.Schedules.Count();
             for(int i = 0; i < countOfSchedules; i++)
             {
                 Schedule schedule = line.Schedules[i];
                 var htmlDocument = await GetAngleSharpDocumentOfSiteAsync(schedule.Url);
-                await GetTracksOfScheduleAngleSharpDocument(htmlDocument);
+                if (htmlDocument == null)
+                    return null;
+                List<Track> listOfScheduleTracks = await GetTracksOfScheduleAngleSharpDocumentAsync(htmlDocument,
+                    line.Id, schedule.Id);
+                if (listOfScheduleTracks == null)
+                    return null;
+                schedule.Tracks = listOfScheduleTracks;
             }
-
             return line;
         }
 
-        private async static Task<List<Track>> GetTracksOfScheduleAngleSharpDocument(IHtmlDocument htmlDocument)
+        private static async Task<List<Track>> GetTracksOfScheduleAngleSharpDocumentAsync(IHtmlDocument htmlDocument, int lineId, int scheduleId)
         {
-            throw new NotImplementedException();
+            var listOfHtmlTracks = htmlDocument.QuerySelectorAll("div")
+                                    .Where(p => p.Id == "lewo" || p.Id == "srodek" || p.Id == "prawo");
+            if (IsNotValidList(listOfHtmlTracks))
+                return null;
+            List<Track> listOfTracks = new List<Track>();
+            foreach(var htmlTrack in listOfHtmlTracks)
+            {
+                Track track = new Track()
+                {
+                    Id = _TrackId++,
+                    IdOfLine = lineId,
+                    IdOfSchedule = scheduleId
+                };
+                track = await GetTrackDetailFromHtmlAsync(htmlTrack, track);
+                if (track == null)
+                    return null; ;
+                listOfTracks.Add(track);
+            }
+            return listOfTracks;
+        }
+
+        private static async Task<Track> GetTrackDetailFromHtmlAsync(IElement htmlTrack, Track track)
+        {
+            string linkToFirstStop = htmlTrack.QuerySelectorAll("tr td a").First().GetAttribute("href");
+            if (string.IsNullOrEmpty(linkToFirstStop))
+                return null;
+            string trackUrl = string.Format("{0}{1}", _TIMETABLE_BASE_URL, linkToFirstStop);
+            track.Url = trackUrl;
+            IHtmlDocument htmlDocument = await GetAngleSharpDocumentOfSiteAsync(trackUrl);
+            if (htmlDocument == null)
+                return null;
+            IEnumerable<IElement> tableOfHtmlStops = htmlDocument.QuerySelectorAll("table")
+                                    .Where(p => p.Id == "div_trasy_table");
+            if (IsNotValidList(tableOfHtmlStops))
+                return null;
+            track = await GetTrackDetailByTableOfHtmlStopsAsync(tableOfHtmlStops, track, htmlDocument);
+            return track;
+        }
+
+        private static async Task<Track> GetTrackDetailByTableOfHtmlStopsAsync(IEnumerable<IElement> htmlTableWithStops, Track track, IHtmlDocument htmlDocument)
+        {
+            var htmlTrack = htmlTableWithStops.First().QuerySelectorAll("tr");
+            if (IsNotValidHtmlList(htmlTrack))
+                return null;
+            string trackName = htmlTrack.First(p => p.ClassName == "tr_kierunek").FirstElementChild.TextContent.Remove(0, 10).Trim();
+            if (string.IsNullOrEmpty(trackName))
+                return null;
+            track = SetTrackName(track, trackName);
+            track = await GetTrackStopsFromHtmlAsync(track, htmlTrack, htmlDocument);
+            return track;
+        }
+
+        private static async Task<Track> GetTrackStopsFromHtmlAsync(Track track, IHtmlCollection<IElement> stopsRawHtmlCollection, IHtmlDocument htmlDocument)
+        {
+            var stopsHtmlCollection = stopsRawHtmlCollection.Where(p => p.ClassName.Contains("zwyk") || 
+                                    p.ClassName.Contains("stre") ||p.ClassName.Contains("wyj"));
+            track.BusStops = new List<BusStop>();
+            foreach(var htmlRawStop in stopsHtmlCollection)
+            {
+                var htmlStop = htmlRawStop.LastElementChild;
+                if (htmlStop == null)
+                    return null;
+                BusStop busStop = new BusStop()
+                {
+                    Id = _StopId++,
+                    IdOfLine = track.IdOfLine,
+                    IdOfSchedule = track.IdOfSchedule,
+                    IdOfTrack = track.Id,
+                    Url = htmlStop.LastElementChild.GetAttribute("href"),
+                    IsVariant = htmlStop.ClassName.Contains("wariant"),
+                    IsBusStopZone = htmlStop.ClassName.Contains("stref")
+                };
+                string busStopName = htmlStop.LastElementChild.TextContent;
+                busStop = SetBusStopName(busStop, busStopName);
+                busStop = await GetStopHoursAsync(track, busStop, htmlDocument);
+                if (busStop == null)
+                    return null;
+                track.BusStops.Add(busStop);
+            }
+            return track;
+        }
+
+        private static async Task<BusStop> GetStopHoursAsync(Track track, BusStop busStop, IHtmlDocument htmlDocument)
+        {
+            if (IsStopFirstStopInTrack(track, busStop))
+            {
+                htmlDocument = await GetStopAngleSharpDocumentAsync(busStop);
+                if (htmlDocument == null)
+                    return null;
+            }
+            var listOfHtmlHours = htmlDocument.QuerySelectorAll("table")
+                                    .Where(p => p.Id == "tabliczka_przystankowo");
+
+            if(!AreNotHoursInHtmlStop(listOfHtmlHours))
+            {
+                listOfHtmlHours = listOfHtmlHours.First().QuerySelectorAll("tr");
+                Hour hour = new Hour();
+                //ended at 227
+            }
+            else if(listOfHtmlHours == null)
+                return null;
+            return busStop;
+        }
+
+        private static async Task<IHtmlDocument> GetStopAngleSharpDocumentAsync(BusStop busStop)
+        {
+            string urlOfBusStop = string.Format("{0}{1}", _TIMETABLE_BASE_URL, busStop.Url);
+            var document = await GetAngleSharpDocumentOfSiteAsync(urlOfBusStop);
+            return document;
+        }
+
+        private static BusStop SetBusStopName(BusStop busStop, string busStopName)
+        {
+            int stopNameId = -1;
+            foreach (var stopNameClass in Timetable.Instance.BusStopsNames)
+            {
+                if (busStopName == stopNameClass.Name)
+                {
+                    busStop.IdOfName = stopNameId = stopNameClass.Id;
+                    break;
+                }
+            }
+            if (stopNameId == -1)
+            {
+                Timetable.Instance.BusStopsNames.Add(new BusStopName()
+                {
+                    Id = _StopNameId++,
+                    Name = busStopName
+                });
+                busStop.IdOfName = _StopNameId - 1;
+            }
+            return busStop;
+        }
+
+        private static Track SetTrackName(Track track, string trackName)
+        {
+            int trackNameId = -1;
+            foreach (var trackNameClass in Timetable.Instance.TracksNames)
+            {
+                if (trackNameClass.Name == trackName)
+                {
+                    track.IdOfName = trackNameId = trackNameClass.Id;
+                    break;
+                }
+            }
+            if (trackNameId == -1)
+            {
+                Timetable.Instance.TracksNames.Add(new TrackName()
+                {
+                    Id = _TrackNameId++,
+                    Name = trackName
+                });
+                track.IdOfName = _TrackNameId - 1;
+            }
+            return track;
         }
 
         private static async Task<Line> AddSchedulesToLineAsync(Line line, IElement htmlDocument, string url)
         {
             List<IElement> listOfHtmlSchedules = htmlDocument.QuerySelectorAll("td")
                       .Where(p => p.ClassName != null && p.ClassName.Contains("kier")).ToList();
-
-            if (CheckIfLineHasSchedulesOrIsFreezed(listOfHtmlSchedules))
+            if (IsSchedulesInLineOrScheduleIsFreezed(listOfHtmlSchedules))
             {
-                listOfHtmlSchedules = htmlDocument.QuerySelectorAll("div").Where(p => p.GetAttribute("id") != null &&
-                                        p.GetAttribute("id").Contains("div_tabelki_tra")).ToList();
-                if (CheckIfLineHasSchedulesOrIsFreezed(listOfHtmlSchedules))
+                listOfHtmlSchedules = htmlDocument.QuerySelectorAll("div").Where(p => p.Id == "div_tabelki_tras").ToList();
+                if (IsSchedulesInLineOrScheduleIsFreezed(listOfHtmlSchedules))
                 {
                     line.Schedules = new List<Schedule>().Add<Schedule>(
                                         new Schedule() { Name = "linia zawieszona" });
@@ -107,7 +295,7 @@ namespace RozkładJazdyv2.Model
                                     Url = url,
                                     IsActualSchedule = true
                                 });
-            line = await GetSchedulesDetailInfo(line);
+            line = await GetSchedulesDetailInfoAsync(line);
             return line;
         }
 
@@ -115,12 +303,11 @@ namespace RozkładJazdyv2.Model
         {
             List<Schedule> listOfSchedules = new List<Schedule>();
             var schedules = listOfHtmlSchedules.ElementAt(0).Children[1].QuerySelectorAll("li a");
-            int id = 0;
             foreach(var schedule in schedules)
             {
                 listOfSchedules.Add(new Schedule()
                 {
-                    Id = id++,
+                    Id = _ScheduleId++,
                     IdOfLine = line.Id,
                     IsActualSchedule = schedule.TextContent.Contains("obecnie"),
                     Name = schedule.TextContent,
@@ -147,16 +334,14 @@ namespace RozkładJazdyv2.Model
         {
             List<Line> listOfLines = new List<Line>();
             int type = 1 << 0;
-            int id = 0;
             foreach (var element in collection)
             {
                 type = GetLineSumBitFromType(element.FirstElementChild.ClassName);
                 if ((type & (1 << 12)) == (1 << 12)) //if is 'koleje'
                     continue;
-
                 Line line = new Line()
                 {
-                    Id = id++,
+                    Id = _LineId++,
                     Url = @element.GetAttribute("href"),
                     Name = element.FirstElementChild.TextContent,
                     Type = type
@@ -166,7 +351,7 @@ namespace RozkładJazdyv2.Model
             return listOfLines;
         }
 
-        private async static Task<IHtmlDocument> GetAngleSharpDocumentOfSiteAsync(string url)
+        private static async Task<IHtmlDocument> GetAngleSharpDocumentOfSiteAsync(string url)
         {
             string htmlOfSite = await HtmlService.GetHtmlFromSite(url);
             if (htmlOfSite == "")
@@ -202,7 +387,19 @@ namespace RozkładJazdyv2.Model
             return bit;
         }
 
-        private static bool CheckIfLineHasSchedulesOrIsFreezed(List<IElement> listOfHtmlSchedules)
+        private static bool AreNotHoursInHtmlStop(IEnumerable<IElement> listOfHtmlHours)
+            => listOfHtmlHours == null || listOfHtmlHours.Count() == 0;
+
+        private static bool IsStopFirstStopInTrack(Track track, BusStop busStop)
+            => track.Name != busStop.Name;
+
+        private static bool IsNotValidHtmlList(IHtmlCollection<IElement> htmlCollection)
+            => htmlCollection == null || htmlCollection.Count() == 0;
+
+        private static bool IsNotValidList(IEnumerable<IElement> htmlList)
+            => htmlList == null || htmlList.Count() == 0;
+
+        private static bool IsSchedulesInLineOrScheduleIsFreezed(List<IElement> listOfHtmlSchedules)
             => listOfHtmlSchedules == null || listOfHtmlSchedules.Count() == 0;
     }
 }

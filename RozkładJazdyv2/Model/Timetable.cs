@@ -6,12 +6,17 @@ using System.Threading.Tasks;
 
 namespace RozkładJazdyv2.Model
 {
-    public sealed class Timetable
+    public class Timetable : EventHelper
     {
-        public static Timetable Instance { get; }
+        public static Timetable Instance { get; protected internal set; }
 
-        private Timetable() { }
+        protected internal Timetable() { }
 
+        public List<Line> Lines { get; set; }
+        public List<BusStopName> BusStopsNames { get; set; }
+        public List<TrackName> TracksNames { get; set; }
+        public List<HourName> HoursNames { get; set;
+        }
         public static bool LoadTimetableFromLocalCache()
         {
             if (!SQLServices.IsValidDatabase())
@@ -21,7 +26,7 @@ namespace RozkładJazdyv2.Model
             return true;
         }
 
-        public async static Task<bool> DownloadTimetableFromInternetAsync()
+        public static async Task<bool> DownloadTimetableFromInternetAsync()
         {
             if (!(InternetConnectionService.IsInternetConnectionAvailable()))
                 return false;
