@@ -107,6 +107,7 @@
     <Compile Include="Model\HourName.cs" />
     <Compile Include="Model\HtmlService.cs" />
     <Compile Include="Model\InternetConnectionService.cs" />
+    <Compile Include="Model\Letter.cs" />
     <Compile Include="Model\Line.cs" />
     <Compile Include="Model\ListExtension.cs" />
     <Compile Include="Model\Schedule.cs" />

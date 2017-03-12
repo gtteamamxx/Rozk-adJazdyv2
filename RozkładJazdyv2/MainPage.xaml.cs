@@ -39,14 +39,12 @@ namespace RozkładJazdyv2
         public MainPage()
         {
             this.InitializeComponent();
-
             ShowStartApplicationInfo();
             ShowProgressRing();
             SetPhoneStatusBarColor(Colors.White, Colors.Gray);
             FadeInOnStart();
             InitSQLFile();
             HookDownloadProgressEvents();
-
             this.Loaded += MainPage_Loaded;
         }
 
@@ -109,7 +107,6 @@ namespace RozkładJazdyv2
                 //todo timetable downloaded
                 return;
             }
-
             CreateRetryDownloadInfo();
         }
 
@@ -156,7 +153,6 @@ namespace RozkładJazdyv2
         {
             DownloadTimetableTextBlock.Visibility = Visibility.Visible;
             DownloadTimetableButton.Visibility = Visibility.Visible;
-
             AnimationHelper.CraeteFadeInAnimation(DownloadTimetableButton, 1.0);
             AnimationHelper.CraeteFadeInAnimation(DownloadTimetableTextBlock, 1.0);
         }
@@ -202,7 +198,6 @@ namespace RozkładJazdyv2
         private void AddTextToInfoStackPanelOrEditIfExist(InfoStackPanelTextId index, string text, params object[] args)
         {
             bool editText = RunInfoStackPanel.Children.Count() - 1 >= (int)index;
-
             if (editText)
                 EditTextInInfoStackPanel(index, string.Format(text, args));
             else

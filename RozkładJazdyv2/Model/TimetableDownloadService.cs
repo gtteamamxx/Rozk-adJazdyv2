@@ -20,6 +20,8 @@ namespace RozkładJazdyv2.Model
         private static int _ScheduleId;
         private static int _TrackId;
         private static int _StopId;
+        private static int _HourId;
+        private static int _LetterId;
         private static int _TrackNameId;
         private static int _StopNameId;
         private static int _HourNameId;
@@ -30,12 +32,14 @@ namespace RozkładJazdyv2.Model
             {
                 BusStopsNames = new List<BusStopName>(),
                 TracksNames = new List<TrackName>(),
-                HoursNames = new List<HourName>()
+                HoursNames = new List<HourName>(),
+                Letters = new List<Letter>()
             };
             _LineId = 0;
             _ScheduleId = 0;
             _TrackId = 0;
             _StopId = 0;
+            _HourId = 0;
             _TrackNameId = 0;
             _StopNameId = 0;
             _HourNameId = 0;
@@ -89,7 +93,9 @@ namespace RozkładJazdyv2.Model
             var angSharpDocument = (await GetAngleSharpDocumentOfSiteAsync(url));
             if (angSharpDocument == null)
                 return null;
-            var htmlDocument = angSharpDocument.Children[0];
+            var htmlDocument = angSharpDocument.Children.Count() >= 1 ? angSharpDocument.Children[0] : null;
+            if (htmlDocument == null)
+                return null;
             line = await AddSchedulesToLineAsync(line, htmlDocument, url);
             return line;
         }
@@ -97,7 +103,7 @@ namespace RozkładJazdyv2.Model
         private static async Task<Line> GetSchedulesDetailInfoAsync(Line line)
         {
             int countOfSchedules = line.Schedules.Count();
-            for(int i = 0; i < countOfSchedules; i++)
+            for (int i = 0; i < countOfSchedules; i++)
             {
                 Schedule schedule = line.Schedules[i];
                 var htmlDocument = await GetAngleSharpDocumentOfSiteAsync(schedule.Url);
@@ -119,7 +125,7 @@ namespace RozkładJazdyv2.Model
             if (IsNotValidList(listOfHtmlTracks))
                 return null;
             List<Track> listOfTracks = new List<Track>();
-            foreach(var htmlTrack in listOfHtmlTracks)
+            foreach (var htmlTrack in listOfHtmlTracks)
             {
                 Track track = new Track()
                 {
@@ -158,7 +164,8 @@ namespace RozkładJazdyv2.Model
             var htmlTrack = htmlTableWithStops.First().QuerySelectorAll("tr");
             if (IsNotValidHtmlList(htmlTrack))
                 return null;
-            string trackName = htmlTrack.First(p => p.ClassName == "tr_kierunek").FirstElementChild.TextContent.Remove(0, 10).Trim();
+            string trackName = htmlTrack.First(p => p.ClassName == "tr_kierunek")
+                                .FirstElementChild.TextContent.Remove(0, 10).Trim();
             if (string.IsNullOrEmpty(trackName))
                 return null;
             track = SetTrackName(track, trackName);
@@ -168,10 +175,10 @@ namespace RozkładJazdyv2.Model
 
         private static async Task<Track> GetTrackStopsFromHtmlAsync(Track track, IHtmlCollection<IElement> stopsRawHtmlCollection, IHtmlDocument htmlDocument)
         {
-            var stopsHtmlCollection = stopsRawHtmlCollection.Where(p => p.ClassName.Contains("zwyk") || 
-                                    p.ClassName.Contains("stre") ||p.ClassName.Contains("wyj"));
+            var stopsHtmlCollection = stopsRawHtmlCollection.Where(p => p.ClassName.Contains("zwyk") ||
+                                    p.ClassName.Contains("stre") || p.ClassName.Contains("wyj"));
             track.BusStops = new List<BusStop>();
-            foreach(var htmlRawStop in stopsHtmlCollection)
+            foreach (var htmlRawStop in stopsHtmlCollection)
             {
                 var htmlStop = htmlRawStop.LastElementChild;
                 if (htmlStop == null)
@@ -198,24 +205,148 @@ namespace RozkładJazdyv2.Model
 
         private static async Task<BusStop> GetStopHoursAsync(Track track, BusStop busStop, IHtmlDocument htmlDocument)
         {
-            if (IsStopFirstStopInTrack(track, busStop))
-            {
-                htmlDocument = await GetStopAngleSharpDocumentAsync(busStop);
-                if (htmlDocument == null)
-                    return null;
-            }
+            htmlDocument = await GetStopAngleSharpDocumentAsync(busStop);
+            if (htmlDocument == null)
+                return null;
             var listOfHtmlHours = htmlDocument.QuerySelectorAll("table")
                                     .Where(p => p.Id == "tabliczka_przystankowo");
-
-            if(!AreNotHoursInHtmlStop(listOfHtmlHours))
+            if (!AreNotHoursInHtmlStop(listOfHtmlHours))
             {
                 listOfHtmlHours = listOfHtmlHours.First().QuerySelectorAll("tr");
-                Hour hour = new Hour();
-                //ended at 227
+                List<Hour> hours = GetHoursListFromHtmlList(htmlDocument, listOfHtmlHours, busStop);
+                if (hours == null)
+                    return null;
+                busStop.Hours = hours;
             }
-            else if(listOfHtmlHours == null)
+            else if (listOfHtmlHours == null)
                 return null;
             return busStop;
+        }
+
+        private static List<Hour> GetHoursListFromHtmlList(IHtmlDocument htmlDocument, IEnumerable<IElement> listOfHtmlHours, BusStop busStom)
+        {
+            var listOfDaysType = listOfHtmlHours.Where((p, i) => i % 2 == 0);
+            var listWithHoursOfDaysType = listOfHtmlHours.Where((p, i) => i % 2 == 1);
+            List<Hour> listOfHours = new List<Hour>();
+            int daysTypeCount = listOfDaysType.Count();
+            for(int i = 0; i < daysTypeCount; i++)
+            {
+                var htmlDayType = listOfDaysType.ElementAt(i);
+                var hour = new Hour()
+                {
+                    Id = _HourId++,
+                    IdOfBusStop = busStom.Id
+                };
+                string hourName = htmlDayType.FirstElementChild.TextContent;
+                hour = SetHourName(hour, hourName);
+                hour = GetHoursFromDayType(hour, listWithHoursOfDaysType.ElementAt(i), htmlDocument);
+                if (hour == null)
+                    return null;
+                listOfHours.Add(hour);
+                
+            }
+            return listOfHours;
+        }
+
+        private static Hour GetHoursFromDayType(Hour hour, IElement htmlDayType, IHtmlDocument htmlDocument)
+        {
+            var listOfHtmlHours = htmlDayType.QuerySelectorAll("span")
+                                    .Where(p => p.Id == "blok_godzina");
+            if (IsNotValidList(listOfHtmlHours))
+                return null;
+            StringBuilder stringBuilder = new StringBuilder();
+            foreach(var htmlHour in listOfHtmlHours)
+            {
+                string hourHours = GetHoursFromHtmlHour(htmlHour, htmlDocument);
+                if (hourHours == null)
+                    return null;
+                stringBuilder.Append(hourHours);         
+            }
+            hour.Hours = stringBuilder.ToString();
+            hour.Hours = hour.Hours.Remove(hour.Hours.Length - 1, 1); // remove last space
+            return hour;
+        }
+
+        private static string GetHoursFromHtmlHour(IElement htmlHour, IHtmlDocument htmlDocument)
+        {
+            string hourPart, minutePart;
+            hourPart = htmlHour.FirstElementChild.TextContent;
+            var listOfHtmlMinutes = htmlHour.QuerySelectorAll("a");
+            if (IsNotValidList(listOfHtmlMinutes))
+                return null;
+            StringBuilder stringBuilder = new StringBuilder();
+            bool isLetter = false;
+            foreach (var htmlMinute in listOfHtmlMinutes)
+            {
+                string letter = "";
+                minutePart = GetMinutePartFromHtmlMinute(htmlMinute);
+                if (minutePart == null)
+                    return null;
+                bool isLetterInHtmlMinute = htmlMinute.FirstElementChild.FirstElementChild != null;
+                if(isLetterInHtmlMinute)
+                {
+                    letter = htmlMinute.FirstElementChild.FirstElementChild.TextContent;
+                    minutePart = minutePart.Replace(letter, "");
+                    isLetter = true;
+                }
+                stringBuilder.AppendFormat("{0}:{1}{2} ", hourPart, minutePart, letter);
+            }
+            if (isLetter)
+                GetBusStopLetters(htmlDocument);
+            return stringBuilder.ToString();
+        }
+
+        private static string GetMinutePartFromHtmlMinute(IElement htmlMinute)
+        {
+            try
+            {
+                return htmlMinute.FirstElementChild.TextContent;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private static void GetBusStopLetters(IHtmlDocument htmlDocument)
+        {
+            var htmlTableWithLetters = htmlDocument.QuerySelectorAll("table").FirstOrDefault(p => p.ClassName == "legenda_literki");
+            if (htmlTableWithLetters == null)
+                return;
+            var listOfHtmlLetters = htmlTableWithLetters.QuerySelectorAll("tr");
+            foreach(var htmlLetter in listOfHtmlLetters)
+            {
+                Char letterChar = htmlLetter.TextContent[0];
+                Timetable.Instance.Letters.Add(new Letter()
+                {
+                    Id = _LetterId++,
+                    IdOfBusStop = _StopId-1,
+                    Name = htmlLetter.TextContent.Remove(0, 1).Insert(0, string.Format("{0} - ", letterChar))
+                });
+            }
+        }
+
+        private static Hour SetHourName(Hour hour, string hourName)
+        {
+            int hourNameId = -1;
+            foreach (var hourNameClass in Timetable.Instance.HoursNames)
+            {
+                if (hourName == hourNameClass.Name)
+                {
+                    hour.IdOfName = hourNameId = hourNameClass.Id;
+                    break;
+                }
+            }
+            if (hourNameId == -1)
+            {
+                Timetable.Instance.HoursNames.Add(new HourName()
+                {
+                    Id = _HourNameId++,
+                    Name = hourName
+                });
+                hour.IdOfName = _HourNameId - 1;
+            }
+            return hour;
         }
 
         private static async Task<IHtmlDocument> GetStopAngleSharpDocumentAsync(BusStop busStop)
@@ -303,7 +434,7 @@ namespace RozkładJazdyv2.Model
         {
             List<Schedule> listOfSchedules = new List<Schedule>();
             var schedules = listOfHtmlSchedules.ElementAt(0).Children[1].QuerySelectorAll("li a");
-            foreach(var schedule in schedules)
+            foreach (var schedule in schedules)
             {
                 listOfSchedules.Add(new Schedule()
                 {

@@ -7,15 +7,12 @@ using System.Threading.Tasks;
 
 namespace RozkładJazdyv2.Model
 {
-    public class Hour
+    public class Letter
     {
         [PrimaryKey]
         [Indexed]
         public int Id { get; set; }
-        public int IdOfName { get; set; }
         public int IdOfBusStop { get; set; }
-        [Ignore]
-        public string Name { get { return Timetable.Instance.HoursNames.First(p => p.Id == this.IdOfName).Name; } }
-        public string Hours { get; set; }
+        public string Name { get; set; }
     }
 }

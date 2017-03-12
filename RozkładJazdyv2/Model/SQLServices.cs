@@ -36,7 +36,7 @@ namespace RozkładJazdyv2.Model
 
         public static void LoadTimetableFromDatabase()
         {
-            ;
+            //todo
         }
     }
 }
