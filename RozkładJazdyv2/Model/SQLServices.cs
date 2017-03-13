@@ -120,12 +120,12 @@ namespace RozkładJazdyv2.Model
                 sqlConnection.InsertAll(listOfBusStops);
                 InvokeOnSqlSavingChanged(13, _SAVING_STEPS);
                 sqlConnection.InsertAll(listOfHours);
+                return true;
             }
             catch
             {
                 return false;
             }
-            return true;
         }
 
         private static bool CreateDatabase(SQLiteConnection sqlConnection)
@@ -143,12 +143,12 @@ namespace RozkładJazdyv2.Model
                 sqlConnection.CreateTable<BusStop>();
                 sqlConnection.CreateTable<Hour>();
                 InvokeOnSqlSavingChanged(3, _SAVING_STEPS);
+                return true;
             }
             catch
             {
                 return false;
             }
-            return true;
         }
 
         private static bool DeleteFile(string path)
@@ -156,6 +156,7 @@ namespace RozkładJazdyv2.Model
             try
             {
                 File.Delete(path);
+                return true;
             }
             catch(DirectoryNotFoundException)
             {
@@ -165,7 +166,6 @@ namespace RozkładJazdyv2.Model
             {
                 return false;
             }
-            return true;
         }
 
         public static void LoadTimetableFromDatabase()

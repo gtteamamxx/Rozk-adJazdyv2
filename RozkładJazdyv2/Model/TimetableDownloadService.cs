@@ -93,14 +93,16 @@ namespace RozkładJazdyv2.Model
         private static async Task<Line> GetLineDetailInfoAsync(Line line)
         {
             string url = string.Format("{0}{1}", _TIMETABLE_BASE_URL, line.Url);
-            var angSharpDocument = (await GetAngleSharpDocumentOfSiteAsync(url));
-            if (angSharpDocument == null)
-                return null;
-            var htmlDocument = angSharpDocument.Children.Count() >= 1 ? angSharpDocument.Children[0] : null;
-            if (htmlDocument == null)
-                return null;
-            line = await AddSchedulesToLineAsync(line, htmlDocument, url);
-            return line;
+            using (var angSharpDocument = (await GetAngleSharpDocumentOfSiteAsync(url)))
+            {
+                if (angSharpDocument == null)
+                    return null;
+                var htmlDocument = angSharpDocument.Children.Count() >= 1 ? angSharpDocument.Children[0] : null;
+                if (htmlDocument == null)
+                    return null;
+                line = await AddSchedulesToLineAsync(line, htmlDocument, url);
+                return line;
+            }
         }
 
         private static async Task<Line> GetSchedulesDetailInfoAsync(Line line)
@@ -151,18 +153,20 @@ namespace RozkładJazdyv2.Model
                 return null;
             string trackUrl = string.Format("{0}{1}", _TIMETABLE_BASE_URL, linkToFirstStop);
             track.Url = trackUrl;
-            IHtmlDocument htmlDocument = await GetAngleSharpDocumentOfSiteAsync(trackUrl);
-            if (htmlDocument == null)
-                return null;
-            IEnumerable<IElement> tableOfHtmlStops = htmlDocument.QuerySelectorAll("table")
-                                    .Where(p => p.Id == "div_trasy_table");
-            if (IsNotValidList(tableOfHtmlStops))
-                return null;
-            track = await GetTrackDetailByTableOfHtmlStopsAsync(tableOfHtmlStops, track, htmlDocument);
-            return track;
+            using (var htmlDocument = await GetAngleSharpDocumentOfSiteAsync(trackUrl))
+            {
+                if (htmlDocument == null)
+                    return null;
+                IEnumerable<IElement> tableOfHtmlStops = htmlDocument.QuerySelectorAll("table")
+                                        .Where(p => p.Id == "div_trasy_table");
+                if (IsNotValidList(tableOfHtmlStops))
+                    return null;
+                track = await GetTrackDetailByTableOfHtmlStopsAsync(tableOfHtmlStops, track);
+                return track;
+            }
         }
 
-        private static async Task<Track> GetTrackDetailByTableOfHtmlStopsAsync(IEnumerable<IElement> htmlTableWithStops, Track track, IHtmlDocument htmlDocument)
+        private static async Task<Track> GetTrackDetailByTableOfHtmlStopsAsync(IEnumerable<IElement> htmlTableWithStops, Track track)
         {
             var htmlTrack = htmlTableWithStops.First().QuerySelectorAll("tr");
             if (IsNotValidHtmlList(htmlTrack))
@@ -172,11 +176,11 @@ namespace RozkładJazdyv2.Model
             if (string.IsNullOrEmpty(trackName))
                 return null;
             track = SetTrackName(track, trackName);
-            track = await GetTrackStopsFromHtmlAsync(track, htmlTrack, htmlDocument);
+            track = await GetTrackStopsFromHtmlAsync(track, htmlTrack);
             return track;
         }
 
-        private static async Task<Track> GetTrackStopsFromHtmlAsync(Track track, IHtmlCollection<IElement> stopsRawHtmlCollection, IHtmlDocument htmlDocument)
+        private static async Task<Track> GetTrackStopsFromHtmlAsync(Track track, IHtmlCollection<IElement> stopsRawHtmlCollection)
         {
             var stopsHtmlCollection = stopsRawHtmlCollection.Where(p => p.ClassName.Contains("zwyk") ||
                                     p.ClassName.Contains("stre") || p.ClassName.Contains("wyj"));
@@ -198,7 +202,7 @@ namespace RozkładJazdyv2.Model
                 };
                 string busStopName = htmlStop.LastElementChild.TextContent;
                 busStop = SetBusStopName(busStop, busStopName);
-                busStop = await GetStopHoursAsync(track, busStop, htmlDocument);
+                busStop = await GetStopHoursAsync(track, busStop);
                 if (busStop == null)
                     return null;
                 track.BusStops.Add(busStop);
@@ -206,24 +210,26 @@ namespace RozkładJazdyv2.Model
             return track;
         }
 
-        private static async Task<BusStop> GetStopHoursAsync(Track track, BusStop busStop, IHtmlDocument htmlDocument)
+        private static async Task<BusStop> GetStopHoursAsync(Track track, BusStop busStop)
         {
-            htmlDocument = await GetStopAngleSharpDocumentAsync(busStop);
-            if (htmlDocument == null)
-                return null;
-            var listOfHtmlHours = htmlDocument.QuerySelectorAll("table")
-                                    .Where(p => p.Id == "tabliczka_przystankowo");
-            if (!AreNotHoursInHtmlStop(listOfHtmlHours))
+            using (var htmlDocument = await GetStopAngleSharpDocumentAsync(busStop))
             {
-                listOfHtmlHours = listOfHtmlHours.First().QuerySelectorAll("tr");
-                List<Hour> hours = GetHoursListFromHtmlList(htmlDocument, listOfHtmlHours, busStop);
-                if (hours == null)
+                if (htmlDocument == null)
                     return null;
-                busStop.Hours = hours;
+                var listOfHtmlHours = htmlDocument.QuerySelectorAll("table")
+                                        .Where(p => p.Id == "tabliczka_przystankowo");
+                if (!AreNotHoursInHtmlStop(listOfHtmlHours))
+                {
+                    listOfHtmlHours = listOfHtmlHours.First().QuerySelectorAll("tr");
+                    List<Hour> hours = GetHoursListFromHtmlList(htmlDocument, listOfHtmlHours, busStop);
+                    if (hours == null)
+                        return null;
+                    busStop.Hours = hours;
+                }
+                else if (listOfHtmlHours == null)
+                    return null;
+                return busStop;
             }
-            else if (listOfHtmlHours == null)
-                return null;
-            return busStop;
         }
 
         private static List<Hour> GetHoursListFromHtmlList(IHtmlDocument htmlDocument, IEnumerable<IElement> listOfHtmlHours, BusStop busStom)
@@ -257,15 +263,15 @@ namespace RozkładJazdyv2.Model
                                     .Where(p => p.Id == "blok_godzina");
             if (IsNotValidList(listOfHtmlHours))
                 return null;
-            StringBuilder stringBuilder = new StringBuilder();
+            StringBuilder hoursString = new StringBuilder();
             foreach(var htmlHour in listOfHtmlHours)
             {
                 string hourHours = GetHoursFromHtmlHour(htmlHour, htmlDocument);
                 if (hourHours == null)
                     return null;
-                stringBuilder.Append(hourHours);         
+                hoursString.Append(hourHours);         
             }
-            hour.Hours = stringBuilder.ToString();
+            hour.Hours = hoursString.ToString();
             hour.Hours = hour.Hours.Remove(hour.Hours.Length - 1, 1); // remove last space
             return hour;
         }
@@ -277,7 +283,7 @@ namespace RozkładJazdyv2.Model
             var listOfHtmlMinutes = htmlHour.QuerySelectorAll("a");
             if (IsNotValidList(listOfHtmlMinutes))
                 return null;
-            StringBuilder stringBuilder = new StringBuilder();
+            StringBuilder hoursString = new StringBuilder();
             bool isLetter = false;
             foreach (var htmlMinute in listOfHtmlMinutes)
             {
@@ -292,11 +298,11 @@ namespace RozkładJazdyv2.Model
                     minutePart = minutePart.Replace(letter, "");
                     isLetter = true;
                 }
-                stringBuilder.AppendFormat("{0}:{1}{2} ", hourPart, minutePart, letter);
+                hoursString.AppendFormat("{0}:{1}{2} ", hourPart, minutePart, letter);
             }
             if (isLetter)
                 GetBusStopLetters(htmlDocument);
-            return stringBuilder.ToString();
+            return hoursString.ToString();
         }
 
         private static string GetMinutePartFromHtmlMinute(IElement htmlMinute)

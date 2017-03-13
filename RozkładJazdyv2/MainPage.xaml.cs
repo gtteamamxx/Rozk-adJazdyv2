@@ -45,7 +45,7 @@ namespace RozkładJazdyv2
             SetPhoneStatusBarColor(Colors.White, Colors.Gray);
             FadeInOnStart();
             InitSQLFile();
-            HookDownloadProgressEvents();
+            HookEvents();
             this.Loaded += MainPage_Loaded;
         }
 
@@ -65,13 +65,14 @@ namespace RozkładJazdyv2
             LoadBusTimetable();
         }
 
-        private void HookDownloadProgressEvents()
+        private void HookEvents()
         {
             EventHelper.OnLinesInfoDownloaded += OnLinesInfoDownloaded;
             EventHelper.OnLineDownloaded += OnLineDownloaded;
             EventHelper.OnAllLinesDownloaded += OnAllLinesDownloaded;
             EventHelper.OnSqlSavingChanged += OnSqlSavingChanged;
             EventHelper.OnSqlSaved += OnSqlSaved;
+            DownloadTimetableRetryButton.Click += DownloadTimetableButtonClick;
         }
 
         private void OnSqlSaved()
@@ -140,7 +141,11 @@ namespace RozkładJazdyv2
                 CreateRetryDownloadInfo();
             else
                 if (!SQLServices.SaveDatabase())
+                {
                     CreateRetryDownloadInfo();
+                    AddTextToInfoStackPanelOrEditIfExist(InfoStackPanelTextId.Saving_Timetable, "Rozkład nie został zapisany...");
+                }
+                   
             HideProgressRing();
         }
 
@@ -173,7 +178,8 @@ namespace RozkładJazdyv2
         {
             ShowTimetableNotDownloadedError();
             ShowRetryDownloadButton();
-            DownloadTimetableRetryButton.Click += DownloadTimetableButtonClick;
+            if(CheckIfInfoExist(InfoStackPanelTextId.Saving_Timetable))
+                DeleteTextInInfoStackPanel(InfoStackPanelTextId.Saving_Timetable);
         }
 
         private void ShowAndFadeInOnDownloadInfo()
@@ -221,7 +227,14 @@ namespace RozkładJazdyv2
         private void FadeInOnStart()
             => AnimationHelper.CraeteFadeInAnimation(MainGrid, 2.0);
 
-        #region Adding Info to StackPanelInfo
+        #region Editing info in stackpanel
+
+        private bool CheckIfInfoExist(InfoStackPanelTextId index)
+            => RunInfoStackPanel.Children.Count() - 1 > (int)index;
+
+        private void DeleteTextInInfoStackPanel(InfoStackPanelTextId index)
+            => RunInfoStackPanel.Children.RemoveAt((int)index);
+
         private void AddTextToInfoStackPanelOrEditIfExist(InfoStackPanelTextId index, string text, params object[] args)
         {
             bool editText = RunInfoStackPanel.Children.Count() - 1 >= (int)index;
