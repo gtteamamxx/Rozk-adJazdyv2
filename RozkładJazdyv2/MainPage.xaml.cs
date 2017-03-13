@@ -46,7 +46,7 @@ namespace RozkładJazdyv2
             FadeInOnStart();
             InitSQLFile();
             HookEvents();
-            this.Loaded += MainPage_Loaded;
+            this.Loaded += MainPage_LoadedAsync;
         }
 
         private void SetPhoneStatusBarColor(Color foregroundColor, Color backgroundColor)
@@ -59,10 +59,10 @@ namespace RozkładJazdyv2
             }
         }
 
-        private void MainPage_Loaded(object sender, RoutedEventArgs e)
+        private async void MainPage_LoadedAsync(object sender, RoutedEventArgs e)
         {
             ShowStartApplicationLoadedInfo();
-            LoadBusTimetable();
+            await LoadBusTimetableAsync();
         }
 
         private void HookEvents()
@@ -113,9 +113,9 @@ namespace RozkładJazdyv2
             DownloadTimetableButton.Click += DownloadTimetableButtonClick;
         }
 
-        private void LoadBusTimetable()
+        private async Task LoadBusTimetableAsync()
         {
-            bool isTimetableLoaded = Timetable.LoadTimetableFromLocalCache();
+            bool isTimetableLoaded = await Timetable.LoadTimetableFromLocalCacheAsync();
             if (!isTimetableLoaded)
             {
                 HideProgressRing();
@@ -137,15 +137,17 @@ namespace RozkładJazdyv2
         {
             ShowProgressRing();
             bool isTimetableDownloaded = await DownloadBusTimetableAsync();
-            if(!isTimetableDownloaded)
+            if (!isTimetableDownloaded)
                 CreateRetryDownloadInfo();
             else
-                if (!SQLServices.SaveDatabase())
+            {
+                bool isDatabaseSaved = !(await SQLServices.SaveDatabaseAsync());
+                if(!isDatabaseSaved)
                 {
                     CreateRetryDownloadInfo();
                     AddTextToInfoStackPanelOrEditIfExist(InfoStackPanelTextId.Saving_Timetable, "Rozkład nie został zapisany...");
                 }
-                   
+            }      
             HideProgressRing();
         }
 

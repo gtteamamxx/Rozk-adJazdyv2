@@ -7,13 +7,11 @@ using System.Threading.Tasks;
 
 namespace RozkładJazdyv2.Model
 {
-    public class Letter
+    public class LetterName
     {
         [PrimaryKey]
         [Indexed]
         public int Id { get; set; }
-        public int IdOfBusStop { get; set; }
-        public int IdOfName { get; set; }
         public string Name { get; set; }
     }
 }

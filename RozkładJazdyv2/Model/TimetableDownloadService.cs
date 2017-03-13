@@ -25,6 +25,7 @@ namespace RozkładJazdyv2.Model
         private static int _TrackNameId;
         private static int _StopNameId;
         private static int _HourNameId;
+        private static int _LetterNameId;
 
         private static void ResetIdentyficators()
         {
@@ -33,16 +34,19 @@ namespace RozkładJazdyv2.Model
                 BusStopsNames = new List<BusStopName>(),
                 TracksNames = new List<TrackName>(),
                 HoursNames = new List<HourName>(),
-                Letters = new List<Letter>()
+                Letters = new List<Letter>(),
+                LettersNames = new List<LetterName>()
             };
             _LineId = 0;
             _ScheduleId = 0;
             _TrackId = 0;
             _StopId = 0;
             _HourId = 0;
+            _LetterId = 0;
             _TrackNameId = 0;
             _StopNameId = 0;
             _HourNameId = 0;
+            _LetterNameId = 0;
         }
 
         public static async Task<bool> DownloadNewTimetableAsync()
@@ -326,13 +330,38 @@ namespace RozkładJazdyv2.Model
             foreach(var htmlLetter in listOfHtmlLetters)
             {
                 Char letterChar = htmlLetter.TextContent[0];
-                Timetable.Instance.Letters.Add(new Letter()
+                var letter = new Letter()
                 {
                     Id = _LetterId++,
-                    IdOfBusStop = _StopId-1,
-                    Name = htmlLetter.TextContent.Remove(0, 1).Insert(0, string.Format("{0} - ", letterChar))
-                });
+                    IdOfBusStop = _StopId - 1
+                };
+                var letterName = htmlLetter.TextContent.Remove(0, 1).Insert(0, string.Format("{0} - ", letterChar));
+                letter = SetLetterName(letter, letterName);
+                Timetable.Instance.Letters.Add(letter);
             }
+        }
+
+        private static Letter SetLetterName(Letter letter, string letterName)
+        {
+            int letterNameId = -1;
+            foreach (var letterNameClass in Timetable.Instance.LettersNames)
+            {
+                if (letterName == letterNameClass.Name)
+                {
+                    letter.IdOfName = letterNameId = letterNameClass.Id;
+                    break;
+                }
+            }
+            if (letterNameId == -1)
+            {
+                Timetable.Instance.LettersNames.Add(new LetterName()
+                {
+                    Id = _LetterNameId++,
+                    Name = letterName
+                });
+                letter.IdOfName = _HourNameId - 1;
+            }
+            return letter;
         }
 
         private static Hour SetHourName(Hour hour, string hourName)

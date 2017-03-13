@@ -1,5 +1,7 @@
 ﻿using SQLite.Net;
+using SQLite.Net.Async;
 using SQLite.Net.Platform.WinRT;
+
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -18,42 +20,46 @@ namespace RozkładJazdyv2.Model
         private static string _SQLFilePath = Path.Combine(ApplicationData.Current.LocalFolder.Path, _SQLFileName);
         private static string _SQLTempFilePath => Path.Combine(ApplicationData.Current.LocalFolder.Path, _SQLTempFileName);
 
-        private static SQLiteConnection _SQLConnection;
+        private static SQLiteAsyncConnection _SQLConnection;
 
         private static int _SAVING_STEPS = 14;
 
         private SQLServices() { }
 
         public static void InitSQL()
-            => _SQLConnection = new SQLiteConnection(new SQLitePlatformWinRT(), _SQLFilePath);
+            => _SQLConnection = new SQLiteAsyncConnection(new Func<SQLiteConnectionWithLock>(
+                () => new SQLiteConnectionWithLock(
+                    new SQLitePlatformWinRT(),
+                    new SQLiteConnectionString(_SQLFilePath, storeDateTimeAsTicks: false))));
 
         private static bool IsDatabaseFileExist()
             => File.Exists(_SQLFilePath);
 
-        public static bool IsValidDatabase()
+        public static async Task<bool> IsValidDatabaseAsync()
         {
             if (!IsDatabaseFileExist())
                 return false;
             string query = "SELECT * FROM sqlite_master WHERE name LIKE 'Line';";
-            SQLiteCommand command = _SQLConnection.CreateCommand(query);
-            string result = command.ExecuteScalar<string>();
+            var result = await _SQLConnection.ExecuteScalarAsync<string>(query);
             bool isValidDatabase = result != null && result.Length > 0;
             return isValidDatabase;
         }
 
-        public static bool SaveDatabase()
+        public static async Task<bool> SaveDatabaseAsync()
         {
             InvokeOnSqlSavingChanged(1, _SAVING_STEPS);
             bool isFileRemoved = DeleteFile(_SQLTempFilePath);
             if (!isFileRemoved)
                 return false;
-            var tempSqlConnection = new SQLiteConnection(new SQLitePlatformWinRT(), _SQLTempFilePath);
-            if (!CreateDatabase(tempSqlConnection))
+            var tempSqlConnection = new SQLiteAsyncConnection(new Func<SQLiteConnectionWithLock>(
+                () => new SQLiteConnectionWithLock(
+                    new SQLitePlatformWinRT(),
+                    new SQLiteConnectionString(_SQLTempFilePath, storeDateTimeAsTicks: false))));
+            if (!(await CreateDatabaseAsync(tempSqlConnection)))
                 return false;
-            if (!InsertIntoDatabase(tempSqlConnection))
+            if (!(await InsertIntoDatabaseAsync(tempSqlConnection)))
                 return false;
             InvokeOnSqlSavingChanged(14, _SAVING_STEPS);
-            tempSqlConnection.Close();
             isFileRemoved = DeleteFile(_SQLFilePath);
             if (!isFileRemoved)
                 return false;
@@ -76,7 +82,7 @@ namespace RozkładJazdyv2.Model
                 return false;
             }
         }
-        private static bool InsertIntoDatabase(SQLiteConnection sqlConnection)
+        private static async Task<bool> InsertIntoDatabaseAsync(SQLiteAsyncConnection sqlConnection)
         {
             try
             {
@@ -90,36 +96,40 @@ namespace RozkładJazdyv2.Model
                     foreach(var schedule in line.Schedules)
                     {
                         listOfSchedules.Add(schedule);
-                        foreach(var track in schedule.Tracks)
+                        if (schedule.Tracks != null)
                         {
-                            listOfTracks.Add(track);
-                            foreach(var busStop in track.BusStops)
+                            foreach (var track in schedule.Tracks)
                             {
-                                listOfBusStops.Add(busStop);
-                                foreach(var hour in busStop.Hours)
-                                    listOfHours.Add(hour);
+                                listOfTracks.Add(track);
+                                foreach (var busStop in track.BusStops)
+                                {
+                                    listOfBusStops.Add(busStop);
+                                    foreach (var hour in busStop.Hours)
+                                        listOfHours.Add(hour);
+                                }
                             }
                         }
                     }
                 }
                 InvokeOnSqlSavingChanged(5, _SAVING_STEPS);
-                sqlConnection.InsertAll(Timetable.Instance.BusStopsNames);
+                await sqlConnection.InsertAllAsync(Timetable.Instance.BusStopsNames);
                 InvokeOnSqlSavingChanged(6, _SAVING_STEPS);
-                sqlConnection.InsertAll(Timetable.Instance.HoursNames);
+                await sqlConnection.InsertAllAsync(Timetable.Instance.HoursNames);
                 InvokeOnSqlSavingChanged(7, _SAVING_STEPS);
-                sqlConnection.InsertAll(Timetable.Instance.Letters);
+                await sqlConnection.InsertAllAsync(Timetable.Instance.Letters);
                 InvokeOnSqlSavingChanged(8, _SAVING_STEPS);
-                sqlConnection.InsertAll(Timetable.Instance.Lines);
+                await sqlConnection.InsertAllAsync(Timetable.Instance.Lines);
                 InvokeOnSqlSavingChanged(9, _SAVING_STEPS);
-                sqlConnection.InsertAll(Timetable.Instance.TracksNames);
+                await sqlConnection.InsertAllAsync(Timetable.Instance.TracksNames);
+                await sqlConnection.InsertAllAsync(Timetable.Instance.LettersNames);
                 InvokeOnSqlSavingChanged(10, _SAVING_STEPS);
-                sqlConnection.InsertAll(listOfSchedules);
+                await sqlConnection.InsertAllAsync(listOfSchedules);
                 InvokeOnSqlSavingChanged(11, _SAVING_STEPS);
-                sqlConnection.InsertAll(listOfTracks);
+                await sqlConnection.InsertAllAsync(listOfTracks);
                 InvokeOnSqlSavingChanged(12, _SAVING_STEPS);
-                sqlConnection.InsertAll(listOfBusStops);
+                await sqlConnection.InsertAllAsync(listOfBusStops);
                 InvokeOnSqlSavingChanged(13, _SAVING_STEPS);
-                sqlConnection.InsertAll(listOfHours);
+                await sqlConnection.InsertAllAsync(listOfHours);
                 return true;
             }
             catch
@@ -128,20 +138,21 @@ namespace RozkładJazdyv2.Model
             }
         }
 
-        private static bool CreateDatabase(SQLiteConnection sqlConnection)
+        private static async Task<bool> CreateDatabaseAsync(SQLiteAsyncConnection sqlConnection)
         {
             try
             {
                 InvokeOnSqlSavingChanged(2, _SAVING_STEPS);
-                sqlConnection.CreateTable<Line>();
-                sqlConnection.CreateTable<BusStopName>();
-                sqlConnection.CreateTable<TrackName>();
-                sqlConnection.CreateTable<HourName>();
-                sqlConnection.CreateTable<Letter>();
-                sqlConnection.CreateTable<Schedule>();
-                sqlConnection.CreateTable<Track>();
-                sqlConnection.CreateTable<BusStop>();
-                sqlConnection.CreateTable<Hour>();
+                await sqlConnection.CreateTableAsync<Line>();
+                await sqlConnection.CreateTableAsync<BusStopName>();
+                await sqlConnection.CreateTableAsync<TrackName>();
+                await sqlConnection.CreateTableAsync<HourName>();
+                await sqlConnection.CreateTableAsync<Letter>();
+                await sqlConnection.CreateTableAsync<Schedule>();
+                await sqlConnection.CreateTableAsync<Track>();
+                await sqlConnection.CreateTableAsync<BusStop>();
+                await sqlConnection.CreateTableAsync<Hour>();
+                await sqlConnection.CreateTableAsync<LetterName>();
                 InvokeOnSqlSavingChanged(3, _SAVING_STEPS);
                 return true;
             }

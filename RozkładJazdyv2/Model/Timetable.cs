@@ -16,11 +16,12 @@ namespace RozkładJazdyv2.Model
         public List<BusStopName> BusStopsNames { get; set; }
         public List<TrackName> TracksNames { get; set; }
         public List<HourName> HoursNames { get; set; }
+        public List<LetterName> LettersNames { get; set; }
         public List<Letter> Letters { get; set; }
 
-        public static bool LoadTimetableFromLocalCache()
+        public static async Task<bool> LoadTimetableFromLocalCacheAsync()
         {
-            if (!SQLServices.IsValidDatabase())
+            if (!(await SQLServices.IsValidDatabaseAsync()))
                 return false;
             SQLServices.LoadTimetableFromDatabase();
             return true;
