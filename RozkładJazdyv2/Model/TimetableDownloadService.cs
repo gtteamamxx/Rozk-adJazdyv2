@@ -232,6 +232,8 @@ namespace RozkładJazdyv2.Model
                 }
                 else if (listOfHtmlHours == null)
                     return null;
+                else
+                    busStop.Hours = new List<Hour>();
                 return busStop;
             }
         }
@@ -450,7 +452,7 @@ namespace RozkładJazdyv2.Model
                 if (IsSchedulesInLineOrScheduleIsFreezed(listOfHtmlSchedules))
                 {
                     line.Schedules = new List<Schedule>().Add<Schedule>(
-                                        new Schedule() { Name = "linia zawieszona" });
+                                        new Schedule() { Id = _ScheduleId++, Name = "linia zawieszona" });
                     return line;
                 }
                 GetSchedulesDetail(ref line, listOfHtmlSchedules);
@@ -459,6 +461,7 @@ namespace RozkładJazdyv2.Model
                 line.Schedules = new List<Schedule>().Add<Schedule>(
                                 new Schedule()
                                 {
+                                    Id = _ScheduleId++,
                                     Name = "obecnie obowiązujący",
                                     IdOfLine = line.Id,
                                     Url = url,

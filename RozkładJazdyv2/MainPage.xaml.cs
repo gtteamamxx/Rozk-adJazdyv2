@@ -135,13 +135,12 @@ namespace RozkładJazdyv2
 
         private async void DownloadTimetableButtonClick(object sender, RoutedEventArgs e)
         {
-            ShowProgressRing();
             bool isTimetableDownloaded = await DownloadBusTimetableAsync();
             if (!isTimetableDownloaded)
                 CreateRetryDownloadInfo();
             else
             {
-                bool isDatabaseSaved = !(await SQLServices.SaveDatabaseAsync());
+                bool isDatabaseSaved = await SQLServices.SaveDatabaseAsync();
                 if(!isDatabaseSaved)
                 {
                     CreateRetryDownloadInfo();
