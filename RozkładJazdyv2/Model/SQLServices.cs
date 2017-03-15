@@ -144,23 +144,10 @@ namespace RozkładJazdyv2.Model
         {
             try
             {
-                foreach (Line line in Timetable.Instance.Lines)
-                {
-                    foreach (Schedule schedule in line.Schedules)
-                    {
-                        listOfSchedules.Add(schedule);
-                        foreach (Track track in schedule.Tracks)
-                        {
-                            listOfTracks.Add(track);
-                            foreach (BusStop busStop in track.BusStops)
-                            {
-                                listOfBusStops.Add(busStop);
-                                foreach (Hour hour in busStop.Hours)
-                                    listOfHours.Add(hour);
-                            }
-                        }
-                    }
-                }
+                listOfSchedules = Timetable.Instance.Lines.SelectMany(p => p.Schedules).ToList();
+                listOfTracks = listOfSchedules.SelectMany(p => p.Tracks).ToList();
+                listOfBusStops = listOfTracks.SelectMany(p => p.BusStops).ToList();
+                listOfHours = listOfBusStops.SelectMany(p => p.Hours).ToList();
                 return true;
             }
             catch

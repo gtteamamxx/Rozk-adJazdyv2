@@ -37,6 +37,14 @@ namespace RozkładJazdyv2
             Saving_Timetable
         }
 
+        enum GlobalInfoTextId
+        {
+            Schedules = 0,
+            Tracks,
+            Bus_Stops,
+            Hours
+        }
+
         public MainPage()
         {
             this.InitializeComponent();
@@ -137,10 +145,31 @@ namespace RozkładJazdyv2
         {
             double percent = ((line.Id + 1) * 100.0 / linesCount);
             TimetableProgressBar.Value = percent;
-            TimetableInfoText.Text = string.Format("Pobieranie linii: {0} [{1:00}%]", line.Name, percent);
+            var busStopsCount = (line.Schedules.SelectMany(p => p.Tracks.SelectMany(f => f.BusStops))).Count();
+            TimetableInfoText.Text = string.Format("Pobieranie linii: {0} [{1:00}%]{2}Przystanków: {3}", line.Name, percent, 
+                Environment.NewLine, busStopsCount);
             AddTextToInfoStackPanelOrEditIfExist(InfoStackPanelTextId.DownOrload_Timetable, "Trwa pobieranie linii: {0} / {1}", line.Id + 1, linesCount);
+            UpdateGlobalInfo(line);
         }
 
+        private int _TotalSchedules;
+        private int _TotalTracks;
+        private int _TotalBusStops;
+        private int _TotalHours;
+
+        private void UpdateGlobalInfo(Line line)
+        {
+            var schedulesCount = line.Schedules.Count();
+            var tracks = line.Schedules.SelectMany(p => p.Tracks);
+            var tracksCount = tracks.Count();
+            var busStops = tracks.SelectMany(p => p.BusStops);
+            var busStopsCount = busStops.Count();
+            var hoursCount = busStops.SelectMany(p => p.Hours).Count();
+            ((TextBlock)DownloadInfoStackPanel.Children[(int)GlobalInfoTextId.Schedules]).Text = "Rozkładów: " + (_TotalSchedules += schedulesCount);
+            ((TextBlock)DownloadInfoStackPanel.Children[(int)GlobalInfoTextId.Bus_Stops]).Text = "Przystanków: " + (_TotalBusStops += busStopsCount);
+            ((TextBlock)DownloadInfoStackPanel.Children[(int)GlobalInfoTextId.Tracks]).Text = "Tras: " + (_TotalTracks += tracksCount);
+            ((TextBlock)DownloadInfoStackPanel.Children[(int)GlobalInfoTextId.Hours]).Text = "Godzin: " + (_TotalHours += hoursCount);
+        }
         #endregion
 
         #region Loading timetable
@@ -231,6 +260,18 @@ namespace RozkładJazdyv2
         private void SetRetryDownloadButtonVisibility(Visibility visibility)
             => DownloadTimetableRetryButton.Visibility = visibility;
 
+        private void SetDownloadInfoStackPanelVisibility(Visibility visibility)
+        {
+            DownloadInfoStackPanel.Visibility = visibility;
+            if (visibility == Visibility.Visible)
+            {
+                _TotalBusStops = 0;
+                _TotalHours = 0;
+                _TotalSchedules = 0;
+                _TotalTracks = 0;
+            }
+        }
+
         private void ShowTimetableProgressBar()
         {
             TimetableProgressBar.Visibility = Visibility.Visible;
@@ -268,6 +309,7 @@ namespace RozkładJazdyv2
                 "Wystąpił problem podczas pobierania. Sprawdź połączenie z internetem i spróbuj ponownie.";
             SetTimetableProgressBarVisibility(Visibility.Collapsed);
             TimetableInfoText.Visibility = Visibility.Visible;
+            SetDownloadInfoStackPanelVisibility(Visibility.Collapsed);
         }
 
         private void ShowDownloadBusTimetableInfo()
@@ -277,6 +319,7 @@ namespace RozkładJazdyv2
             TimetableInfoText.Text = "Trwa pobieranie informacji o liniach...";
             HideButtons();
             ShowTimetableProgressBar();
+            SetDownloadInfoStackPanelVisibility(Visibility.Visible);
         }
 
         private void CreateRetryDownloadInfo()
