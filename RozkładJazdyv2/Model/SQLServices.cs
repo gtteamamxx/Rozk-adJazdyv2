@@ -45,21 +45,13 @@ namespace RozkładJazdyv2.Model
             if(timetableExistString == null || timetableExistString.Length == 0)
                 return;
             var sqliteStatus = tempConnection.Table<SQLiteStatus>().ElementAt(0);
-            if (sqliteStatus == null)
+            bool isTableValid = sqliteStatus ! null && sqliteStatus.Status == SQLiteStatus.LoadStatus.Succes;
+            if (!isTableValid)
                 return;
-            if (sqliteStatus.Status == SQLiteStatus.LoadStatus.Succes)
-            {
-                tempConnection.Close();
-                tempConnection.Dispose();
-                RenameTempFileToMainFile();
-            }
+            tempConnection.Close();
+            tempConnection.Dispose();
+            RenameTempFileToMainFile();
         }
-
-        private static bool IsDatabaseFileExist()
-            => File.Exists(_SQLFilePath);
-
-        private static bool IsTempDatabaseExist()
-            => File.Exists(_SQLTempFilePath);
 
         public static async Task<bool> IsValidDatabaseAsync()
         {
@@ -86,7 +78,6 @@ namespace RozkładJazdyv2.Model
             if (!(await InsertIntoDatabaseAsync(tempSqlConnection)))
                 return false;
             InvokeOnSqlSavingChanged(14, _SAVING_STEPS);
-            //close file a & b
             isFileRemoved = DeleteFile(_SQLFilePath);
             if (!isFileRemoved)
                 return false;
@@ -108,59 +99,56 @@ namespace RozkładJazdyv2.Model
         }
         private static async Task<bool> InsertIntoDatabaseAsync(SQLiteAsyncConnection sqlConnection)
         {
-            List<Schedule> listOfSchedules = new List<Schedule>();
-            List<Track> listOfTracks = new List<Track>();
-            List<BusStop> listOfBusStops = new List<BusStop>();
-            List<Hour> listOfHours = new List<Hour>();
-            InvokeOnSqlSavingChanged(4, _SAVING_STEPS);
-            foreach (var line in Timetable.Instance.Lines)
+            try
             {
-                if (line.Schedules != null)
+                List<Schedule> listOfSchedules = new List<Schedule>();
+                List<Track> listOfTracks = new List<Track>();
+                List<BusStop> listOfBusStops = new List<BusStop>();
+                List<Hour> listOfHours = new List<Hour>();
+                InvokeOnSqlSavingChanged(4, _SAVING_STEPS);
+                foreach (var line in Timetable.Instance.Lines)
                 {
                     foreach (var schedule in line.Schedules)
                     {
                         listOfSchedules.Add(schedule);
-                        if (schedule.Tracks != null)
+                        foreach (var track in schedule.Tracks)
                         {
-                            foreach (var track in schedule.Tracks)
+                            listOfTracks.Add(track);
+                            foreach (var busStop in track.BusStops)
                             {
-                                listOfTracks.Add(track);
-                                if (track.BusStops != null)
-                                {
-                                    foreach (var busStop in track.BusStops)
-                                    {
-                                        listOfBusStops.Add(busStop);
-                                        if (busStop.Hours != null)
-                                            foreach (var hour in busStop.Hours)
-                                                listOfHours.Add(hour);
-                                    }
-                                }
+                                listOfBusStops.Add(busStop);
+                                foreach (var hour in busStop.Hours)
+                                    listOfHours.Add(hour);
                             }
                         }
                     }
                 }
+                InvokeOnSqlSavingChanged(5, _SAVING_STEPS);
+                await sqlConnection.InsertAllAsync(Timetable.Instance.BusStopsNames);
+                InvokeOnSqlSavingChanged(6, _SAVING_STEPS);
+                await sqlConnection.InsertAllAsync(Timetable.Instance.HoursNames);
+                InvokeOnSqlSavingChanged(7, _SAVING_STEPS);
+                await sqlConnection.InsertAllAsync(Timetable.Instance.Letters);
+                InvokeOnSqlSavingChanged(8, _SAVING_STEPS);
+                await sqlConnection.InsertAllAsync(Timetable.Instance.Lines);
+                InvokeOnSqlSavingChanged(9, _SAVING_STEPS);
+                await sqlConnection.InsertAllAsync(Timetable.Instance.TracksNames);
+                await sqlConnection.InsertAllAsync(Timetable.Instance.LettersNames);
+                InvokeOnSqlSavingChanged(10, _SAVING_STEPS);
+                await sqlConnection.InsertAllAsync(listOfSchedules);
+                InvokeOnSqlSavingChanged(11, _SAVING_STEPS);
+                await sqlConnection.InsertAllAsync(listOfTracks);
+                InvokeOnSqlSavingChanged(12, _SAVING_STEPS);
+                await sqlConnection.InsertAllAsync(listOfBusStops);
+                InvokeOnSqlSavingChanged(13, _SAVING_STEPS);
+                await sqlConnection.InsertAllAsync(listOfHours);
+                await sqlConnection.InsertAsync(new SQLiteStatus() { Status = SQLiteStatus.LoadStatus.Succes });
+                return true;
             }
-            InvokeOnSqlSavingChanged(5, _SAVING_STEPS);
-            await sqlConnection.InsertAllAsync(Timetable.Instance.BusStopsNames);
-            InvokeOnSqlSavingChanged(6, _SAVING_STEPS);
-            await sqlConnection.InsertAllAsync(Timetable.Instance.HoursNames);
-            InvokeOnSqlSavingChanged(7, _SAVING_STEPS);
-            await sqlConnection.InsertAllAsync(Timetable.Instance.Letters);
-            InvokeOnSqlSavingChanged(8, _SAVING_STEPS);
-            await sqlConnection.InsertAllAsync(Timetable.Instance.Lines);
-            InvokeOnSqlSavingChanged(9, _SAVING_STEPS);
-            await sqlConnection.InsertAllAsync(Timetable.Instance.TracksNames);
-            await sqlConnection.InsertAllAsync(Timetable.Instance.LettersNames);
-            InvokeOnSqlSavingChanged(10, _SAVING_STEPS);
-            await sqlConnection.InsertAllAsync(listOfSchedules);
-            InvokeOnSqlSavingChanged(11, _SAVING_STEPS);
-            await sqlConnection.InsertAllAsync(listOfTracks);
-            InvokeOnSqlSavingChanged(12, _SAVING_STEPS);
-            await sqlConnection.InsertAllAsync(listOfBusStops);
-            InvokeOnSqlSavingChanged(13, _SAVING_STEPS);
-            await sqlConnection.InsertAllAsync(listOfHours);
-            await sqlConnection.InsertAsync(new SQLiteStatus() { Status = SQLiteStatus.LoadStatus.Succes });
-            return true;
+            catch
+            {
+                return false;
+            }
         }
 
         private static async Task<bool> CreateDatabaseAsync(SQLiteAsyncConnection sqlConnection)
@@ -182,7 +170,7 @@ namespace RozkładJazdyv2.Model
                 InvokeOnSqlSavingChanged(3, _SAVING_STEPS);
                 return true;
             }
-            catch(Exception ex)
+            catch
             {
                 return false;
             }
@@ -209,5 +197,11 @@ namespace RozkładJazdyv2.Model
         {
             //todo
         }
+        
+        private static bool IsDatabaseFileExist()
+            => File.Exists(_SQLFilePath);
+
+        private static bool IsTempDatabaseExist()
+            => File.Exists(_SQLTempFilePath);
     }
 }
