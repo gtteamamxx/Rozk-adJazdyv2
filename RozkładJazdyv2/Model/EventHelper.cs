@@ -23,6 +23,9 @@ namespace RozkładJazdyv2.Model
         public delegate void SqlSaved();
         public static event SqlSaved OnSqlSaved;
 
+        public delegate void SqlLoadingChanged(int step, int maxSteps);
+        public static event SqlLoadingChanged OnSqlLoadingChanged;
+
         protected EventHelper() { }
 
         protected internal static void InvokeOnSqlSaved()
@@ -39,5 +42,8 @@ namespace RozkładJazdyv2.Model
 
         protected internal static void InvokeOnLineDownloaded(Line line, int linesCount)
             => OnLineDownloaded?.Invoke(line, linesCount);
+
+        protected internal static void InvokeOnSqlLoadingChanged(int step, int maxSteps)
+            => OnSqlLoadingChanged?.Invoke(step, maxSteps);
     }
 }

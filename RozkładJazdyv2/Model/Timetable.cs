@@ -23,8 +23,8 @@ namespace RozkładJazdyv2.Model
         {
             if (!(await SQLServices.IsValidDatabaseAsync()))
                 return false;
-            SQLServices.LoadTimetableFromDatabase();
-            return true;
+            bool isTimetableLoaded = await SQLServices.LoadTimetableFromDatabase();
+            return isTimetableLoaded;
         }
 
         public static async Task<bool> DownloadTimetableFromInternetAsync()

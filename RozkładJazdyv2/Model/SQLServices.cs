@@ -23,6 +23,7 @@ namespace RozkładJazdyv2.Model
         private static SQLiteAsyncConnection _SQLConnection;
 
         private static int _SAVING_STEPS = 14;
+        private static int _LOADING_STEPS = 8;
 
         private SQLServices() { }
 
@@ -209,9 +210,32 @@ namespace RozkładJazdyv2.Model
             }
         }
 
-        public static void LoadTimetableFromDatabase()
+        public static async Task<bool> LoadTimetableFromDatabase()
         {
-            //todo
+            if (_SQLConnection == null)
+                return false;
+            try
+            {
+                Timetable.Instance = new Timetable();
+                InvokeOnSqlLoadingChanged(1, _LOADING_STEPS);
+                Timetable.Instance.BusStopsNames = await _SQLConnection.Table<BusStopName>().ToListAsync();
+                InvokeOnSqlLoadingChanged(2, _LOADING_STEPS);
+                Timetable.Instance.HoursNames = await _SQLConnection.Table<HourName>().ToListAsync();
+                InvokeOnSqlLoadingChanged(3, _LOADING_STEPS);
+                Timetable.Instance.Letters = await _SQLConnection.Table<Letter>().ToListAsync();
+                InvokeOnSqlLoadingChanged(4, _LOADING_STEPS);
+                Timetable.Instance.LettersNames = await _SQLConnection.Table<LetterName>().ToListAsync();
+                InvokeOnSqlLoadingChanged(5, _LOADING_STEPS);
+                Timetable.Instance.TracksNames = await _SQLConnection.Table<TrackName>().ToListAsync();
+                InvokeOnSqlLoadingChanged(6, _LOADING_STEPS);
+                Timetable.Instance.Lines = await _SQLConnection.Table<Line>().ToListAsync();
+                InvokeOnSqlLoadingChanged(7, _LOADING_STEPS);
+                return true;
+            }   
+            catch
+            {
+                return false;
+            }
         }
 
         private static bool IsDatabaseFileExist()
