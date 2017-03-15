@@ -38,18 +38,20 @@ namespace RozkładJazdyv2.Model
         {
             if (IsDatabaseFileExist() || !IsTempDatabaseExist())
                 return;
-            var tempConnection = new SQLiteConnection(new SQLitePlatformWinRT(), _SQLTempFilePath);
-            if (tempConnection == null)
-                return;
-            var timetableExistString = tempConnection.ExecuteScalar<string>("SELECT * FROM sqlite_master WHERE name LIKE 'SQLiteStatus'");
-            if(timetableExistString == null || timetableExistString.Length == 0)
-                return;
-            var sqliteStatus = tempConnection.Table<SQLiteStatus>().ElementAt(0);
-            bool isTableValid = sqliteStatus ! null && sqliteStatus.Status == SQLiteStatus.LoadStatus.Succes;
-            if (!isTableValid)
-                return;
-            tempConnection.Close();
-            tempConnection.Dispose();
+            using(SQLiteConnection tempConnection = new SQLiteConnection(new SQLitePlatformWinRT(), _SQLTempFilePath))
+            {
+                if (tempConnection == null)
+                    return;
+                string timetableExistString = string.Empty;
+                if(string.IsNullOrEmpty((timetableExistString = tempConnection.ExecuteScalar<string>(
+                        "SELECT * FROM sqlite_master WHERE name LIKE 'SQLiteStatus'"))))
+                    return;
+                SQLiteStatus sqliteStatus = tempConnection.Table<SQLiteStatus>().ElementAt(0);
+                bool isTableValid = (sqliteStatus ! null && sqliteStatus.Status == SQLiteStatus.LoadStatus.Succes);
+                if (!isTableValid)
+                    return;
+                tempConnection.Close();
+            }
             RenameTempFileToMainFile();
         }
 
@@ -58,9 +60,8 @@ namespace RozkładJazdyv2.Model
             if (!IsDatabaseFileExist())
                 return false;
             string query = "SELECT * FROM sqlite_master WHERE name LIKE 'Line';";
-            var result = await _SQLConnection.ExecuteScalarAsync<string>(query);
-            bool isValidDatabase = result != null && result.Length > 0;
-            return isValidDatabase;
+            string result = await _SQLConnection.ExecuteScalarAsync<string>(query);
+            return result != null && result.Length > 0;
         }
 
         public static async Task<bool> SaveDatabaseAsync()
@@ -69,7 +70,7 @@ namespace RozkładJazdyv2.Model
             bool isFileRemoved = DeleteFile(_SQLTempFilePath);
             if (!isFileRemoved)
                 return false;
-            var tempSqlConnection = new SQLiteAsyncConnection(new Func<SQLiteConnectionWithLock>(
+            SQLiteAsyncConnection tempSqlConnection = new SQLiteAsyncConnection(new Func<SQLiteConnectionWithLock>(
                 () => new SQLiteConnectionWithLock(
                     new SQLitePlatformWinRT(),
                     new SQLiteConnectionString(_SQLTempFilePath, storeDateTimeAsTicks: false))));
@@ -106,23 +107,10 @@ namespace RozkładJazdyv2.Model
                 List<BusStop> listOfBusStops = new List<BusStop>();
                 List<Hour> listOfHours = new List<Hour>();
                 InvokeOnSqlSavingChanged(4, _SAVING_STEPS);
-                foreach (var line in Timetable.Instance.Lines)
-                {
-                    foreach (var schedule in line.Schedules)
-                    {
-                        listOfSchedules.Add(schedule);
-                        foreach (var track in schedule.Tracks)
-                        {
-                            listOfTracks.Add(track);
-                            foreach (var busStop in track.BusStops)
-                            {
-                                listOfBusStops.Add(busStop);
-                                foreach (var hour in busStop.Hours)
-                                    listOfHours.Add(hour);
-                            }
-                        }
-                    }
-                }
+                bool areListGot = GetTimetableListsFromInstance(ref listOfSchedules, ref listOfTracks, 
+                                                ref listOfBusStops, ref listOfHours);
+                if(!areListGot)
+                    return false;
                 InvokeOnSqlSavingChanged(5, _SAVING_STEPS);
                 await sqlConnection.InsertAllAsync(Timetable.Instance.BusStopsNames);
                 InvokeOnSqlSavingChanged(6, _SAVING_STEPS);
@@ -150,7 +138,35 @@ namespace RozkładJazdyv2.Model
                 return false;
             }
         }
-
+        private static async bool GetTimetableListsFromInstance(ref List<Schedule> listOfSchedules, ref List<Track> listOfTracks, 
+                                                                    ref List<BusStop> listOfBusStops, ref List<Hour> listOfHours);
+        {
+            try
+            {
+                foreach (Line line in Timetable.Instance.Lines)
+                {
+                    foreach (Schedule schedule in line.Schedules)
+                    {
+                        listOfSchedules.Add(schedule);
+                        foreach (Track track in schedule.Tracks)
+                        {
+                            listOfTracks.Add(track);
+                            foreach (BusStop busStop in track.BusStops)
+                            {
+                                listOfBusStops.Add(busStop);
+                                foreach (Hour hour in busStop.Hours)
+                                    listOfHours.Add(hour);
+                            }
+                        }
+                    }
+                }
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
         private static async Task<bool> CreateDatabaseAsync(SQLiteAsyncConnection sqlConnection)
         {
             try
