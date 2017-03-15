@@ -97,14 +97,14 @@ namespace RozkładJazdyv2.Model
         private static async Task<Line> GetLineDetailInfoAsync(Line line)
         {
             string url = string.Format("{0}{1}", _TIMETABLE_BASE_URL, line.Url);
-            using (var angSharpDocument = (await GetAngleSharpDocumentOfSiteAsync(url)))
+            using (var lineAngSharpDocument = (await GetAngleSharpDocumentOfSiteAsync(url)))
             {
-                if (angSharpDocument == null)
+                if (lineAngSharpDocument == null)
                     return null;
-                var htmlDocument = angSharpDocument.Children.Count() >= 1 ? angSharpDocument.Children[0] : null;
-                if (htmlDocument == null)
+                var lineHtmlElement = lineAngSharpDocument.Children.Count() >= 1 ? lineAngSharpDocument.Children[0] : null;
+                if (lineHtmlElement == null)
                     return null;
-                line = await AddSchedulesToLineAsync(line, htmlDocument, url);
+                line = await AddSchedulesToLineAsync(line, lineHtmlElement, url);
                 return line;
             }
         }

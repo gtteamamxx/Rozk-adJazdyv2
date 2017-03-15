@@ -151,12 +151,12 @@ namespace RozkładJazdyv2
             SetProgressRingVisibility(Visibility.Visible);
             bool isTimetableLoaded = await Timetable.LoadTimetableFromLocalCacheAsync();
             SetProgressRingVisibility(Visibility.Collapsed);
+            SetTimetableProgressBarVisibility(Visibility.Collapsed);
             if (!isTimetableLoaded)
             {
                 AskToDownloadDatabaseFromInternetAsync();
                 return;
             }
-            SetTimetableProgressBarVisibility(Visibility.Collapsed);
             TimetableLoaded();
         }
         
