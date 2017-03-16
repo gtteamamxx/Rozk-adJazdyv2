@@ -28,22 +28,22 @@ namespace RozkładJazdyv2.Model
 
         protected EventHelper() { }
 
-        protected internal static void InvokeOnSqlSaved()
+        protected static void InvokeOnSqlSaved()
             => OnSqlSaved?.Invoke();
 
-        protected internal static void InvokeOnSqlSavingChanged(int step, int maxSteps)
+        protected static void InvokeOnSqlSavingChanged(int step, int maxSteps)
             => OnSqlSavingChanged?.Invoke(step, maxSteps);
 
-        protected internal static void InvokeOnAllLinesDownloaded()
+        protected static void InvokeOnAllLinesDownloaded()
             => OnAllLinesDownloaded?.Invoke();
 
-        protected internal static void InvokeOnLinesInfoDownloaded()
+        protected static void InvokeOnLinesInfoDownloaded()
             => OnLinesInfoDownloaded?.Invoke();
 
-        protected internal static void InvokeOnLineDownloaded(Line line, int linesCount)
+        protected static void InvokeOnLineDownloaded(Line line, int linesCount)
             => OnLineDownloaded?.Invoke(line, linesCount);
 
-        protected internal static void InvokeOnSqlLoadingChanged(int step, int maxSteps)
+        protected static void InvokeOnSqlLoadingChanged(int step, int maxSteps)
             => OnSqlLoadingChanged?.Invoke(step, maxSteps);
     }
 }

@@ -99,6 +99,7 @@ namespace RozkładJazdyv2.Model
                 return false;
             }
         }
+
         private static async Task<bool> InsertIntoDatabaseAsync(SQLiteAsyncConnection sqlConnection)
         {
             try
@@ -150,7 +151,7 @@ namespace RozkładJazdyv2.Model
                 listOfHours = listOfBusStops.SelectMany(p => p.Hours).ToList();
                 return true;
             }
-            catch
+            catch (Exception ex)
             {
                 return false;
             }

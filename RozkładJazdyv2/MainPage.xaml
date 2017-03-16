@@ -8,13 +8,15 @@
     mc:Ignorable="d">
 
     <Grid Name="MainGrid" Background="Gray">
-
-        <StackPanel HorizontalAlignment="Center"
-                    VerticalAlignment="Center"
-                    Name="LogoWithTextStackPanel"
-                    Margin="0 -40 0 0"
-                    Width="275"
-                    Height="285">
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        
+        <StackPanel Grid.Row="0"
+                    VerticalAlignment="Bottom"
+                    Margin="0 0 0 10"
+                    Name="LogoWithTextStackPanel">
 
             <TextBlock FontFamily="Segoe MDL2 Assets"
                        Text="&#xE806;"
@@ -29,81 +31,22 @@
                        Margin="10"
                        FontSize="20" />
 
-            <TextBlock Text="Nie znaleziono rozkładu jazdy offine. 
-                       
-                       Chcesz go pobrać teraz?"
-                       Width="200"
+            <TextBlock Text="v. 0.0.1"
                        TextAlignment="Center"
-                       TextWrapping="Wrap"
-                       Foreground="Orange" 
-                       Name="TimetableInfoText"
-                       Visibility="Collapsed" />
-
-            <Button Content="OK"
-                    Name="DownloadTimetableButton"
-                    HorizontalAlignment="Center"
-                    Foreground="White"
-                    Width="200"
-                    Height="30"
-                    Margin="20"
-                    Visibility="Collapsed" />
-            
-            <Button Content="Spróbuj ponownie"
-                    Name="DownloadTimetableRetryButton"
-                    HorizontalAlignment="Center"
-                    Foreground="White"
-                    Width="150"
-                    Height="30"
-                    Margin="20"
-                    Visibility="Collapsed" />
-
+                       FontWeight="ExtraBold"
+                       Foreground="Beige"/>
         </StackPanel>
-        
-        <ProgressRing Foreground="Blue"
-                      Width="50"
-                      Height="50"
-                      Margin="0 300 0 0"
-                      IsActive="True"
-                      Name="ProgressRing" />
-        
-        <ProgressBar Name="TimetableProgressBar"
-                     Margin="20 100 20 20"
-                     VerticalAlignment="Center"
-                     HorizontalAlignment="Center"
-                     Width="300"
-                     Visibility="Collapsed"
-                     Background="{StaticResource ApplicationPageBackgroundThemeBrush}"/>
-        
-        <StackPanel Name="RunInfoStackPanel"
-                    Height="90"
-                    Width="180"
+
+        <StackPanel HorizontalAlignment="Left"
                     VerticalAlignment="Bottom"
-                    HorizontalAlignment="Left">
-
-        </StackPanel>
-        <StackPanel Name="DownloadInfoStackPanel"
-                    Height="90"
-                    Width="180"
-                    VerticalAlignment="Bottom"
-                    HorizontalAlignment="Right"
-                    Margin="0 0 25 0">
-            <TextBlock Text=""
-                       FontSize="12"
-                       FontWeight="Light"
-                       TextAlignment="Right"/>
-            <TextBlock Text=""
-                       FontSize="12"
-                       FontWeight="Light"
-                       TextAlignment="Right"/>
-            <TextBlock Text=""
-                       FontSize="12"
-                       FontWeight="Light"
-                       TextAlignment="Right"/>
-            <TextBlock Text=""
-                       FontSize="12"
-                       FontWeight="Light"
-                       TextAlignment="Right"/>
-        </StackPanel>
+                    Name="InfoStackPanel"
+                    Height="125"
+                    Width="250"
+                    Grid.Row="1"/>
+        
+        <Frame Name="ContentFrame"
+               Grid.Row="1" />
+       
     </Grid>
  
 </Page>
