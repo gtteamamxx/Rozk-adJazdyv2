@@ -23,12 +23,12 @@
                        TextAlignment="Center"
                        TextWrapping="Wrap"
                        Name="SavingInfoText"
-                       Foreground="Beige" />
+                       Foreground="White" />
 
             <ProgressBar Name="SavingProgressBar"
                          Width="300"
                          Margin="0 20"
-                         Visibility="Collapsed"/>
+                         Visibility="Collapsed" />
 
             <Button Height="30"
                     Width="200"

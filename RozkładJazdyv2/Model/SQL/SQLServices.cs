@@ -3,6 +3,7 @@ using SQLite.Net.Async;
 using SQLite.Net.Platform.WinRT;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -17,13 +18,13 @@ namespace RozkładJazdyv2.Model
         private static readonly string _SQLFileName = "Timetable.sqlite";
         private static readonly string _SQLTempFileName = "Timetable_T.sqlite";
 
-        private static string _SQLFilePath = Path.Combine(ApplicationData.Current.LocalFolder.Path, _SQLFileName);
-        private static string _SQLTempFilePath => Path.Combine(ApplicationData.Current.LocalFolder.Path, _SQLTempFileName);
+        public static string SQLFilePath = Path.Combine(ApplicationData.Current.LocalFolder.Path, _SQLFileName);
+        public static string SQLTempFilePath => Path.Combine(ApplicationData.Current.LocalFolder.Path, _SQLTempFileName);
 
         private static SQLiteAsyncConnection _SQLConnection;
 
         private static int _SAVING_STEPS = 14;
-        private static int _LOADING_STEPS = 8;
+        private static int _LOADING_STEPS = 6;
 
         private SQLServices() { }
 
@@ -32,14 +33,12 @@ namespace RozkładJazdyv2.Model
             RenameDownloadedSqlFile();
             _SQLConnection = new SQLiteAsyncConnection(new Func<SQLiteConnectionWithLock>(
                    () => new SQLiteConnectionWithLock(new SQLitePlatformWinRT(),
-                       new SQLiteConnectionString(_SQLFilePath, storeDateTimeAsTicks: false))));
+                       new SQLiteConnectionString(SQLFilePath, storeDateTimeAsTicks: false))));
         }
 
         private static void RenameDownloadedSqlFile()
         {
-            if (IsDatabaseFileExist() || !IsTempDatabaseExist())
-                return;
-            using (SQLiteConnection tempConnection = new SQLiteConnection(new SQLitePlatformWinRT(), _SQLTempFilePath))
+            using (SQLiteConnection tempConnection = new SQLiteConnection(new SQLitePlatformWinRT(), SQLTempFilePath))
             {
                 if (tempConnection == null)
                     return;
@@ -68,19 +67,19 @@ namespace RozkładJazdyv2.Model
         public static async Task<bool> SaveDatabaseAsync()
         {
             InvokeOnSqlSavingChanged(1, _SAVING_STEPS);
-            bool isFileRemoved = DeleteFile(_SQLTempFilePath);
+            bool isFileRemoved = DeleteFile(SQLTempFilePath);
             if (!isFileRemoved)
                 return false;
             SQLiteAsyncConnection tempSqlConnection = new SQLiteAsyncConnection(new Func<SQLiteConnectionWithLock>(
                 () => new SQLiteConnectionWithLock(
                     new SQLitePlatformWinRT(),
-                    new SQLiteConnectionString(_SQLTempFilePath, storeDateTimeAsTicks: false))));
+                    new SQLiteConnectionString(SQLTempFilePath, storeDateTimeAsTicks: false))));
             if (!(await CreateDatabaseAsync(tempSqlConnection)))
                 return false;
             if (!(await InsertIntoDatabaseAsync(tempSqlConnection)))
                 return false;
             InvokeOnSqlSavingChanged(14, _SAVING_STEPS);
-            isFileRemoved = DeleteFile(_SQLFilePath);
+            isFileRemoved = DeleteFile(SQLFilePath);
             if (!isFileRemoved)
                 return false;
             InvokeOnSqlSaved();
@@ -91,7 +90,7 @@ namespace RozkładJazdyv2.Model
         {
             try
             {
-                File.Move(_SQLTempFilePath, _SQLFilePath);
+                File.Move(SQLTempFilePath, SQLFilePath);
                 return true;
             }
             catch
@@ -151,7 +150,7 @@ namespace RozkładJazdyv2.Model
                 listOfHours = listOfBusStops.SelectMany(p => p.Hours).ToList();
                 return true;
             }
-            catch (Exception ex)
+            catch
             {
                 return false;
             }
@@ -210,14 +209,13 @@ namespace RozkładJazdyv2.Model
                 InvokeOnSqlLoadingChanged(2, _LOADING_STEPS);
                 Timetable.Instance.HoursNames = await _SQLConnection.Table<HourName>().ToListAsync();
                 InvokeOnSqlLoadingChanged(3, _LOADING_STEPS);
-                Timetable.Instance.Letters = await _SQLConnection.Table<Letter>().ToListAsync();
-                InvokeOnSqlLoadingChanged(4, _LOADING_STEPS);
                 Timetable.Instance.LettersNames = await _SQLConnection.Table<LetterName>().ToListAsync();
-                InvokeOnSqlLoadingChanged(5, _LOADING_STEPS);
+                InvokeOnSqlLoadingChanged(4, _LOADING_STEPS);
                 Timetable.Instance.TracksNames = await _SQLConnection.Table<TrackName>().ToListAsync();
-                InvokeOnSqlLoadingChanged(6, _LOADING_STEPS);
+                InvokeOnSqlLoadingChanged(5, _LOADING_STEPS);
                 Timetable.Instance.Lines = await _SQLConnection.Table<Line>().ToListAsync();
-                InvokeOnSqlLoadingChanged(7, _LOADING_STEPS);
+                InvokeOnSqlLoadingChanged(6, _LOADING_STEPS);
+                Timetable.Instance.Letters = new List<Letter>();
                 return true;
             }   
             catch
@@ -227,9 +225,9 @@ namespace RozkładJazdyv2.Model
         }
 
         private static bool IsDatabaseFileExist()
-            => File.Exists(_SQLFilePath);
+            => File.Exists(SQLFilePath);
 
         private static bool IsTempDatabaseExist()
-            => File.Exists(_SQLTempFilePath);
+            => File.Exists(SQLTempFilePath);
     }
 }

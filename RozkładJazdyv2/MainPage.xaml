@@ -5,9 +5,11 @@
     xmlns:local="using:RozkładJazdyv2"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    NavigationCacheMode="Disabled"
     mc:Ignorable="d">
 
-    <Grid Name="MainGrid" Background="Gray">
+    <Grid Name="MainGrid" 
+          Background="Black">
         <Grid.RowDefinitions>
             <RowDefinition />
             <RowDefinition />
@@ -22,19 +24,18 @@
                        Text="&#xE806;"
                        TextAlignment="Center"
                        HorizontalAlignment="Center"
+                       Foreground="#9fa7b5"
                        FontSize="100" />
-
             <TextBlock Text="Rozkład jazdy KZK-GOP"
                        TextAlignment="Center"
                        FontWeight="Light"
-                       Foreground="Beige"
                        Margin="10"
-                       FontSize="20" />
-
-            <TextBlock Text="v. 0.0.1"
+                       FontSize="20" 
+                       Foreground="White" />
+            <TextBlock Text="{x:Bind APP_VERSION}"
                        TextAlignment="Center"
-                       FontWeight="ExtraBold"
-                       Foreground="Beige"/>
+                       FontWeight="Bold"
+                       Foreground="White" />
         </StackPanel>
 
         <StackPanel HorizontalAlignment="Left"
@@ -42,11 +43,10 @@
                     Name="InfoStackPanel"
                     Height="125"
                     Width="250"
-                    Grid.Row="1"/>
-        
+                    Grid.Row="1" />
+       
         <Frame Name="ContentFrame"
                Grid.Row="1" />
-       
     </Grid>
  
 </Page>

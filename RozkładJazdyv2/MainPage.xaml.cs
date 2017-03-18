@@ -1,35 +1,22 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
-using Windows.UI.Xaml.Input;
 using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Media.Animation;
-using Windows.UI.Xaml.Navigation;
 using RozkładJazdyv2.Model;
 using Windows.Foundation.Metadata;
 using Windows.UI;
 using Windows.UI.ViewManagement;
 using Windows.UI.Text;
-using System.Threading.Tasks;
-
-//Szablon elementu Pusta strona jest udokumentowany na stronie https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x415
 
 namespace RozkładJazdyv2
 {
-    /// <summary>
-    /// Pusta strona, która może być używana samodzielnie lub do której można nawigować wewnątrz ramki.
-    /// </summary>
     public sealed partial class MainPage : Page
     {
-        public enum OnfoStackPanelTextIndex
+        private static readonly Color _INFOSTACKPANEL_TEXTCOLOR = Colors.White;
+        private string APP_VERSION { get { return Model.Application.Version.VERSION; } }
+
+        public enum InfoStackPanelTextIndex
         {
             App_Run,
             Loading_Timetable,
@@ -50,18 +37,19 @@ namespace RozkładJazdyv2
         public MainPage()
         {
             this.InitializeComponent();
-            SetPhoneStatusBarColor(Colors.White, Colors.Gray);
+            SetPhoneStatusBarColor(Colors.White, Colors.Black);
             FadeInLogoOnStart();
             this.Loaded += MainPage_Loaded;
         }
 
         private void MainPage_Loaded(object sender, RoutedEventArgs e)
         {
-            ChangeTextInInfoStackPanel(OnfoStackPanelTextIndex.App_Run, "Uruchamianie aplikacji... OK");
+            ChangeTextInInfoStackPanel(InfoStackPanelTextIndex.App_Run, "Uruchamianie aplikacji... OK");
             ShowLoadTimetableFrame();
+            MainFrameHelper.SetMainFrame(this.Frame);
         }
 
-        public void ChangeTextInInfoStackPanel(OnfoStackPanelTextIndex index, string text, params object[] args)
+        public void ChangeTextInInfoStackPanel(InfoStackPanelTextIndex index, string text, params object[] args)
         {
             bool editText = InfoStackPanel.Children.Count() - 1 >= (int)index;
             if (editText)
@@ -72,6 +60,7 @@ namespace RozkładJazdyv2
                     Text = string.Format(text, args),
                     FontSize = 12,
                     FontWeight = FontWeights.Light,
+                    Foreground = new SolidColorBrush(_INFOSTACKPANEL_TEXTCOLOR),
                     TextAlignment = TextAlignment.Left
                 });
         }
@@ -83,7 +72,6 @@ namespace RozkładJazdyv2
             => ContentFrame.Navigate(page, parametr);
 
         private void FadeInLogoOnStart()
-            => AnimationHelper.CraeteFadeInAnimation(MainGrid, 2.0);
-
+            => AnimationHelper.CraeteFadeInAnimation(MainGrid, 1.0);
     }
 }

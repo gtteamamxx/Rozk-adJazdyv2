@@ -24,7 +24,7 @@
                        FontWeight="Thin"
                        TextAlignment="Center"
                        Name="LoadingInfoText"
-                       Foreground="Beige" />
+                       Foreground="White" />
 
             <ProgressBar Name="LoadingProgressBar"
                          Width="300"

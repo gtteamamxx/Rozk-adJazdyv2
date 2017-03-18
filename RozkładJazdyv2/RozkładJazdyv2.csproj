@@ -99,26 +99,33 @@
     <Compile Include="MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Model\AnimationHelper.cs" />
-    <Compile Include="Model\BusStop.cs" />
-    <Compile Include="Model\BusStopName.cs" />
-    <Compile Include="Model\EventHelper.cs" />
-    <Compile Include="Model\Hour.cs" />
-    <Compile Include="Model\HourName.cs" />
-    <Compile Include="Model\HtmlService.cs" />
-    <Compile Include="Model\InternetConnectionService.cs" />
-    <Compile Include="Model\Letter.cs" />
-    <Compile Include="Model\LetterName.cs" />
-    <Compile Include="Model\Line.cs" />
-    <Compile Include="Model\ListExtension.cs" />
-    <Compile Include="Model\Schedule.cs" />
-    <Compile Include="Model\SQLiteStatus.cs" />
-    <Compile Include="Model\SQLServices.cs" />
-    <Compile Include="Model\StoryboardExtension.cs" />
-    <Compile Include="Model\Timetable.cs" />
-    <Compile Include="Model\TimetableDownloadService.cs" />
-    <Compile Include="Model\Track.cs" />
-    <Compile Include="Model\TrackName.cs" />
+    <Compile Include="Model\Animation\AnimationHelper.cs" />
+    <Compile Include="Model\Application\Version.cs" />
+    <Compile Include="Model\MainMenu\ButtonHelper.cs" />
+    <Compile Include="Model\MainMenu\MainMenuButton.cs" />
+    <Compile Include="Model\Timetable\BusStop.cs" />
+    <Compile Include="Model\Timetable\Names\BusStopName.cs" />
+    <Compile Include="Model\Events\EventHelper.cs" />
+    <Compile Include="Model\Timetable\Hour.cs" />
+    <Compile Include="Model\Timetable\Names\HourName.cs" />
+    <Compile Include="Model\Internet\HtmlService.cs" />
+    <Compile Include="Model\Services\InternetConnectionService.cs" />
+    <Compile Include="Model\Timetable\Letter.cs" />
+    <Compile Include="Model\Timetable\Names\LetterName.cs" />
+    <Compile Include="Model\Timetable\Line.cs" />
+    <Compile Include="Model\Extensions\ListExtension.cs" />
+    <Compile Include="Model\MainFrameHelper.cs" />
+    <Compile Include="Model\Timetable\Schedule.cs" />
+    <Compile Include="Model\Timetable\SQLiteStatus.cs" />
+    <Compile Include="Model\SQL\SQLServices.cs" />
+    <Compile Include="Model\Extensions\StoryboardExtension.cs" />
+    <Compile Include="Model\Timetable\Timetable.cs" />
+    <Compile Include="Model\Services\TimetableDownloadService.cs" />
+    <Compile Include="Model\Timetable\Track.cs" />
+    <Compile Include="Model\Timetable\Names\TrackName.cs" />
+    <Compile Include="Pages\MainMenu.xaml.cs">
+      <DependentUpon>MainMenu.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Pages\MainPageFrames\DownloadingTimetable.xaml.cs">
       <DependentUpon>DownloadingTimetable.xaml</DependentUpon>
     </Compile>
@@ -154,6 +161,10 @@
     <Page Include="MainPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\MainMenu.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Pages\MainPageFrames\DownloadingTimetable.xaml">
       <SubType>Designer</SubType>

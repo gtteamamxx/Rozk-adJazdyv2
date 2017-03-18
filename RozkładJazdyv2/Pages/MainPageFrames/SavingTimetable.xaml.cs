@@ -39,22 +39,23 @@ namespace RozkładJazdyv2.Pages.MainPageFrames
         private void HookEvents()
         {
             EventHelper.OnSqlSavingChanged += EventHelper_OnSqlSavingChanged;
-            EventHelper.OnSqlSaved += EventHelper_OnSqlSaved;
+            EventHelper.OnSqlSaved += async () => await EventHelper_OnSqlSavedAsync();
             SavingRetryButton.Click += async (s, e) => await SaveTimetableAsync();
         }
 
-        private void EventHelper_OnSqlSaved()
+        private async Task EventHelper_OnSqlSavedAsync()
         {
             SetSavingTimetableInfoVisibility(Visibility.Collapsed);
-            _MainPageInstance.ChangeTextInInfoStackPanel(MainPage.OnfoStackPanelTextIndex.Saving_Timetable, 
+            _MainPageInstance.ChangeTextInInfoStackPanel(MainPage.InfoStackPanelTextIndex.Saving_Timetable,
                                                             "Rozkład zapisany...");
-            //todo
+            await Task.Delay(500);
+            ShowMainMenu();
         }
 
         private void EventHelper_OnSqlSavingChanged(int step, int maxSteps)
         {
             double percent = ((step * 100.0) / maxSteps);
-            _MainPageInstance.ChangeTextInInfoStackPanel(MainPage.OnfoStackPanelTextIndex.Saving_Timetable,
+            _MainPageInstance.ChangeTextInInfoStackPanel(MainPage.InfoStackPanelTextIndex.Saving_Timetable,
                                                             "Zapisywanie rozkładu... {0} / {1}", step, maxSteps);
             SavingInfoText.Text = string.Format("Trwa zapisywanie rozkładu [{0:00}%]", percent);
             SavingProgressBar.Value = percent;
@@ -62,7 +63,7 @@ namespace RozkładJazdyv2.Pages.MainPageFrames
 
         private async Task SaveTimetableAsync()
         {
-            _MainPageInstance.ChangeTextInInfoStackPanel(MainPage.OnfoStackPanelTextIndex.Saving_Timetable, 
+            _MainPageInstance.ChangeTextInInfoStackPanel(MainPage.InfoStackPanelTextIndex.Saving_Timetable, 
                                                             "Zapisywanie rozkładu...");
             SavingInfoText.Text = "Trwa zapisywanie rozkładu...";
             SetSavingRetryButtonVisibility(Visibility.Collapsed);
@@ -72,7 +73,7 @@ namespace RozkładJazdyv2.Pages.MainPageFrames
             {
                 SetSavingTimetableInfoVisibility(Visibility.Collapsed);
                 SetSavingRetryButtonVisibility(Visibility.Visible);
-                _MainPageInstance.ChangeTextInInfoStackPanel(MainPage.OnfoStackPanelTextIndex.Saving_Timetable,
+                _MainPageInstance.ChangeTextInInfoStackPanel(MainPage.InfoStackPanelTextIndex.Saving_Timetable,
                                                                 "Bład podczas zapisywania rozkładu...");
                 SavingInfoText.Text = $"Wystąpił problem podczas zapisywania rozkładu.{Environment.NewLine}Czy chcesz spróbować ponownie?";
             }
@@ -92,5 +93,8 @@ namespace RozkładJazdyv2.Pages.MainPageFrames
 
         private void SetSavingRetryButtonVisibility(Visibility vis)
             => SavingRetryButton.Visibility = vis;
+
+        private void ShowMainMenu()
+            => MainFrameHelper.GetMainFrame().Navigate(typeof(MainMenu));
     }
 }

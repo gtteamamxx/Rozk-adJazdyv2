@@ -50,7 +50,7 @@ namespace RozkładJazdyv2.Pages.MainPageFrames
 
         private void EventHelper_OnAllLinesDownloaded()
         {
-            _MainPageInstance.ChangeTextInInfoStackPanel(MainPage.OnfoStackPanelTextIndex.Downloading_Timetable, 
+            _MainPageInstance.ChangeTextInInfoStackPanel(MainPage.InfoStackPanelTextIndex.Downloading_Timetable, 
                                                             "Pobieranie rozkładu zakończone...");
             DownloadingInfoText.Text = "Pobieranie rozkładu zakończone. Trwa zapisywanie ...";
             _MainPageInstance.ChangePage(typeof(SavingTimetable), _MainPageInstance);
@@ -63,7 +63,7 @@ namespace RozkładJazdyv2.Pages.MainPageFrames
             var busStopsCount = (line.Schedules.SelectMany(p => p.Tracks.SelectMany(f => f.BusStops))).Count();
             DownloadingInfoText.Text = string.Format("Pobieranie linii: {0} [{1:00}%]{2}Przystanków: {3}", line.Name, percent,
                                                         Environment.NewLine, busStopsCount);
-            _MainPageInstance.ChangeTextInInfoStackPanel(MainPage.OnfoStackPanelTextIndex.Downloading_Timetable, 
+            _MainPageInstance.ChangeTextInInfoStackPanel(MainPage.InfoStackPanelTextIndex.Downloading_Timetable, 
                                                             "Trwa pobieranie linii: {0} / {1}", line.Id + 1, linesCount);
         }
 
@@ -79,12 +79,12 @@ namespace RozkładJazdyv2.Pages.MainPageFrames
             SetDownloadInfoVisibility(Visibility.Visible);
             SetDownloadButtonVisibility(Visibility.Collapsed);
             DownloadingInfoText.Text = "Trwa pobieranie informacji o liniach...";
-            _MainPageInstance.ChangeTextInInfoStackPanel(MainPage.OnfoStackPanelTextIndex.Downloading_Timetable, "Pobieranie linii...");
+            _MainPageInstance.ChangeTextInInfoStackPanel(MainPage.InfoStackPanelTextIndex.Downloading_Timetable, "Pobieranie linii...");
             bool isTimetableDownloaded = await Timetable.DownloadTimetableFromInternetAsync();
             SetDownloadInfoVisibility(Visibility.Collapsed);
             if (!isTimetableDownloaded)
             {
-                _MainPageInstance.ChangeTextInInfoStackPanel(MainPage.OnfoStackPanelTextIndex.Downloading_Timetable,
+                _MainPageInstance.ChangeTextInInfoStackPanel(MainPage.InfoStackPanelTextIndex.Downloading_Timetable,
                                                                 "Błąd podczas pobierania linii...");
                 DownloadingInfoText.Text = $"Wystąpil problem podczas pobierania linii.{Environment.NewLine}Sprawdź połączenie z internetem i spróbuj ponownie.";
                 SetDownloadButtonVisibility(Visibility.Visible);
