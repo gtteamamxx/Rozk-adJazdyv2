@@ -32,16 +32,39 @@ namespace RozkładJazdyv2.Pages
         {
             this.InitializeComponent();
             AddButtonsToPage();
+            RegisterButtonHooks();
+        }
+
+        private void RegisterButtonHooks()
+            => ButtonListGridView.SelectionChanged += ButtonClicked;
+
+        private void ButtonClicked(object sender, SelectionChangedEventArgs e)
+        {
+            var clickedButton = ((GridView)sender).SelectedItem as MainMenuButton;
+            switch(clickedButton.Type)
+            {
+                case MainMenuButton.ButtonType.Lines:
+                    MainFrameHelper.GetMainFrame().Navigate(typeof(Pages.Lines.LinesViewPage));
+                    break;
+                case MainMenuButton.ButtonType.Stops:
+                    break;
+                case MainMenuButton.ButtonType.Favourites:
+                    break;
+                case MainMenuButton.ButtonType.Communicates:
+                    break;
+                default:
+                    break;
+            }
         }
 
         private void AddButtonsToPage()
         {
             ButtonHelper.CreateButtonList(ButtonListGridView);
             var backgroundColor = new Color() { R = 121, G = 124, B = 129, A = 255 }; //"gray"
-            ButtonHelper.AddButton("Zobacz listę linii", "Linie", "\xE806", backgroundColor);
-            ButtonHelper.AddButton("Zobacz listę przystanków", "Przystanki", "\xE174", backgroundColor);
-            ButtonHelper.AddButton("Zobacz ulubione", "Ulubione", "\xE082", backgroundColor);
-            ButtonHelper.AddButton("Zobacz komunikaty", "Komunikaty", "\xEC15", backgroundColor);
+            ButtonHelper.AddButton("Zobacz listę linii", "Linie", "\xE806", backgroundColor, MainMenuButton.ButtonType.Lines);
+            ButtonHelper.AddButton("Zobacz listę przystanków", "Przystanki", "\xE174", backgroundColor, MainMenuButton.ButtonType.Stops);
+            ButtonHelper.AddButton("Zobacz ulubione", "Ulubione", "\xE082", backgroundColor, MainMenuButton.ButtonType.Favourites);
+            ButtonHelper.AddButton("Zobacz komunikaty", "Komunikaty", "\xEC15", backgroundColor, MainMenuButton.ButtonType.Communicates);
         }
 
         private void ButtonListGridViewContentChanged(ListViewBase sender, ContainerContentChangingEventArgs args)
@@ -50,5 +73,11 @@ namespace RozkładJazdyv2.Pages
             MainMenuButton buttonClass = ((MainMenuButton)args.Item);
             gridOfButton.Background = buttonClass.BackgroundColor;
         }
+
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+            => ResetButtonSelected();
+
+        private void ResetButtonSelected()
+            => ButtonListGridView.SelectedIndex = -1;
     }
 }

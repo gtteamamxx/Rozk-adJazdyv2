@@ -100,6 +100,7 @@
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Model\Animation\AnimationHelper.cs" />
+    <Compile Include="Model\Application\BackButtonManager.cs" />
     <Compile Include="Model\Application\Version.cs" />
     <Compile Include="Model\MainMenu\ButtonHelper.cs" />
     <Compile Include="Model\MainMenu\MainMenuButton.cs" />
@@ -123,8 +124,11 @@
     <Compile Include="Model\Services\TimetableDownloadService.cs" />
     <Compile Include="Model\Timetable\Track.cs" />
     <Compile Include="Model\Timetable\Names\TrackName.cs" />
-    <Compile Include="Pages\MainMenu.xaml.cs">
-      <DependentUpon>MainMenu.xaml</DependentUpon>
+    <Compile Include="Pages\Lines\LinesViewPage.xaml.cs">
+      <DependentUpon>LinesViewPage.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\MainMenuPage.xaml.cs">
+      <DependentUpon>MainMenuPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Pages\MainPageFrames\DownloadingTimetable.xaml.cs">
       <DependentUpon>DownloadingTimetable.xaml</DependentUpon>
@@ -162,7 +166,11 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-    <Page Include="Pages\MainMenu.xaml">
+    <Page Include="Pages\Lines\LinesViewPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\MainMenuPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

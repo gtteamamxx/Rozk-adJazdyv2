@@ -5,7 +5,6 @@
     xmlns:buttons="using:RozkładJazdyv2.Model.MainMenu"
     xmlns:app="using:RozkładJazdyv2"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:local2="using:RozkładJazdyv2.Model.Application"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     NavigationCacheMode="Required"
     mc:Ignorable="d">

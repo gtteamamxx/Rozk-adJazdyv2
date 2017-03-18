@@ -8,6 +8,7 @@ using Windows.Foundation.Metadata;
 using Windows.UI;
 using Windows.UI.ViewManagement;
 using Windows.UI.Text;
+using Windows.UI.Core;
 
 namespace RozkładJazdyv2
 {
@@ -34,10 +35,22 @@ namespace RozkładJazdyv2
             }
         }
 
+        private void ShowBackButton()
+        {
+            //button is showing only when user is at PC
+            var currentView = SystemNavigationManager.GetForCurrentView();
+            currentView.AppViewBackButtonVisibility = AppViewBackButtonVisibility.Visible;
+        }
+
+        private void RegisterBackButtonPress()
+            => SystemNavigationManager.GetForCurrentView().BackRequested += Model.Application.BackButtonManager.BackButtonPressed;
+        
         public MainPage()
         {
             this.InitializeComponent();
             SetPhoneStatusBarColor(Colors.White, Colors.Black);
+            ShowBackButton();
+            RegisterBackButtonPress();
             FadeInLogoOnStart();
             this.Loaded += MainPage_Loaded;
         }

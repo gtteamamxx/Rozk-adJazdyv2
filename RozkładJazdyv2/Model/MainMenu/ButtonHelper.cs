@@ -25,8 +25,14 @@ namespace RozkładJazdyv2.Model.MainMenu
             }
         }
 
-        public static void AddButton(string description, string header, string logo, Color backgroundColor)
-            => Buttons.Add( new MainMenuButton() { Description = description, Header = header,
-                                        Logo = logo, BackgroundColor = new SolidColorBrush(backgroundColor)});
+        public static void AddButton(string description, string header, string logo, Color backgroundColor, MainMenuButton.ButtonType type)
+            => Buttons.Add(new MainMenuButton()
+            {
+                Description = description,
+                Header = header,
+                Logo = logo,
+                BackgroundColor = new SolidColorBrush(backgroundColor),
+                Type = type
+            });
     }
 }
