@@ -28,6 +28,7 @@ namespace RozkładJazdyv2.Pages
     {
         private string APP_VERSION { get { return Model.Application.Version.VERSION; } }
         private string TimetableLastUpdate { get { return new FileInfo(SQLServices.SQLFilePath).CreationTime.ToUniversalTime().ToString(); } }
+
         public MainMenu()
         {
             this.InitializeComponent();
@@ -41,6 +42,8 @@ namespace RozkładJazdyv2.Pages
         private void ButtonClicked(object sender, SelectionChangedEventArgs e)
         {
             var clickedButton = ((GridView)sender).SelectedItem as MainMenuButton;
+            if (clickedButton == null)
+                return;
             switch(clickedButton.Type)
             {
                 case MainMenuButton.ButtonType.Lines:
