@@ -535,27 +535,27 @@ namespace RozkładJazdyv2.Model
         {
             int bit = 1 << 0;
             if (type.Contains("zwykly"))
-                bit |= 1 << 1;
+                bit |= Line.NORMAL_BUS_BIT;
             if (type.Contains("przysp"))
-                bit |= 1 << 3;
+                bit |= Line.FAST_BUS_BIT;
             if (type.Contains("tram"))
-                bit |= 1 << 4;
+                bit |= Line.TRAIN_BIT;
             if (type.Contains("mini"))
-                bit |= 1 << 5;
+                bit |= Line.MINI_BIT;
             if (type.Contains("lot"))
-                bit |= 1 << 6;
+                bit |= Line.AIRPORT_BIT;
             if (type.Contains("swiezy"))
-                bit |= 1 << 7;
+                bit |= Line.UPDATED_BIT;
             if (type.Contains("zast"))
-                bit |= 1 << 8;
+                bit |= Line.REPLACMENT_BIT;
             if (type.Contains("wiekszy"))
-                bit |= 1 << 9;
+                bit |= Line.BIG_BUS_BIT;
             if (type.Contains("nocna"))
-                bit |= 1 << 10;
-            if (type.Contains("bezp"))
-                bit |= 1 << 11;
+                bit |= Line.NIGHT_BUS_BIT;
+            if (type.Contains("bezp")) //no-paid, free
+                bit |= Line.FREE_BIT;
             if (type.Contains("kolej"))
-                bit |= 1 << 12;
+                bit |= Line.TRAIN_BIT;
             return bit;
         }
 
