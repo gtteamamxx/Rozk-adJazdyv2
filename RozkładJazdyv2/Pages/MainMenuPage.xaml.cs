@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI;
@@ -39,11 +40,12 @@ namespace RozkładJazdyv2.Pages
         private void RegisterButtonHooks()
             => ButtonListGridView.SelectionChanged += ButtonClicked;
 
-        private void ButtonClicked(object sender, SelectionChangedEventArgs e)
+        private async void ButtonClicked(object sender, SelectionChangedEventArgs e)
         {
             var clickedButton = ((GridView)sender).SelectedItem as MainMenuButton;
             if (clickedButton == null)
                 return;
+            await Task.Delay(100www);
             switch(clickedButton.Type)
             {
                 case MainMenuButton.ButtonType.Lines:

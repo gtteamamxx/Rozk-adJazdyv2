@@ -15,9 +15,16 @@ namespace RozkładJazdyv2.Model.Application
         public static void BackButtonPressed(object sender, BackRequestedEventArgs e)
         {
             Frame mainAppFrame = MainFrameHelper.GetMainFrame();
-            var currentPageType = mainAppFrame.CurrentSourcePageType;
+            Type currentPageType = mainAppFrame.CurrentSourcePageType;
+            bool goBack = false;
             if (currentPageType == typeof(Pages.Lines.LinesViewPage))
+                goBack = true;
+
+            if (goBack)
+            {
                 mainAppFrame.GoBack();
+                e.Handled = true;
+            }
         }
     }
 }
