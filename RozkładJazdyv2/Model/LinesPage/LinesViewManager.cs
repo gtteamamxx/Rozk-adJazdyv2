@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml;
 using Windows.ApplicationModel.Core;
 using Windows.UI;
 using Windows.UI.Text;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
+using Windows.UI.Xaml.Markup;
 using Windows.UI.Xaml.Media;
 
 namespace RozkładJazdyv2.Model.LinesPage
@@ -34,8 +36,6 @@ namespace RozkładJazdyv2.Model.LinesPage
                 AddPanelGridToContentGrid(ref contentGrid, name);
                 AddLinesGridViewToContentGrid(ref contentGrid, acceptedLinesBit, page);
                 AddContentGridToPage(contentGrid);
-
-
             });
         }
 
@@ -47,17 +47,19 @@ namespace RozkładJazdyv2.Model.LinesPage
 
         private static void AddLinesGridViewToContentGrid(ref Grid grid, int acceptedLinesBit, Pages.Lines.LinesViewPage page)
         {
-            var linesGridView = new GridView() { Margin = new Thickness(10) };
+            var linesGridView = new GridView()
+            {
+                Margin = new Thickness(10),
+                HorizontalContentAlignment = HorizontalAlignment.Center
+            };
             Grid.SetRow(linesGridView, 1);
+            linesGridView.ItemsPanel = page.Resources["LinesGridViewItemPanelTemplate"] as ItemsPanelTemplate;
             linesGridView.ItemTemplate = page.Resources["LineDataTemplate"] as DataTemplate;
             foreach (var line in Timetable.Instance.Lines)
-            {
                 if ((line.Type & acceptedLinesBit) > 0)
                     linesGridView.Items.Add(line);
-            }
             grid.Children.Add(linesGridView);
         }
-
         private static void AddPanelGridToContentGrid(ref Grid grid, string name)
         {
             var panelGrid = new Grid()
@@ -100,17 +102,17 @@ namespace RozkładJazdyv2.Model.LinesPage
         private static void PannelGridTapped(object sender, TappedRoutedEventArgs e)
         {
             var panelGrid = sender as Grid;
-            var listGridView = ((Grid)panelGrid.Parent).Children.ElementAt(1);
+            var linesGridView = ((Grid)panelGrid.Parent).Children.ElementAt(1);
             var arrowTextBlock = panelGrid.Children.ElementAt(1) as TextBlock;
-            if (listGridView.Visibility == Visibility.Collapsed)
+            if (linesGridView.Visibility == Visibility.Collapsed)
             {
                 arrowTextBlock.Text = "\xE74B";
-                listGridView.Visibility = Visibility.Visible;
+                linesGridView.Visibility = Visibility.Visible;
             }
             else
             {
                 arrowTextBlock.Text = "\xE74A";
-                listGridView.Visibility = Visibility.Collapsed;
+                linesGridView.Visibility = Visibility.Collapsed;
             }
         }
     }

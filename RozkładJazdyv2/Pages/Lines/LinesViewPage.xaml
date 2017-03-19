@@ -19,6 +19,12 @@
                            Text="{x:Bind Name}"/>
             </Grid>
         </DataTemplate>
+
+        <ItemsPanelTemplate x:Key="LinesGridViewItemPanelTemplate">
+            <ItemsWrapGrid Orientation="Horizontal"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
+        </ItemsPanelTemplate>
     </Page.Resources>
     
     <Grid Background="Black">
