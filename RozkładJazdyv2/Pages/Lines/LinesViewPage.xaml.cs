@@ -43,10 +43,12 @@ namespace RozkładJazdyv2.Pages.Lines
         private async Task LoadLinesToView()
         {
             Model.LinesPage.LinesViewManager.SetInstance(LinesScrollViewer);
+            await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync("Ulubione", Line.FAVOURITE_BIT, this);
             await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync("Tramwaje", Line.TRAM_BITS, this);
             await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync("Autobusy", Line.BUS_BITS, this);
             await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync("Minibusy", Line.MINI_BIT, this);
             await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync("Nocne", Line.NIGHT_BUS_BIT, this);
+            await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync("Inne", Line.AIRPORT_BIT, this);
             LoadingProgressRing.IsActive = false;
             _IsPageCached = true;
         }

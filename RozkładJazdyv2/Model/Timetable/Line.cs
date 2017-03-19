@@ -23,6 +23,7 @@ namespace RozkładJazdyv2.Model
         public const int NIGHT_BUS_BIT = 1 << 9;
         public const int FREE_BIT = 1 << 11;
         public const int TRAIN_BIT = 1 << 12;
+        public const int FAVOURITE_BIT = 1 << 13;
 
         [PrimaryKey]
         [Indexed]

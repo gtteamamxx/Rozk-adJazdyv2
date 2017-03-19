@@ -35,6 +35,9 @@ namespace RozkładJazdyv2.Model.LinesPage
                 AddRowDefinitionsToContentGrid(ref contentGrid);
                 AddPanelGridToContentGrid(ref contentGrid, name);
                 AddLinesGridViewToContentGrid(ref contentGrid, acceptedLinesBit, page);
+                bool isLineTypeEmpty = IsLineTypEmpty(contentGrid);
+                if (isLineTypeEmpty)
+                    return;
                 AddContentGridToPage(contentGrid);
             });
         }
@@ -43,6 +46,12 @@ namespace RozkładJazdyv2.Model.LinesPage
         {
             var scrollViewerGrid = _LinesTypeScrollViewer.Content as StackPanel;
             scrollViewerGrid.Children.Add(grid);
+        }
+
+        private static bool IsLineTypEmpty(Grid grid)
+        {
+            var linesGridView = grid.Children.ElementAt(1) as GridView;
+            return linesGridView.Items.Count() == 0;
         }
 
         private static void AddLinesGridViewToContentGrid(ref Grid grid, int acceptedLinesBit, Pages.Lines.LinesViewPage page)
