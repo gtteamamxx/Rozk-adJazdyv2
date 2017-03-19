@@ -16,6 +16,7 @@
             <Grid>
                 <GridView Name="ButtonListGridView"
                           HorizontalContentAlignment="Center"
+                          Margin="0 0 0 25"
                           VerticalContentAlignment="Center" 
                           ContainerContentChanging="ButtonListGridViewContentChanged" >
                     <GridView.ItemsPanel>
@@ -58,46 +59,44 @@
                     </GridView.ItemTemplate>
                 </GridView>
 
-                <TextBlock VerticalAlignment="Bottom"
-                           HorizontalAlignment="Right"
-                           TextAlignment="Right"
-                           Foreground="White"
-                           Margin="10">
+                <Grid VerticalAlignment="Bottom">
+                    <TextBlock HorizontalAlignment="Right"
+                               TextAlignment="Right"
+                               Foreground="White">
                     <Run FontSize="10" 
-                         Text="Ostatnia aktualizacja: "/>
+                         Text="Rozkład z dnia: "/>
                     <Run FontSize="10" 
                          Text="{x:Bind TimetableLastUpdate}" />
                     <Run Text="&#x0a;"/>
                     <Run Text="{x:Bind APP_VERSION}" />
-                </TextBlock>
+                    </TextBlock>
 
-                <Button VerticalAlignment="Bottom"
-                        HorizontalAlignment="Left"
-                        Foreground="White"
-                        Background="Transparent"
-                        Margin="10">
-                    <Button.Flyout>
-                        <Flyout>
-                            <StackPanel>
-                                <TextBlock>
+                    <Button HorizontalAlignment="Left"
+                            Foreground="White"
+                            Background="Transparent">
+                        <Button.Flyout>
+                            <Flyout>
+                                <StackPanel>
+                                    <TextBlock>
                                     <Run Foreground="LightSeaGreen"
                                          Text="Rozkład jazdy KZKGOP | UWP" />
                                     <Run Text="&#x0a;Autor: Grzegorz Stanik&#x0a;Wersja: " />
                                     <Run Foreground="Yellow" Text="{x:Bind APP_VERSION}"/>
-                                </TextBlock>
-                                <HyperlinkButton Content="Kontakt: grs4_98@o2.pl" 
-                                                 Margin="0 -8"
-                                                 Foreground="Red"
-                                                 NavigateUri="mailto:grs4_98@o2.pl" />
-                            </StackPanel>
-                        </Flyout>
-                    </Button.Flyout>
+                                    </TextBlock>
+                                    <HyperlinkButton Content="Kontakt: grs4_98@o2.pl" 
+                                                     Margin="0 -8"
+                                                     Foreground="Red"
+                                                     NavigateUri="mailto:grs4_98@o2.pl" />
+                                </StackPanel>
+                            </Flyout>
+                        </Button.Flyout>
 
-                    <Grid BorderBrush="White"
-                          BorderThickness="0 0 0 1">
-                        <TextBlock Text="Autor"/>
-                    </Grid>
-                </Button>
+                        <Grid BorderBrush="White"
+                              BorderThickness="0 0 0 1">
+                            <TextBlock Text="Autor"/>
+                        </Grid>
+                    </Button>
+                </Grid>
             </Grid>
         </ScrollViewer>
     </Grid>
