@@ -25,11 +25,14 @@ namespace RozkładJazdyv2.Pages.Lines
     public sealed partial class LinesViewPage : Page
     {
         private List<Line> _Lines => Timetable.Instance.Lines;
+        private List<GridView> _ClickedGridViews;
+
         private bool _IsPageCached;
 
         public LinesViewPage()
         {
             this.InitializeComponent();
+            _ClickedGridViews = new List<GridView>();
             this.Loaded += LinesViewPage_Loaded;
         }
 
@@ -43,14 +46,42 @@ namespace RozkładJazdyv2.Pages.Lines
         private async Task LoadLinesToView()
         {
             Model.LinesPage.LinesViewManager.SetInstance(LinesScrollViewer);
-            await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync("Ulubione", Line.FAVOURITE_BIT, this);
-            await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync("Tramwaje", Line.TRAM_BITS, this);
-            await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync("Autobusy", Line.BUS_BITS, this);
-            await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync("Minibusy", Line.MINI_BIT, this);
-            await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync("Nocne", Line.NIGHT_BUS_BIT, this);
-            await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync("Inne", Line.AIRPORT_BIT, this);
-            LoadingProgressRing.IsActive = false;
+            await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync("Ulubione", Line.FAVOURITE_BIT, this, LineSelectionChanged);
+            await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync("Tramwaje", Line.TRAM_BITS, this, LineSelectionChanged);
+            await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync("Autobusy", Line.BUS_BITS, this, LineSelectionChanged);
+            await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync("Minibusy", Line.MINI_BIT, this, LineSelectionChanged);
+            await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync("Nocne", Line.NIGHT_BUS_BIT, this, LineSelectionChanged);
+            await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync("Inne", Line.AIRPORT_BIT, this, LineSelectionChanged);
+            HideLoadingStackPanel();
             _IsPageCached = true;
         }
+
+        private void LineSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var gridView = sender as GridView;
+            if (gridView.SelectedIndex == -1)
+                return;
+            AddGridViewToCacheList(gridView);
+            ResetClickedGridsExceptNowClicked(gridView);
+        }
+
+        private void ResetClickedGridsExceptNowClicked(GridView exceptGridView)
+        {
+            foreach(var gridView in _ClickedGridViews)
+            {
+                if (exceptGridView == gridView)
+                    continue;
+                gridView.SelectedIndex = -1;
+            }
+        }
+
+        private void AddGridViewToCacheList(GridView gridView)
+        {
+            if (_ClickedGridViews.FirstOrDefault(p => p == gridView) == null)
+                _ClickedGridViews.Add(gridView);
+        }
+
+        private void HideLoadingStackPanel()
+            => LoadingStackPanel.Visibility = Visibility.Collapsed;
     }
 }

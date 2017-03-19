@@ -27,14 +27,15 @@ namespace RozkładJazdyv2.Model.LinesPage
                 _LinesTypeScrollViewer = linesScrollViewer;
         }
 
-        public static async Task AddLineTypeToListViewAsync(string name, int acceptedLinesBit, Pages.Lines.LinesViewPage page)
+        public static async Task AddLineTypeToListViewAsync(string name, int acceptedLinesBit, Pages.Lines.LinesViewPage page,
+                                                            SelectionChangedEventHandler selectionChangedFunction)
         {
             await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
             {
                 var contentGrid = new Grid();
                 AddRowDefinitionsToContentGrid(ref contentGrid);
                 AddPanelGridToContentGrid(ref contentGrid, name);
-                AddLinesGridViewToContentGrid(ref contentGrid, acceptedLinesBit, page);
+                AddLinesGridViewToContentGrid(ref contentGrid, acceptedLinesBit, page, ref selectionChangedFunction);
                 bool isLineTypeEmpty = IsLineTypEmpty(contentGrid);
                 if (isLineTypeEmpty)
                     return;
@@ -54,13 +55,15 @@ namespace RozkładJazdyv2.Model.LinesPage
             return linesGridView.Items.Count() == 0;
         }
 
-        private static void AddLinesGridViewToContentGrid(ref Grid grid, int acceptedLinesBit, Pages.Lines.LinesViewPage page)
+        private static void AddLinesGridViewToContentGrid(ref Grid grid, int acceptedLinesBit,
+                                                            Pages.Lines.LinesViewPage page, ref SelectionChangedEventHandler selectionChangedFunction)
         {
             var linesGridView = new GridView()
             {
                 Margin = new Thickness(10),
                 HorizontalContentAlignment = HorizontalAlignment.Center
             };
+            linesGridView.SelectionChanged += selectionChangedFunction;
             Grid.SetRow(linesGridView, 1);
             linesGridView.ItemsPanel = page.Resources["LinesGridViewItemPanelTemplate"] as ItemsPanelTemplate;
             linesGridView.ItemTemplate = page.Resources["LineDataTemplate"] as DataTemplate;

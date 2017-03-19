@@ -45,7 +45,7 @@ namespace RozkładJazdyv2.Pages
             var clickedButton = ((GridView)sender).SelectedItem as MainMenuButton;
             if (clickedButton == null)
                 return;
-            await Task.Delay(100www);
+            await Task.Delay(100);
             switch(clickedButton.Type)
             {
                 case MainMenuButton.ButtonType.Lines:
