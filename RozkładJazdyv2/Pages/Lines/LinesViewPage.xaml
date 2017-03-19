@@ -33,12 +33,12 @@
             <RowDefinition />
         </Grid.RowDefinitions>
         
-        <Grid>
+        <Grid> <!-- Grid for flyout function -->
             <AutoSuggestBox QueryIcon="Zoom"
-                        PlaceholderText="Wyszukaj linie..."
-                        ItemsSource="{x:Bind _SearchLinesGrids}"
-                        TextChanged="SearchLineAutoSuggestBox_TextChanged"
-                        Name="SearchLineAutoSuggestBox"/>
+                            PlaceholderText="Wyszukaj linie..."
+                            ItemsSource="{x:Bind _SearchLinesGrids}"
+                            TextChanged="SearchLineAutoSuggestBox_TextChanged"
+                            Name="SearchLineAutoSuggestBox"/>
         </Grid>
 
         <StackPanel HorizontalAlignment="Center"

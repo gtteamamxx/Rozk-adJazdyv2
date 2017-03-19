@@ -5,6 +5,7 @@
     xmlns:local="using:RozkładJazdyv2.Pages.Lines"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    NavigationCacheMode="Required"
     mc:Ignorable="d">
 
     <Grid Background="Black">
@@ -31,8 +32,10 @@
                            RelativePanel.RightOf="LineLogoTextBlock"
                            RelativePanel.AlignVerticalCenterWithPanel="True"
                            x:Name="LineNumberTextBlock"/>
-                <TextBlock Margin="0 50 0 0"
-                           Text="Rozkład: obecnie obowiązujący"/>
+                <TextBlock Margin="0 50 0 0">
+                    <Run Text="Rozkład: " />
+                    <Run x:Name="LineScheduleNameTextBlock" />
+                </TextBlock>
             </RelativePanel>
 
         </Grid>
