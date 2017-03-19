@@ -16,7 +16,7 @@
                 <TextBlock HorizontalAlignment="Center"
                            VerticalAlignment="Center"
                            Foreground="White"
-                           Text="{x:Bind Name}"/>
+                           Text="{x:Bind EditedName}"/>
             </Grid>
         </DataTemplate>
 

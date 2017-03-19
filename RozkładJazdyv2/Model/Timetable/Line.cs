@@ -21,9 +21,9 @@ namespace RozkładJazdyv2.Model
         public const int REPLACMENT_BIT = 1 << 7;
         public const int BIG_BUS_BIT = 1 << 8;
         public const int NIGHT_BUS_BIT = 1 << 9;
-        public const int FREE_BIT = 1 << 11;
-        public const int TRAIN_BIT = 1 << 12;
-        public const int FAVOURITE_BIT = 1 << 13;
+        public const int FREE_BIT = 1 << 10;
+        public const int TRAIN_BIT = 1 << 11;
+        public const int FAVOURITE_BIT = 1 << 12;
 
         [PrimaryKey]
         [Indexed]
@@ -34,5 +34,8 @@ namespace RozkładJazdyv2.Model
         public int Type { get; set; }
         [Ignore]
         public List<Schedule> Schedules { get; set; }
+
+        [Ignore]
+        public string EditedName { get { return (this.Type & TRAM_BIT) == TRAM_BIT ? $"{this.Name}T" : this.Name; } }
     }
 }

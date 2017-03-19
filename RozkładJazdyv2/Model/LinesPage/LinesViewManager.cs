@@ -66,7 +66,7 @@ namespace RozkładJazdyv2.Model.LinesPage
             linesGridView.ItemTemplate = page.Resources["LineDataTemplate"] as DataTemplate;
             foreach (var line in Timetable.Instance.Lines)
                 if ((line.Type & acceptedLinesBit) > 0)
-                    linesGridView.Items.Add(line);
+                        linesGridView.Items.Add(line);
             grid.Children.Add(linesGridView);
         }
         private static void AddPanelGridToContentGrid(ref Grid grid, string name)
