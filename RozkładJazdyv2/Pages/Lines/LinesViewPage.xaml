@@ -32,10 +32,15 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition />
         </Grid.RowDefinitions>
-
-        <AutoSuggestBox QueryIcon="Zoom"
-                        PlaceholderText="Wyszukaj linie..."/>
         
+        <Grid>
+            <AutoSuggestBox QueryIcon="Zoom"
+                        PlaceholderText="Wyszukaj linie..."
+                        ItemsSource="{x:Bind _SearchLinesGrids}"
+                        TextChanged="SearchLineAutoSuggestBox_TextChanged"
+                        Name="SearchLineAutoSuggestBox"/>
+        </Grid>
+
         <StackPanel HorizontalAlignment="Center"
                     VerticalAlignment="Center"
                     Grid.RowSpan="2"

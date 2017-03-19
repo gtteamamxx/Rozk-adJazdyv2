@@ -14,17 +14,19 @@ namespace RozkładJazdyv2.Model.LinesPage
     {
         private FlyoutHelper() { }
 
-        public static void ShowFlyOutAtLineGrid(Line line, RoutedEventHandler scheduleClickedEvent)
+        public static void ShowFlyOutAtLineGrid(Grid lineGrid, Line line, RoutedEventHandler scheduleClickedEvent)
         {
-            var lineGrid = line.GridObjectInLinesList;
             var inivisibleButton = GetLineGridInvisibleButton(lineGrid);
             var flyout = CreateFlyOutAtButton(ref inivisibleButton, line, ref scheduleClickedEvent);
+            bool isGridLineGrid = lineGrid == line.GridObjectInLinesList;
             flyout.Closed += (s, e) =>
             {
                 lineGrid.Children.Remove(inivisibleButton);
-                RemoveLineGridBorder(ref lineGrid);
+                if (isGridLineGrid)
+                    RemoveLineGridBorder(ref lineGrid);
             };
-            SetLineGridBorder(ref lineGrid);
+            if(isGridLineGrid)
+                SetLineGridBorder(ref lineGrid);
             lineGrid.Children.Add(inivisibleButton);
             flyout.ShowAt(inivisibleButton);
         }

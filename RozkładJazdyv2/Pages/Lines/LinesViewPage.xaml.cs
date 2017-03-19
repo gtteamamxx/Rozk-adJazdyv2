@@ -2,12 +2,14 @@
 using RozkładJazdyv2.Model.LinesPage;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.UI;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -25,7 +27,7 @@ namespace RozkładJazdyv2.Pages.Lines
     /// </summary>
     public sealed partial class LinesViewPage : Page
     {
-        private List<Line> _Lines => Timetable.Instance.Lines;
+        private ObservableCollection<Grid> _SearchLinesGrids;
         private List<GridView> _ClickedGridViews;
         private bool _IsPageCached;
 
@@ -33,7 +35,21 @@ namespace RozkładJazdyv2.Pages.Lines
         {
             this.InitializeComponent();
             _ClickedGridViews = new List<GridView>();
+            _SearchLinesGrids = new ObservableCollection<Grid>();
+            RegisterHooks();
             this.Loaded += LinesViewPage_Loaded;
+        }
+
+        private void RegisterHooks()
+            => SearchLineAutoSuggestBox.SuggestionChosen += SearchLineAutoSuggestBox_SuggestionChosenAsync;
+
+        private async void SearchLineAutoSuggestBox_SuggestionChosenAsync(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs args)
+        {
+            var grid = sender.Parent as Grid;
+            var selectedGrid = args.SelectedItem as Grid;
+            var selectedLine = selectedGrid.DataContext as Line;
+            selectedLine = await FillLineSchedulesAsync(selectedLine);
+            await ShowLinePageBySchedulesAsync(selectedLine, grid);
         }
 
         private async void LinesViewPage_Loaded(object sender, RoutedEventArgs e)
@@ -69,13 +85,24 @@ namespace RozkładJazdyv2.Pages.Lines
                 return;
             AddGridViewToCacheList(gridView);
             var line = gridView.SelectedItem as Line;
-            if (line.Schedules == null)
-                line.Schedules = await GetLineSchedules(line);
+            line = await FillLineSchedulesAsync(line);
+            await ShowLinePageBySchedulesAsync(line, line.GridObjectInLinesList);
+            ResetClickedGrids();
+        }
+
+        private async Task ShowLinePageBySchedulesAsync(Line line, Grid lineBackgroundGtid)
+        {
             if (line.Schedules.Count() == 1)
                 await ShowLinePageAsync(new ChangeLineParameter() { Line = line, SelectedSchedule = line.Schedules.ElementAt(0) });
             else
-                Model.LinesPage.FlyoutHelper.ShowFlyOutAtLineGrid(line, ScheduleClickedAsync);
-            ResetClickedGrids();
+                Model.LinesPage.FlyoutHelper.ShowFlyOutAtLineGrid(lineBackgroundGtid, line, ScheduleClickedAsync);
+        }
+
+        private async Task<Line> FillLineSchedulesAsync(Line line)
+        {
+            if (line.Schedules == null)
+                line.Schedules = await GetLineSchedules(line);
+            return line;
         }
 
         private async void ScheduleClickedAsync(object sender, RoutedEventArgs e)
@@ -106,5 +133,31 @@ namespace RozkładJazdyv2.Pages.Lines
 
         private void HideLoadingStackPanel()
             => LoadingStackPanel.Visibility = Visibility.Collapsed;
+
+        private void SearchLineAutoSuggestBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
+        {
+            _SearchLinesGrids.Clear();
+            if (sender.Text.Trim().Length == 0)
+                return;
+            Timetable.Instance.Lines.Where(p => p.EditedName.StartsWith(sender.Text)).ToList().ForEach(p =>
+            {
+                var searchLineGrid = new Grid()
+                {
+                    Width = 50,
+                    Height = 50,
+                    Margin = new Thickness(5),
+                    Background = new SolidColorBrush(Color.FromArgb(255, 55, 58, 69)),
+                    DataContext = p
+                };
+                searchLineGrid.Children.Add(new TextBlock()
+                {
+                    HorizontalAlignment = HorizontalAlignment.Center,
+                    VerticalAlignment = VerticalAlignment.Center,
+                    Foreground = new SolidColorBrush(Colors.White),
+                    Text = p.EditedName
+                });
+                _SearchLinesGrids.Add(searchLineGrid);
+            });
+        }
     }
 }

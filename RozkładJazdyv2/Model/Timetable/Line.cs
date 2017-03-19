@@ -41,5 +41,8 @@ namespace RozkładJazdyv2.Model
         [Ignore]
         public Grid GridObjectInLinesList { get; set; }
 
+        public override string ToString()
+            => this.EditedName;
+
     }
 }
