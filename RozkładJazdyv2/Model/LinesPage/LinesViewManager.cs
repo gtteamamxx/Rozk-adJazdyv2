@@ -64,14 +64,23 @@ namespace RozkładJazdyv2.Model.LinesPage
                 HorizontalContentAlignment = HorizontalAlignment.Center
             };
             linesGridView.SelectionChanged += selectionChangedFunction;
+            linesGridView.ContainerContentChanging += LinesGridView_ContainerContentChanging;
             Grid.SetRow(linesGridView, 1);
             linesGridView.ItemsPanel = page.Resources["LinesGridViewItemPanelTemplate"] as ItemsPanelTemplate;
             linesGridView.ItemTemplate = page.Resources["LineDataTemplate"] as DataTemplate;
             foreach (var line in Timetable.Instance.Lines)
                 if ((line.Type & acceptedLinesBit) > 0)
-                        linesGridView.Items.Add(line);
+                    linesGridView.Items.Add(line);
             grid.Children.Add(linesGridView);
         }
+
+        private static void LinesGridView_ContainerContentChanging(ListViewBase sender, ContainerContentChangingEventArgs args)
+        {
+            var gridOfLine = ((Grid)args.ItemContainer.ContentTemplateRoot);
+            Line lineClass = ((Line)args.Item);
+            lineClass.GridObjectInLinesList = gridOfLine;
+        }
+
         private static void AddPanelGridToContentGrid(ref Grid grid, string name)
         {
             var panelGrid = new Grid()

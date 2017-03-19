@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Windows.UI.Xaml.Controls;
 
 namespace RozkładJazdyv2.Model
 {
@@ -37,5 +38,8 @@ namespace RozkładJazdyv2.Model
 
         [Ignore]
         public string EditedName { get { return (this.Type & TRAM_BIT) == TRAM_BIT ? $"{this.Name}T" : this.Name; } }
+        [Ignore]
+        public Grid GridObjectInLinesList { get; set; }
+
     }
 }

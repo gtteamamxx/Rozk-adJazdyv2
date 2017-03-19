@@ -16,15 +16,23 @@ namespace RozkładJazdyv2.Model.Application
         {
             Frame mainAppFrame = MainFrameHelper.GetMainFrame();
             Type currentPageType = mainAppFrame.CurrentSourcePageType;
-            bool goBack = false;
-            if (currentPageType == typeof(Pages.Lines.LinesViewPage))
-                goBack = true;
+            bool goBack = IsGoBackFromPageAllowed(currentPageType);
 
             if (goBack)
             {
                 mainAppFrame.GoBack();
                 e.Handled = true;
             }
+        }
+
+        private static bool IsGoBackFromPageAllowed(Type currentPageType)
+        {
+            if (currentPageType == typeof(Pages.Lines.LinesViewPage))
+                return true;
+            if (currentPageType == typeof(Pages.Lines.LinePage))
+                return true;
+
+            return false;
         }
     }
 }

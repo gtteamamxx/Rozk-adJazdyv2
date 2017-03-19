@@ -1,0 +1,41 @@
+﻿<Page
+    x:Class="RozkładJazdyv2.Pages.Lines.LinePage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:RozkładJazdyv2.Pages.Lines"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d">
+
+    <Grid Background="Black">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="1"
+              VerticalAlignment="Top"
+              Margin="20">
+            <RelativePanel>
+                <TextBlock FontFamily="Segoe MDL2 Assets"
+                           FontSize="30"
+                           Text="&#xE806;"
+                           Foreground="#FF959DD3"
+                           x:Name="LineLogoTextBlock"
+                           RelativePanel.AlignVerticalCenterWithPanel="True"/>
+                <TextBlock VerticalAlignment="Center"
+                           FontSize="30"
+                           Foreground="White"
+                           Text="722"
+                           Margin="10 0 0 0"
+                           RelativePanel.RightOf="LineLogoTextBlock"
+                           RelativePanel.AlignVerticalCenterWithPanel="True"
+                           x:Name="LineNumberTextBlock"/>
+                <TextBlock Margin="0 50 0 0"
+                           Text="Rozkład: obecnie obowiązujący"/>
+            </RelativePanel>
+
+        </Grid>
+        
+    </Grid>
+</Page>

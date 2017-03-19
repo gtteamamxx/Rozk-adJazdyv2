@@ -55,6 +55,15 @@ namespace RozkładJazdyv2.Model
             RenameTempFileToMainFile();
         }
 
+        public static async Task<List<T>> QueryAsync<T>(string query, params object[] args) where T : class
+            => await _SQLConnection.QueryAsync<T>(query, args);
+
+        public static async Task ExecuteQueryAsync(string query, params object[] args)
+            => await _SQLConnection.ExecuteAsync(query, args);
+
+        public static async Task<T> ExecuteScalarAsync<T>(string query, params object[] args) where T : class
+            => await _SQLConnection.ExecuteScalarAsync<T>(query, args);
+
         public static async Task<bool> IsValidDatabaseAsync()
         {
             if (!IsDatabaseFileExist())
