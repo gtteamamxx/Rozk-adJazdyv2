@@ -60,7 +60,11 @@ namespace RozkładJazdyv2.Pages.MainPageFrames
         {
             double percent = ((line.Id + 1) * 100.0 / linesCount);
             DownloadingProgressBar.Value = percent;
-            var busStopsCount = (line.Schedules.SelectMany(p => p.Tracks.SelectMany(f => f.BusStops))).Count();
+            int busStopsCount = 0;
+            if (line.Schedules[0].Name.Contains("zawiesz"))
+                busStopsCount = 0;
+            else
+                busStopsCount = (line.Schedules.SelectMany(p => p.Tracks.SelectMany(f => f.BusStops))).Count();
             DownloadingInfoText.Text = string.Format("Pobieranie linii: {0} [{1:00}%]{2}Przystanków: {3}", line.Name, percent,
                                                         Environment.NewLine, busStopsCount);
             _MainPageInstance.ChangeTextInInfoStackPanel(MainPage.InfoStackPanelTextIndex.Downloading_Timetable, 

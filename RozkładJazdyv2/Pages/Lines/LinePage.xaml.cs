@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI;
+using Windows.UI.Text;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -57,18 +58,17 @@ namespace RozkładJazdyv2.Pages.Lines
             var textBlock = ((args.ItemContainer.ContentTemplateRoot as Grid).Children.ElementAt(0) as TextBlock);
             if (busStop.IsBusStopZone)
                 textBlock.Foreground = new SolidColorBrush(Color.FromArgb(255, 255, 255, 0));
-            else if (busStop.IsOnDemand)
+            if (busStop.IsOnDemand)
                 textBlock.Foreground = new SolidColorBrush(Color.FromArgb(255, 255, 0, 0));
-            else if (busStop.IsVariant)
+            if (busStop.IsVariant)
             {
                 var text = textBlock.Text;
                 textBlock.Text = $"-- {text}";
+                textBlock.FontWeight = FontWeights.ExtraLight;
+                textBlock.FontSize = 13;
                 textBlock.Foreground = new SolidColorBrush(Colors.Aqua);
             }
-            else
-            {
-                textBlock.Foreground = new SolidColorBrush(Colors.White);
-            }
+            args.Handled = false;
         }
 
         private async void LinePage_LoadedAsync(object sender, RoutedEventArgs e)

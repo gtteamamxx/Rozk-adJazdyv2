@@ -38,6 +38,8 @@ namespace RozkładJazdyv2.Model
 
         private static void RenameDownloadedSqlFile()
         {
+            if (!IsTempDatabaseExist())
+                return;
             using (SQLiteConnection tempConnection = new SQLiteConnection(new SQLitePlatformWinRT(), SQLTempFilePath))
             {
                 if (tempConnection == null)
@@ -46,12 +48,17 @@ namespace RozkładJazdyv2.Model
                 if (string.IsNullOrEmpty((timetableExistString = tempConnection.ExecuteScalar<string>(
                         "SELECT * FROM sqlite_master WHERE name LIKE 'SQLiteStatus'"))))
                     return;
-                SQLiteStatus sqliteStatus = tempConnection.Table<SQLiteStatus>().ElementAt(0);
+                var sqLiteStatusTable = tempConnection.Table<SQLiteStatus>();
+                if (sqLiteStatusTable == null || sqLiteStatusTable.Count() == 0)
+                    return;
+                SQLiteStatus sqliteStatus = sqLiteStatusTable.ElementAt(0);
                 bool isTableValid = (sqliteStatus != null && sqliteStatus.Status == SQLiteStatus.LoadStatus.Succes);
                 if (!isTableValid)
                     return;
                 tempConnection.Close();
             }
+            if (IsDatabaseFileExist())
+                DeleteFile(SQLFilePath);
             RenameTempFileToMainFile();
         }
 
@@ -76,9 +83,12 @@ namespace RozkładJazdyv2.Model
         public static async Task<bool> SaveDatabaseAsync()
         {
             InvokeOnSqlSavingChanged(1, _SAVING_STEPS);
-            bool isFileRemoved = DeleteFile(SQLTempFilePath);
-            if (!isFileRemoved)
-                return false;
+            if (IsTempDatabaseExist())
+            {
+                bool isFileRemoved = DeleteFile(SQLTempFilePath);
+                if (!isFileRemoved)
+                    return false;
+            } 
             SQLiteAsyncConnection tempSqlConnection = new SQLiteAsyncConnection(new Func<SQLiteConnectionWithLock>(
                 () => new SQLiteConnectionWithLock(
                     new SQLitePlatformWinRT(),
@@ -88,9 +98,6 @@ namespace RozkładJazdyv2.Model
             if (!(await InsertIntoDatabaseAsync(tempSqlConnection)))
                 return false;
             InvokeOnSqlSavingChanged(14, _SAVING_STEPS);
-            isFileRemoved = DeleteFile(SQLFilePath);
-            if (!isFileRemoved)
-                return false;
             InvokeOnSqlSaved();
             return true;
         }
@@ -164,6 +171,7 @@ namespace RozkładJazdyv2.Model
                 return false;
             }
         }
+
         private static async Task<bool> CreateDatabaseAsync(SQLiteAsyncConnection sqlConnection)
         {
             try

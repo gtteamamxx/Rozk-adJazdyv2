@@ -194,6 +194,7 @@ namespace RozkładJazdyv2.Model
                 var htmlStop = htmlRawStop.LastElementChild;
                 if (htmlStop == null)
                     return null;
+                string busHtmlContentStyle = htmlStop.GetAttribute("style");
                 BusStop busStop = new BusStop()
                 {
                     Id = _StopId++,
@@ -202,7 +203,8 @@ namespace RozkładJazdyv2.Model
                     IdOfTrack = track.Id,
                     Url = htmlStop.LastElementChild.GetAttribute("href"),
                     IsVariant = htmlStop.ClassName.Contains("wariant"),
-                    IsBusStopZone = htmlStop.ClassName.Contains("stref")
+                    IsLastStopOnTrack = (busHtmlContentStyle == null ? false : busHtmlContentStyle.Contains("bold")),
+                    IsBusStopZone = htmlRawStop.ClassName.Contains("stref")
                 };
                 string busStopName = htmlStop.LastElementChild.TextContent;
                 busStop = SetBusStopName(busStop, busStopName);
@@ -509,7 +511,7 @@ namespace RozkładJazdyv2.Model
             foreach (var element in collection)
             {
                 type = GetLineSumBitFromType(element.FirstElementChild.ClassName);
-                if ((type & (1 << 12)) == (1 << 12)) //if is 'koleje'
+                if ((type & Line.TRAIN_BIT) == Line.TRAIN_BIT) //if is 'koleje'
                     continue;
                 Line line = new Line()
                 {
@@ -539,7 +541,7 @@ namespace RozkładJazdyv2.Model
             if (type.Contains("przysp"))
                 bit |= Line.FAST_BUS_BIT;
             if (type.Contains("tram"))
-                bit |= Line.TRAIN_BIT;
+                bit |= Line.TRAM_BIT;
             if (type.Contains("mini"))
                 bit |= Line.MINI_BIT;
             if (type.Contains("lot"))

@@ -19,6 +19,7 @@ namespace RozkładJazdyv2.Model
         [Ignore]
         public string Url { get; set; }
         public bool IsVariant { get; set; }
+        public bool IsLastStopOnTrack { get; set; }
         [Ignore]
         public bool IsOnDemand { get { return Name.Contains("n/ż"); } }
         public bool IsBusStopZone { get; set; }
