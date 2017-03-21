@@ -81,7 +81,7 @@ namespace RozkładJazdyv2.Model
 
         private static async Task<List<Line>> GetAllLinesDetailFromLinesInfoAsync(List<Line> lines)
         {
-            int countOfLines = lines.Count();
+            int countOfLines = 2; //lines.Count();
             for (int i = 0; i < countOfLines; i++)
             {
                 Line line = lines[i];

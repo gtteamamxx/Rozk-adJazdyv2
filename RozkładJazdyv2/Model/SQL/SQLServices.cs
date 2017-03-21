@@ -160,8 +160,8 @@ namespace RozkładJazdyv2.Model
         {
             try
             {
-                listOfSchedules = Timetable.Instance.Lines.SelectMany(p => p.Schedules).ToList();
-                listOfTracks = listOfSchedules.SelectMany(p => p.Tracks).ToList();
+                listOfSchedules = Timetable.Instance.Lines.Where(p => p.Schedules != null).SelectMany(p => p.Schedules).ToList();
+                listOfTracks = listOfSchedules.Where(p => p.Tracks != null).SelectMany(p => p.Tracks).ToList();
                 listOfBusStops = listOfTracks.SelectMany(p => p.BusStops).ToList();
                 listOfHours = listOfBusStops.SelectMany(p => p.Hours).ToList();
                 return true;
