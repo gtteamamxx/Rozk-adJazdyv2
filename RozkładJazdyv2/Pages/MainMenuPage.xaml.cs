@@ -84,5 +84,8 @@ namespace RozkładJazdyv2.Pages
 
         private void ResetButtonSelected()
             => ButtonListGridView.SelectedIndex = -1;
+
+        private void RefreshTimetableButton_Click(object sender, RoutedEventArgs e)
+            => Model.MainFrameHelper.GetMainFrame().Navigate(typeof(MainPage), true);
     }
 }

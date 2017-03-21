@@ -9,6 +9,7 @@ using Windows.UI;
 using Windows.UI.ViewManagement;
 using Windows.UI.Text;
 using Windows.UI.Core;
+using Windows.UI.Xaml.Navigation;
 
 namespace RozkładJazdyv2
 {
@@ -16,6 +17,7 @@ namespace RozkładJazdyv2
     {
         private static readonly Color _INFOSTACKPANEL_TEXTCOLOR = Colors.White;
         private string APP_VERSION { get { return Model.Application.Version.VERSION; } }
+        private static bool _IsRefreshPage;
 
         public enum InfoStackPanelTextIndex
         {
@@ -58,7 +60,7 @@ namespace RozkładJazdyv2
         private void MainPage_Loaded(object sender, RoutedEventArgs e)
         {
             ChangeTextInInfoStackPanel(InfoStackPanelTextIndex.App_Run, "Uruchamianie aplikacji... OK");
-            ShowLoadTimetableFrame();
+            SetActionFrame();
             MainFrameHelper.SetMainFrame(this.Frame);
         }
 
@@ -78,8 +80,15 @@ namespace RozkładJazdyv2
                 });
         }
 
-        private void ShowLoadTimetableFrame()
-            => ChangePage(typeof(Pages.MainPageFrames.LoadingTimetable), this);
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+            => _IsRefreshPage = (bool)e.Parameter;
+
+        private void SetActionFrame()
+        {
+            var pageType = _IsRefreshPage ? typeof(Pages.MainPageFrames.DownloadingTimetable)
+                            : typeof(Pages.MainPageFrames.LoadingTimetable);
+            ChangePage(pageType, this);
+        }
 
         public void ChangePage(Type page, object parametr)
             => ContentFrame.Navigate(page, parametr);
