@@ -38,6 +38,7 @@
                             PlaceholderText="Wyszukaj linie..."
                             ItemsSource="{x:Bind _SearchLinesGrids}"
                             TextChanged="SearchLineAutoSuggestBox_TextChanged"
+                            Visibility="Collapsed"
                             Name="SearchLineAutoSuggestBox"/>
         </Grid>
 

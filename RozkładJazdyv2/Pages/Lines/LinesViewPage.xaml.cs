@@ -57,18 +57,22 @@ namespace RozkładJazdyv2.Pages.Lines
             if (_IsPageCached == true)
                 return;
             await LoadLinesToView();
+            HideLoadingStackPanel();
+            ShowSearchLineAutoSuggestBox();
         }
 
         private async Task LoadLinesToView()
         {
             Model.LinesPage.LinesViewManager.SetInstance(LinesScrollViewer);
+            int busBits = Line.BUS_BITS;
+            busBits &= ~(Line.FAST_BUS_BIT);
             await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync("Ulubione", Line.FAVOURITE_BIT, this, LineSelectionChangedAsync);
             await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync("Tramwaje", Line.TRAM_BITS, this, LineSelectionChangedAsync);
-            await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync("Autobusy", Line.BUS_BITS, this, LineSelectionChangedAsync);
-            await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync("Minibusy", Line.MINI_BIT, this, LineSelectionChangedAsync);
+            await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync("Autobusy", busBits, this, LineSelectionChangedAsync);
+            await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync("Autobusy przyśpieszone", Line.FAST_BUS_BIT, this, LineSelectionChangedAsync);
             await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync("Nocne", Line.NIGHT_BUS_BIT, this, LineSelectionChangedAsync);
+            await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync("Minibusy", Line.MINI_BIT, this, LineSelectionChangedAsync);
             await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync("Inne", Line.AIRPORT_BIT, this, LineSelectionChangedAsync);
-            HideLoadingStackPanel();
             _IsPageCached = true;
         }
 
@@ -131,9 +135,6 @@ namespace RozkładJazdyv2.Pages.Lines
                 _ClickedGridViews.Add(gridView);
         }
 
-        private void HideLoadingStackPanel()
-            => LoadingStackPanel.Visibility = Visibility.Collapsed;
-
         private void SearchLineAutoSuggestBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
         {
             _SearchLinesGrids.Clear();
@@ -159,5 +160,11 @@ namespace RozkładJazdyv2.Pages.Lines
                 _SearchLinesGrids.Add(searchLineGrid);
             });
         }
+
+        private void HideLoadingStackPanel()
+            => LoadingStackPanel.Visibility = Visibility.Collapsed;
+
+        private void ShowSearchLineAutoSuggestBox()
+            => SearchLineAutoSuggestBox.Visibility = Visibility.Visible;
     }
 }

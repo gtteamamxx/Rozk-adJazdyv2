@@ -28,47 +28,27 @@ namespace RozkładJazdyv2.Pages.Lines
     /// </summary>
     public sealed partial class LinePage : Page
     {
-        private static ChangeLineParameter _ActualShowingParameters;
+        private static ChangeLineParameter _ActualShowingLineParameters;
         private static Line _SelectedLine
         {
-            get { return _ActualShowingParameters.Line; }
-            set { _ActualShowingParameters.Line = value; }
+            get { return _ActualShowingLineParameters.Line; }
+            set { _ActualShowingLineParameters.Line = value; }
         }
         private static Schedule _SelectedSchedule
         {
-            get{ return _ActualShowingParameters.SelectedSchedule; }
-            set { _ActualShowingParameters.SelectedSchedule = value; }
+            get{ return _ActualShowingLineParameters.SelectedSchedule; }
+            set { _ActualShowingLineParameters.SelectedSchedule = value; }
         }
         private static bool _IsRefreshingPageNeeded;
-        private ObservableCollection<BusStop> _LineFirstTrackBusStops;
-        private ObservableCollection<BusStop> _LineSecondTrackBusStops;
- 
+        private ObservableCollection<LineViewBusStop> _LineFirstTrackBusStops;
+        private ObservableCollection<LineViewBusStop> _LineSecondTrackBusStops;
 
         public LinePage()
         {
             this.InitializeComponent();
-            _LineFirstTrackBusStops = new ObservableCollection<BusStop>();
-            _LineSecondTrackBusStops = new ObservableCollection<BusStop>();
+            _LineFirstTrackBusStops = new ObservableCollection<LineViewBusStop>();
+            _LineSecondTrackBusStops = new ObservableCollection<LineViewBusStop>();
             this.Loaded += LinePage_LoadedAsync;
-        }
-
-        private void SetBusStopViewAttribute(ListViewBase sender, ContainerContentChangingEventArgs args)
-        {
-            var busStop = args.Item as BusStop;
-            var textBlock = ((args.ItemContainer.ContentTemplateRoot as Grid).Children.ElementAt(0) as TextBlock);
-            if (busStop.IsBusStopZone)
-                textBlock.Foreground = new SolidColorBrush(Color.FromArgb(255, 255, 255, 0));
-            if (busStop.IsOnDemand)
-                textBlock.Foreground = new SolidColorBrush(Color.FromArgb(255, 255, 0, 0));
-            if (busStop.IsVariant)
-            {
-                var text = textBlock.Text;
-                textBlock.Text = $"-- {text}";
-                textBlock.FontWeight = FontWeights.ExtraLight;
-                textBlock.FontSize = 13;
-                textBlock.Foreground = new SolidColorBrush(Colors.Aqua);
-            }
-            args.Handled = false;
         }
 
         private async void LinePage_LoadedAsync(object sender, RoutedEventArgs e)
@@ -91,6 +71,22 @@ namespace RozkładJazdyv2.Pages.Lines
             _LineFirstTrackBusStops.Clear();
             _LineSecondTrackBusStops.Clear();
             _SelectedSchedule = await GetScheduleTracksAsync(_SelectedSchedule);
+            SetTrackGridStyle(_SelectedSchedule.Tracks);
+            _SelectedSchedule = await GetTracksBusStopsAsync(_SelectedSchedule);
+        }
+
+        private async Task<Schedule> GetTracksBusStopsAsync(Schedule schedule)
+        {
+            string query = string.Empty;
+            int trackNumber = 1;
+            foreach (var track in schedule.Tracks)
+            {
+                query = $"SELECT * FROM BusStop WHERE IdOfTrack = {track.Id} AND IdOfSchedule = {track.IdOfSchedule};";
+                if (track.BusStops == null)
+                    track.BusStops = await SQLServices.QueryAsync<BusStop>(query);
+                AddStopsToViewByTrack(trackNumber++, track);
+            }
+            return schedule;
         }
 
         private async Task<Schedule> GetScheduleTracksAsync(Schedule schedule)
@@ -98,7 +94,12 @@ namespace RozkładJazdyv2.Pages.Lines
             string query = $"SELECT * FROM Track WHERE IdOfSchedule = {schedule.Id};";
             if(schedule.Tracks == null)
                 schedule.Tracks = await SQLServices.QueryAsync<Track>(query);
-            if (schedule.Tracks.Count() == 1)
+            return schedule;
+        }
+
+        private void SetTrackGridStyle(List<Track> tracks)
+        {
+            if (tracks.Count() == 1)
             {
                 Grid.SetColumnSpan(LineFirstGrid, 2);
                 LineSecondGrid.Visibility = Visibility.Collapsed;
@@ -108,29 +109,67 @@ namespace RozkładJazdyv2.Pages.Lines
                 LineSecondGrid.Visibility = Visibility.Visible;
                 Grid.SetColumnSpan(LineFirstGrid, 1);
             }
-            int trackNumber = 1;
-            foreach(var track in schedule.Tracks)
+        }
+
+        private void AddStopsToViewByTrack(int trackId, Track track)
+        {
+            string trackName = $"Kierunek: {track.Name}";
+            LineFirstTrackName.Text = trackName;
+            foreach (var busStop in track.BusStops)
+                AddEditedBusStopClassToTrackList(trackId, busStop);
+            if(trackId == 1)
+                LineFirstTrackProgressRing.IsActive = false;
+            else
+                LineSecondTrackProgressRing.IsActive = false;
+        }
+        
+        private void AddEditedBusStopClassToTrackList(int trackId, BusStop busStop)
+        {
+            string editedName = GetBusStopEditedName(busStop);
+            var editedBusStop = new LineViewBusStop()
             {
-                query = $"SELECT * FROM BusStop WHERE IdOfTrack = {track.Id} AND IdOfSchedule = {track.IdOfSchedule};";
-                if(track.BusStops == null)
-                    track.BusStops = await SQLServices.QueryAsync<BusStop>(query);
-                string trackName = $"Kierunek: {track.Name}";
-                if (trackNumber++ == 1)
-                {
-                    LineFirstTrackName.Text = trackName;
-                    LineFirstTrackProgressRing.IsActive = false;
-                    foreach (var busStop in track.BusStops)
-                        _LineFirstTrackBusStops.Add(busStop);
-                }
-                else
-                {
-                    LineSecondTrackProgressRing.IsActive = false;
-                    LineSecondTrackName.Text = trackName;
-                    foreach (var busStop in track.BusStops)
-                        _LineSecondTrackBusStops.Add(busStop);
-                }
+                Name = editedName,
+                BusStop = busStop
+            };
+            if (trackId == 1)
+                _LineFirstTrackBusStops.Add(editedBusStop);
+            else
+                _LineSecondTrackBusStops.Add(editedBusStop);
+        }
+
+        private string GetBusStopEditedName(BusStop busStop)
+        {
+            string editedName = string.Empty;
+            if (busStop.IsVariant)
+                editedName = $"-- {busStop.Name}";
+            else if (busStop.IsBusStopZone)
+                editedName = $"[S] {busStop.Name}";
+            else
+                editedName = busStop.Name;
+            return editedName;
+        }
+
+        private void SetBusStopViewAttribute(ListViewBase sender, ContainerContentChangingEventArgs args)
+        {
+            var busStop = (args.Item as LineViewBusStop).BusStop;
+            var textBlock = ((Grid)args.ItemContainer.ContentTemplateRoot).Children[0] as TextBlock;
+            // due to bug, we have to set default style firstly
+            textBlock.Foreground = new SolidColorBrush(Colors.White);
+            textBlock.FontWeight = FontWeights.Normal;
+            if (busStop.IsLastStopOnTrack)
+            {
+                textBlock.Foreground = new SolidColorBrush(Color.FromArgb(127, 255, 0, 0));
+                textBlock.FontWeight = FontWeights.ExtraBold;
             }
-            return schedule;
+            else if (busStop.IsVariant)
+            {
+                textBlock.Foreground = new SolidColorBrush(Colors.DarkGray);
+                textBlock.FontWeight = FontWeights.ExtraLight;
+            }
+            if (busStop.IsOnDemand)
+                textBlock.Foreground = new SolidColorBrush(Color.FromArgb(255, 50, 50, 255));
+            if (busStop.IsBusStopZone)
+                textBlock.Foreground = new SolidColorBrush(Colors.Yellow);
         }
 
         private void UpdateLineHeaderTexts()
@@ -143,19 +182,17 @@ namespace RozkładJazdyv2.Pages.Lines
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             var changeLineParameter = e.Parameter as ChangeLineParameter;
-            if (_ActualShowingParameters == null)
+            if (_ActualShowingLineParameters == null)
             {
-                _ActualShowingParameters = changeLineParameter;
+                _ActualShowingLineParameters = changeLineParameter;
                 _IsRefreshingPageNeeded = true;
+                return;
             }
-            else
+            if (changeLineParameter.Line.Id != _ActualShowingLineParameters.Line.Id
+                && changeLineParameter.SelectedSchedule.Id != _ActualShowingLineParameters.SelectedSchedule.Id)
             {
-                if (changeLineParameter.Line.Id != _ActualShowingParameters.Line.Id
-                    && changeLineParameter.SelectedSchedule.Id != _ActualShowingParameters.SelectedSchedule.Id)
-                {
-                    _ActualShowingParameters = changeLineParameter;
-                    _IsRefreshingPageNeeded = true;
-                }
+                _ActualShowingLineParameters = changeLineParameter;
+                _IsRefreshingPageNeeded = true;
             }
         }
 

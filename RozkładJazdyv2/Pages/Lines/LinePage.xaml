@@ -2,18 +2,27 @@
     x:Class="RozkładJazdyv2.Pages.Lines.LinePage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:local="using:RozkładJazdyv2.Model"
+    xmlns:local="using:RozkładJazdyv2.Model.LinesPage"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     NavigationCacheMode="Required"
     mc:Ignorable="d">
 
+    <Page.Resources>
+        <DataTemplate x:Key="BusStopListViewStyle" x:DataType="local:LineViewBusStop">
+            <Grid>
+                <TextBlock Text="{x:Bind Name}"
+                                           FontSize="13"
+                                           TextAlignment="Left"
+                                           TextWrapping="Wrap" />
+            </Grid>
+        </DataTemplate>
+    </Page.Resources>
     <Grid Background="Black">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition />
         </Grid.RowDefinitions>
-
         <Grid Grid.Row="0"
               VerticalAlignment="Top"
               Margin="20">
@@ -37,7 +46,6 @@
                     <Run x:Name="LineScheduleNameTextBlock" />
                 </TextBlock>
             </RelativePanel>
-
         </Grid>
 
         <Grid Grid.Row="1">
@@ -69,7 +77,8 @@
                 <ListView Name="LineFirstTrackListView"
                           ItemsSource="{x:Bind _LineFirstTrackBusStops}"
                           Grid.Row="1"
-                          ContainerContentChanging="SetBusStopViewAttribute">
+                          ContainerContentChanging="SetBusStopViewAttribute"
+                          ItemTemplate="{StaticResource BusStopListViewStyle}">
                     <ListView.ItemsPanel>
                         <ItemsPanelTemplate>
                             <ItemsWrapGrid HorizontalAlignment="Center"
@@ -78,16 +87,6 @@
                                            ItemWidth="180"/>
                         </ItemsPanelTemplate>
                     </ListView.ItemsPanel>
-                    <ListView.ItemTemplate>
-                        <DataTemplate x:DataType="local:BusStop">
-                            <Grid>
-                                <TextBlock Text="{x:Bind Name}"
-                                           FontSize="13"
-                                           TextAlignment="Left"
-                                           TextWrapping="Wrap" />
-                            </Grid>
-                        </DataTemplate>
-                    </ListView.ItemTemplate>
                 </ListView>
             </Grid>
             <Grid Name="LineSecondGrid"
@@ -115,7 +114,8 @@
                 <ListView Grid.Row="1"
                           Name="LineSecondTrackListView"
                           ItemsSource="{x:Bind _LineSecondTrackBusStops}"
-                          ContainerContentChanging="SetBusStopViewAttribute">
+                          ContainerContentChanging="SetBusStopViewAttribute"
+                          ItemTemplate="{StaticResource BusStopListViewStyle}">
                     <ListView.ItemsPanel>
                         <ItemsPanelTemplate>
                             <ItemsWrapGrid HorizontalAlignment="Center"
@@ -124,16 +124,6 @@
                                            ItemWidth="180"/>
                         </ItemsPanelTemplate>
                     </ListView.ItemsPanel>
-                    <ListView.ItemTemplate>
-                        <DataTemplate x:DataType="local:BusStop">
-                            <Grid>
-                                <TextBlock Text="{x:Bind Name}"
-                                           FontSize="13"
-                                           TextAlignment="Left"
-                                           TextWrapping="Wrap" />
-                            </Grid>
-                        </DataTemplate>
-                    </ListView.ItemTemplate>
                 </ListView>
             </Grid>
         </Grid>
