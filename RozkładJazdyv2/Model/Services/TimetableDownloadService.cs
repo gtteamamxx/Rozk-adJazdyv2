@@ -454,7 +454,7 @@ namespace RozkładJazdyv2.Model
                 if (IsSchedulesInLineOrScheduleIsFreezed(listOfHtmlSchedules))
                 {
                     line.Schedules = new List<Schedule>().Add<Schedule>(
-                                        new Schedule() { Id = _ScheduleId++, Name = "linia zawieszona" });
+                                        new Schedule() { Id = _ScheduleId++, Name = "linia zawieszona", IdOfLine = line.Id });
                     return line;
                 }
                 GetSchedulesDetail(ref line, listOfHtmlSchedules);
