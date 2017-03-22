@@ -131,8 +131,8 @@
     <Compile Include="Pages\Lines\LinePage.xaml.cs">
       <DependentUpon>LinePage.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Pages\Lines\LinesViewPage.xaml.cs">
-      <DependentUpon>LinesViewPage.xaml</DependentUpon>
+    <Compile Include="Pages\Lines\LinesListPage.xaml.cs">
+      <DependentUpon>LinesListPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Pages\MainMenuPage.xaml.cs">
       <DependentUpon>MainMenuPage.xaml</DependentUpon>
@@ -177,7 +177,7 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
-    <Page Include="Pages\Lines\LinesViewPage.xaml">
+    <Page Include="Pages\Lines\LinesListPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

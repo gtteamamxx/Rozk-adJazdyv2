@@ -85,6 +85,8 @@ namespace RozkładJazdyv2.Pages.Lines
                 if (track.BusStops == null)
                     track.BusStops = await SQLServices.QueryAsync<BusStop>(query);
                 AddStopsToViewByTrack(trackNumber++, track);
+                LineFirstTrackProgressRing.IsActive = false;
+                LineSecondTrackProgressRing.IsActive = false;
             }
             return schedule;
         }
@@ -114,15 +116,19 @@ namespace RozkładJazdyv2.Pages.Lines
         private void AddStopsToViewByTrack(int trackId, Track track)
         {
             string trackName = $"Kierunek: {track.Name}";
-            LineFirstTrackName.Text = trackName;
             foreach (var busStop in track.BusStops)
                 AddEditedBusStopClassToTrackList(trackId, busStop);
-            if(trackId == 1)
-                LineFirstTrackProgressRing.IsActive = false;
-            else
-                LineSecondTrackProgressRing.IsActive = false;
+            SetTrackName(trackId, trackName);
         }
-        
+
+        private void SetTrackName(int trackId, string trackName)
+        {
+            if (trackId == 1)
+                LineFirstTrackName.Text = trackName;
+            else
+                LineSecondTrackName.Text = trackName;
+        }
+
         private void AddEditedBusStopClassToTrackList(int trackId, BusStop busStop)
         {
             string editedName = GetBusStopEditedName(busStop);
@@ -167,7 +173,7 @@ namespace RozkładJazdyv2.Pages.Lines
                 textBlock.FontWeight = FontWeights.ExtraLight;
             }
             if (busStop.IsOnDemand)
-                textBlock.Foreground = new SolidColorBrush(Color.FromArgb(255, 50, 50, 255));
+                textBlock.Foreground = new SolidColorBrush(Color.FromArgb(255, 0, 120, 215));
             if (busStop.IsBusStopZone)
                 textBlock.Foreground = new SolidColorBrush(Colors.Yellow);
         }

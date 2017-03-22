@@ -10,11 +10,12 @@
 
     <Page.Resources>
         <DataTemplate x:Key="BusStopListViewStyle" x:DataType="local:LineViewBusStop">
-            <Grid>
+            <Grid HorizontalAlignment="Center">
                 <TextBlock Text="{x:Bind Name}"
-                                           FontSize="13"
-                                           TextAlignment="Left"
-                                           TextWrapping="Wrap" />
+                           FontSize="13"
+                           Width="200"
+                           TextAlignment="Left"
+                           TextWrapping="Wrap" />
             </Grid>
         </DataTemplate>
     </Page.Resources>
@@ -41,7 +42,7 @@
                            RelativePanel.RightOf="LineLogoTextBlock"
                            RelativePanel.AlignVerticalCenterWithPanel="True"
                            x:Name="LineNumberTextBlock"/>
-                <TextBlock Margin="0 50 0 0">
+                <TextBlock Margin="0 55 0 0">
                     <Run Text="Rozkład: " />
                     <Run x:Name="LineScheduleNameTextBlock" />
                 </TextBlock>
@@ -83,8 +84,7 @@
                         <ItemsPanelTemplate>
                             <ItemsWrapGrid HorizontalAlignment="Center"
                                            Orientation="Horizontal" 
-                                           MaximumRowsOrColumns="1"
-                                           ItemWidth="180"/>
+                                           MaximumRowsOrColumns="1"/>
                         </ItemsPanelTemplate>
                     </ListView.ItemsPanel>
                 </ListView>
@@ -120,8 +120,7 @@
                         <ItemsPanelTemplate>
                             <ItemsWrapGrid HorizontalAlignment="Center"
                                            Orientation="Horizontal" 
-                                           MaximumRowsOrColumns="1"
-                                           ItemWidth="180"/>
+                                           MaximumRowsOrColumns="1"/>
                         </ItemsPanelTemplate>
                     </ListView.ItemsPanel>
                 </ListView>
