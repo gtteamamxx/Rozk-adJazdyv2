@@ -31,11 +31,12 @@ namespace RozkładJazdyv2.Model.LinesPage
             flyout.ShowAt(inivisibleButton);
         }
 
-        private static Button GetLineGridInvisibleButton(Grid lineGrid)
-            => new Button() { Visibility = Visibility.Collapsed };
-
-        private static void RemoveLineGridBorder(ref Grid lineGrid)
-            => lineGrid.BorderThickness = new Thickness(0);
+        public static Flyout ShowFlyOutAtButtonInLinePage(Button button, Line line, RoutedEventHandler scheduleClickedEven)
+        {
+            var flyout = CreateFlyOutAtButton(ref button, line, ref scheduleClickedEven, true);
+            flyout.ShowAt(button);
+            return flyout; 
+        }
 
         private static void SetLineGridBorder(ref Grid lineGrid)
         {
@@ -43,12 +44,22 @@ namespace RozkładJazdyv2.Model.LinesPage
             lineGrid.BorderThickness = new Thickness(1);
         }
 
-        private static Flyout CreateFlyOutAtButton(ref Button button, Line line, ref RoutedEventHandler scheduleClickedEvent)
+        private static Flyout CreateFlyOutAtButton(ref Button button, Line line, 
+                ref RoutedEventHandler scheduleClickedEvent, bool hideActuallyShowedSchedule = false)
         {
             var contentGrid = new Grid();
-            AddRowsToGridBySchedulesNum(ref contentGrid, line.Schedules);
+            List<Schedule> schedules = new List<Schedule>();
+            if (hideActuallyShowedSchedule)
+            {
+                var actuallyShowedSchedule = Pages.Lines.LinePage.ActualShowingLineParameters.SelectedSchedule;
+                schedules = line.Schedules.Where(p => p.Id != actuallyShowedSchedule.Id).ToList();
+            }
+            else
+                schedules = line.Schedules;
+
+            AddRowsToGridBySchedulesNum(ref contentGrid, schedules);
             AddHeaderToContentGrid(ref contentGrid);
-            AddSchedulesToGridContent(ref contentGrid, line.Schedules, ref scheduleClickedEvent, line);
+            AddSchedulesToGridContent(ref contentGrid, schedules, ref scheduleClickedEvent, line);
             return new Flyout() { Content = contentGrid };
         }
 
@@ -89,5 +100,11 @@ namespace RozkładJazdyv2.Model.LinesPage
                 contentGrid.RowDefinitions.Add(
                     new RowDefinition() { Height = GridLength.Auto });
         }
+
+        private static Button GetLineGridInvisibleButton(Grid lineGrid)
+            => new Button() { Visibility = Visibility.Collapsed };
+
+        private static void RemoveLineGridBorder(ref Grid lineGrid)
+            => lineGrid.BorderThickness = new Thickness(0);
     }
 }

@@ -31,21 +31,24 @@
                 <TextBlock FontFamily="Segoe MDL2 Assets"
                            FontSize="30"
                            Text="&#xEB4D;"
+                           Margin="0 5"
                            Foreground="#FF959DD3"
-                           x:Name="LineLogoTextBlock"
-                           RelativePanel.AlignVerticalCenterWithPanel="True"/>
+                           x:Name="LineLogoTextBlock"/>
                 <TextBlock VerticalAlignment="Center"
                            FontSize="30"
                            Foreground="White"
                            Text="722"
                            Margin="10 0 0 0"
                            RelativePanel.RightOf="LineLogoTextBlock"
-                           RelativePanel.AlignVerticalCenterWithPanel="True"
                            x:Name="LineNumberTextBlock"/>
-                <TextBlock Margin="0 55 0 0">
-                    <Run Text="Rozkład: " />
-                    <Run x:Name="LineScheduleNameTextBlock" />
-                </TextBlock>
+                <Button Margin="0 55 0 0"
+                        Name="LineScheduleNameButton"
+                        Click="LineScheduleNameButton_Click">
+                    <TextBlock>
+                        <Run Text="Rozkład: " />
+                        <Run x:Name="LineScheduleNameTextBlock" />
+                    </TextBlock>
+                </Button>
             </RelativePanel>
         </Grid>
 
@@ -57,7 +60,7 @@
 
             <Grid Name="LineFirstGrid">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="60" />
+                    <RowDefinition Height="50" />
                     <RowDefinition />
                 </Grid.RowDefinitions>
 
@@ -72,7 +75,7 @@
                            HorizontalAlignment="Center"
                            VerticalAlignment="Center"
                            Foreground="White"
-                           Text="Kierunek: Chorzów Pętla Zachodnia. Wschodnia."
+                           FontSize="14"
                            TextWrapping="Wrap"
                            Margin="5"/>
                 <ListView Name="LineFirstTrackListView"
@@ -94,7 +97,7 @@
                   BorderBrush="White"
                   BorderThickness="1 0 0 0">
                 <Grid.RowDefinitions>
-                    <RowDefinition Height="60" />
+                    <RowDefinition Height="50" />
                     <RowDefinition />
                 </Grid.RowDefinitions>
                 <ProgressRing Grid.RowSpan="2"
@@ -108,7 +111,7 @@
                            HorizontalAlignment="Center"
                            VerticalAlignment="Center"
                            Foreground="White"
-                           Text="Kierunek: Bańgów Zachodnia"
+                           FontSize="14"
                            TextWrapping="Wrap"
                            Margin="5"/>
                 <ListView Grid.Row="1"

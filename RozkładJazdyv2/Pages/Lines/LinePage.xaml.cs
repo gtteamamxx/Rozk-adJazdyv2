@@ -28,20 +28,21 @@ namespace RozkładJazdyv2.Pages.Lines
     /// </summary>
     public sealed partial class LinePage : Page
     {
-        private static ChangeLineParameter _ActualShowingLineParameters;
+        public static ChangeLineParameter ActualShowingLineParameters;
         private static Line _SelectedLine
         {
-            get { return _ActualShowingLineParameters.Line; }
-            set { _ActualShowingLineParameters.Line = value; }
+            get { return ActualShowingLineParameters.Line; }
+            set { ActualShowingLineParameters.Line = value; }
         }
         private static Schedule _SelectedSchedule
         {
-            get{ return _ActualShowingLineParameters.SelectedSchedule; }
-            set { _ActualShowingLineParameters.SelectedSchedule = value; }
+            get{ return ActualShowingLineParameters.SelectedSchedule; }
+            set { ActualShowingLineParameters.SelectedSchedule = value; }
         }
         private static bool _IsRefreshingPageNeeded;
         private ObservableCollection<LineViewBusStop> _LineFirstTrackBusStops;
         private ObservableCollection<LineViewBusStop> _LineSecondTrackBusStops;
+        private Flyout _LastOpenedFlyout;
 
         public LinePage()
         {
@@ -49,6 +50,35 @@ namespace RozkładJazdyv2.Pages.Lines
             _LineFirstTrackBusStops = new ObservableCollection<LineViewBusStop>();
             _LineSecondTrackBusStops = new ObservableCollection<LineViewBusStop>();
             this.Loaded += LinePage_LoadedAsync;
+        }
+
+        private void LineScheduleNameButton_Click(object sender, RoutedEventArgs e)
+        {
+            if(_SelectedLine.Schedules.Count() > 1)
+                _LastOpenedFlyout = FlyoutHelper.ShowFlyOutAtButtonInLinePage(sender as Button, _SelectedLine, ScheduleClickedAsync);
+        }
+
+        private async void ScheduleClickedAsync(object sender, RoutedEventArgs e)
+        {
+            var clickedButton = (Button)sender;
+            var selectedSchedule = _SelectedLine.Schedules.First(p => p.Name == (string)clickedButton.Content);
+            await ShowLinePageAsync(new ChangeLineParameter() { Line = _SelectedLine, SelectedSchedule = selectedSchedule });
+            HideFlyOutOnScheduleButton();
+        }
+
+        private void HideFlyOutOnScheduleButton()
+        {
+            if(_LastOpenedFlyout != null)
+            {
+                _LastOpenedFlyout.Hide();
+                _LastOpenedFlyout = null;
+            }
+        }
+
+        private async Task ShowLinePageAsync(ChangeLineParameter changeLineParameter)
+        {
+            await Task.Delay(100);
+            MainFrameHelper.GetMainFrame().Navigate(typeof(LinePage), changeLineParameter);
         }
 
         private async void LinePage_LoadedAsync(object sender, RoutedEventArgs e)
@@ -188,17 +218,20 @@ namespace RozkładJazdyv2.Pages.Lines
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             var changeLineParameter = e.Parameter as ChangeLineParameter;
-            if (_ActualShowingLineParameters == null)
+            if (ActualShowingLineParameters == null)
             {
-                _ActualShowingLineParameters = changeLineParameter;
+                ActualShowingLineParameters = changeLineParameter;
                 _IsRefreshingPageNeeded = true;
                 return;
             }
-            if (changeLineParameter.Line.Id != _ActualShowingLineParameters.Line.Id
-                && changeLineParameter.SelectedSchedule.Id != _ActualShowingLineParameters.SelectedSchedule.Id)
+            if (changeLineParameter.Line.Id != ActualShowingLineParameters.Line.Id
+                || changeLineParameter.SelectedSchedule.Id != ActualShowingLineParameters.SelectedSchedule.Id)
             {
-                _ActualShowingLineParameters = changeLineParameter;
+                bool isRefreshPage = changeLineParameter.Line.Id == ActualShowingLineParameters.Line.Id;
+                ActualShowingLineParameters = changeLineParameter;
                 _IsRefreshingPageNeeded = true;
+                if (isRefreshPage)
+                    LinePage_LoadedAsync(this, null);
             }
         }
 
@@ -214,5 +247,6 @@ namespace RozkładJazdyv2.Pages.Lines
                 return "\xE7C0";
             return "\xE806";
         }
+
     }
 }
