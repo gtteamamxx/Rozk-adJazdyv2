@@ -22,6 +22,7 @@ namespace RozkładJazdyv2.Model.Application
             {
                 mainAppFrame.GoBack();
                 e.Handled = true;
+                return;
             }
 
             App.Current.Exit();
