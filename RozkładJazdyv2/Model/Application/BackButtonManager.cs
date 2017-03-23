@@ -34,7 +34,7 @@ namespace RozkładJazdyv2.Model.Application
                 return true;
             if (currentPageType == typeof(Pages.Lines.LinePage))
                 return true;
-
+            
             return false;
         }
     }
