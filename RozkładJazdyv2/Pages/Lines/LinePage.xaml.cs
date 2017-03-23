@@ -40,6 +40,8 @@ namespace RozkładJazdyv2.Pages.Lines
             set { ActualShowingLineParameters.SelectedSchedule = value; }
         }
         private static bool _IsRefreshingPageNeeded;
+        private static bool _IsOppositeBusStopSelecting;
+        private static List<ListView> _ListViewsList;
         private ObservableCollection<LineViewBusStop> _LineFirstTrackBusStops;
         private ObservableCollection<LineViewBusStop> _LineSecondTrackBusStops;
         private Flyout _LastOpenedFlyout;
@@ -49,6 +51,8 @@ namespace RozkładJazdyv2.Pages.Lines
             this.InitializeComponent();
             _LineFirstTrackBusStops = new ObservableCollection<LineViewBusStop>();
             _LineSecondTrackBusStops = new ObservableCollection<LineViewBusStop>();
+            _ListViewsList = new List<ListView>().Add<ListView>(LineFirstTrackListView)
+                .Add<ListView>(LineSecondTrackListView);
             this.Loaded += LinePage_LoadedAsync;
         }
 
@@ -202,9 +206,9 @@ namespace RozkładJazdyv2.Pages.Lines
                 textBlock.Foreground = new SolidColorBrush(Colors.DarkGray);
                 textBlock.FontWeight = FontWeights.ExtraLight;
             }
-            if (busStop.IsOnDemand)
+            else if (busStop.IsOnDemand)
                 textBlock.Foreground = new SolidColorBrush(Color.FromArgb(255, 0, 120, 215));
-            if (busStop.IsBusStopZone)
+            else if (busStop.IsBusStopZone)
                 textBlock.Foreground = new SolidColorBrush(Colors.Yellow);
         }
 
@@ -231,9 +235,12 @@ namespace RozkładJazdyv2.Pages.Lines
                 ActualShowingLineParameters = changeLineParameter;
                 _IsRefreshingPageNeeded = true;
                 if (isRefreshPage)
-                    LinePage_LoadedAsync(this, null);
+                    RefreshPage();
             }
         }
+
+        private void RefreshPage()
+            => LinePage_LoadedAsync(this, null);
 
         private string GetLineLogoByType(int type)
         {
@@ -248,5 +255,54 @@ namespace RozkładJazdyv2.Pages.Lines
             return "\xE806";
         }
 
+        private void LineTrackListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var listView = sender as ListView;
+            if(_IsOppositeBusStopSelecting)
+            {
+                listView.ScrollIntoView(listView.SelectedItem);
+                return;
+            }
+            if (listView.SelectedIndex == -1
+                || listView.SelectedItem == null)
+                return;
+            ;
+        }
+
+        private void LineViewBusStop_PointerExited(object sender, PointerRoutedEventArgs e)
+        {
+            if (_SelectedSchedule.Tracks.Count() == 1)
+                return;
+            var lineViewBusStop = (sender as Grid).DataContext as LineViewBusStop;
+            SelectOppositeBusStopByCurrentlySelected(lineViewBusStop.BusStop);
+        }
+
+        private void SelectOppositeBusStopByCurrentlySelected(BusStop selectedBusStop)
+        {
+            var trackId = GetTrackIdByBusStop(selectedBusStop);
+            if (trackId == 0)
+                return;
+            var oppositeListView = _ListViewsList[trackId == 2 ? 0 : 1];
+            foreach(LineViewBusStop lineViewBusStop in oppositeListView.Items)
+            {
+                if(selectedBusStop.Name == lineViewBusStop.BusStop.Name)
+                {
+                    _IsOppositeBusStopSelecting = true;
+                    oppositeListView.SelectedItem = lineViewBusStop;
+                    _IsOppositeBusStopSelecting = false;
+                }
+            }
+        }
+
+        private int GetTrackIdByBusStop(BusStop busStop)
+        {
+            int tracksCount = _SelectedSchedule.Tracks.Count();
+            for(int i = 1; i <= tracksCount; i++)
+            {
+                if (busStop.IdOfTrack == _SelectedSchedule.Tracks[i-1].Id)
+                    return i;
+            }
+            return 0;
+        }
     }
 }
