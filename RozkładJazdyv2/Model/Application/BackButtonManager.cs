@@ -17,14 +17,11 @@ namespace RozkładJazdyv2.Model.Application
             Frame mainAppFrame = MainFrameHelper.GetMainFrame();
             Type currentPageType = mainAppFrame.CurrentSourcePageType;
             bool goBack = IsGoBackFromPageAllowed(currentPageType);
-
             if (goBack)
             {
                 mainAppFrame.GoBack();
-                e.Handled = true;
                 return;
             }
-
             App.Current.Exit();
         }
 
@@ -34,7 +31,8 @@ namespace RozkładJazdyv2.Model.Application
                 return true;
             if (currentPageType == typeof(Pages.Lines.LinePage))
                 return true;
-
+            if (currentPageType == typeof(Pages.Lines.LineBusStopPage))
+                return true;
             return false;
         }
     }

@@ -81,7 +81,7 @@ namespace RozkładJazdyv2.Model
 
         private static async Task<List<Line>> GetAllLinesDetailFromLinesInfoAsync(List<Line> lines)
         {
-            int countOfLines = 2; //lines.Count();
+            int countOfLines = lines.Count();
             for (int i = 0; i < countOfLines; i++)
             {
                 Line line = lines[i];
@@ -363,7 +363,7 @@ namespace RozkładJazdyv2.Model
                     Id = _LetterNameId++,
                     Name = letterName
                 });
-                letter.IdOfName = _HourNameId - 1;
+                letter.IdOfName = _LetterNameId - 1;
             }
             return letter;
         }

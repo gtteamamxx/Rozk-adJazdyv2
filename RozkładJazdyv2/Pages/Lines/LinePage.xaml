@@ -84,7 +84,7 @@
                           Grid.Row="1"
                           ContainerContentChanging="SetBusStopViewAttribute"
                           ItemTemplate="{StaticResource BusStopListViewStyle}"
-                          SelectionChanged="LineTrackListView_SelectionChanged">
+                          SelectionChanged="LineTrackListView_SelectionChangedAsync">
                     <ListView.ItemsPanel>
                         <ItemsPanelTemplate>
                             <ItemsWrapGrid HorizontalAlignment="Center"
@@ -121,7 +121,8 @@
                           ItemsSource="{x:Bind _LineSecondTrackBusStops}"
                           ContainerContentChanging="SetBusStopViewAttribute"
                           ItemTemplate="{StaticResource BusStopListViewStyle}"
-                          SelectionChanged="LineTrackListView_SelectionChanged">
+                          SelectionMode="Single"
+                          SelectionChanged="LineTrackListView_SelectionChangedAsync">
                     <ListView.ItemsPanel>
                         <ItemsPanelTemplate>
                             <ItemsWrapGrid HorizontalAlignment="Center"

@@ -102,10 +102,12 @@
     <Compile Include="Model\Animation\AnimationHelper.cs" />
     <Compile Include="Model\Application\BackButtonManager.cs" />
     <Compile Include="Model\Application\Version.cs" />
+    <Compile Include="Model\LinesPage\ChangeBusStopParametr.cs" />
     <Compile Include="Model\LinesPage\ChangeLineParameter.cs" />
     <Compile Include="Model\LinesPage\FlyoutHelper.cs" />
     <Compile Include="Model\LinesPage\LinesViewManager.cs" />
     <Compile Include="Model\LinesPage\LineViewBusStop.cs" />
+    <Compile Include="Model\LinesPage\LineViewHour.cs" />
     <Compile Include="Model\MainMenu\ButtonHelper.cs" />
     <Compile Include="Model\MainMenu\MainMenuButton.cs" />
     <Compile Include="Model\Timetable\BusStop.cs" />
@@ -128,6 +130,9 @@
     <Compile Include="Model\Services\TimetableDownloadService.cs" />
     <Compile Include="Model\Timetable\Track.cs" />
     <Compile Include="Model\Timetable\Names\TrackName.cs" />
+    <Compile Include="Pages\Lines\LineBusStopPage.xaml.cs">
+      <DependentUpon>LineBusStopPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Pages\Lines\LinePage.xaml.cs">
       <DependentUpon>LinePage.xaml</DependentUpon>
     </Compile>
@@ -172,6 +177,10 @@
     <Page Include="MainPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\Lines\LineBusStopPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Pages\Lines\LinePage.xaml">
       <SubType>Designer</SubType>

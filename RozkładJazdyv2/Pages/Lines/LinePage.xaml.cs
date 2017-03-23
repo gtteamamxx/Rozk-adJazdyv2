@@ -165,7 +165,7 @@ namespace RozkładJazdyv2.Pages.Lines
 
         private void AddEditedBusStopClassToTrackList(int trackId, BusStop busStop)
         {
-            string editedName = GetBusStopEditedName(busStop);
+            string editedName = busStop.GetBusStopEditedName();
             var editedBusStop = new LineViewBusStop()
             {
                 Name = editedName,
@@ -175,18 +175,6 @@ namespace RozkładJazdyv2.Pages.Lines
                 _LineFirstTrackBusStops.Add(editedBusStop);
             else
                 _LineSecondTrackBusStops.Add(editedBusStop);
-        }
-
-        private string GetBusStopEditedName(BusStop busStop)
-        {
-            string editedName = string.Empty;
-            if (busStop.IsVariant)
-                editedName = $"-- {busStop.Name}";
-            else if (busStop.IsBusStopZone)
-                editedName = $"[S] {busStop.Name}";
-            else
-                editedName = busStop.Name;
-            return editedName;
         }
 
         private void SetBusStopViewAttribute(ListViewBase sender, ContainerContentChangingEventArgs args)
@@ -216,7 +204,7 @@ namespace RozkładJazdyv2.Pages.Lines
         {
             LineScheduleNameTextBlock.Text = _SelectedSchedule.Name;
             LineNumberTextBlock.Text = _SelectedLine.EditedName;
-            LineLogoTextBlock.Text = GetLineLogoByType(_SelectedLine.Type);
+            LineLogoTextBlock.Text = _SelectedLine.GetLineLogoByType();
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -239,23 +227,7 @@ namespace RozkładJazdyv2.Pages.Lines
             }
         }
 
-        private void RefreshPage()
-            => LinePage_LoadedAsync(this, null);
-
-        private string GetLineLogoByType(int type)
-        {
-            if ((type & Line.BIG_BUS_BIT) > 0)
-                return "\xE806";
-            if ((type & Line.TRAM_BITS) > 0)
-                return "\xEB4D";
-            if ((type & Line.AIRPORT_BIT) > 0)
-                return "\xEB4C";
-            if ((type & Line.TRAIN_BIT) > 0)
-                return "\xE7C0";
-            return "\xE806";
-        }
-
-        private void LineTrackListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private async void LineTrackListView_SelectionChangedAsync(object sender, SelectionChangedEventArgs e)
         {
             var listView = sender as ListView;
             if(_IsOppositeBusStopSelecting)
@@ -263,10 +235,14 @@ namespace RozkładJazdyv2.Pages.Lines
                 listView.ScrollIntoView(listView.SelectedItem);
                 return;
             }
-            if (listView.SelectedIndex == -1
-                || listView.SelectedItem == null)
+            var selectedItem = (listView.SelectedItem as LineViewBusStop);
+            if (listView.SelectedIndex == -1 || selectedItem == null)
                 return;
-            ;
+            var selectedTrack = listView.Name.Contains("First") 
+                ? _SelectedSchedule.Tracks[0] : _SelectedSchedule.Tracks[1];
+            await Task.Delay(100);
+            ChangePageToBusPage(selectedItem.BusStop, selectedTrack);
+            listView.SelectedItem = -1;
         }
 
         private void LineViewBusStop_PointerExited(object sender, PointerRoutedEventArgs e)
@@ -304,5 +280,15 @@ namespace RozkładJazdyv2.Pages.Lines
             }
             return 0;
         }
+
+        private void RefreshPage()
+            => LinePage_LoadedAsync(this, null);
+
+        private void ChangePageToBusPage(BusStop busStop, Track track)
+            => MainFrameHelper.GetMainFrame().Navigate(typeof(LineBusStopPage), new ChangeBusStopParametr()
+            {
+                BusStop = busStop,
+                Track = track
+            });
     }
 }

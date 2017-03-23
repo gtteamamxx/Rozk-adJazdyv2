@@ -44,5 +44,17 @@ namespace RozkładJazdyv2.Model
         public override string ToString()
             => this.EditedName;
 
+        public string GetLineLogoByType()
+        {
+            if ((this.Type & Line.BIG_BUS_BIT) > 0)
+                return "\xE806";
+            if ((this.Type & Line.TRAM_BITS) > 0)
+                return "\xEB4D";
+            if ((this.Type & Line.AIRPORT_BIT) > 0)
+                return "\xEB4C";
+            if ((this.Type & Line.TRAIN_BIT) > 0)
+                return "\xE7C0";
+            return "\xE806";
+        }
     }
 }
