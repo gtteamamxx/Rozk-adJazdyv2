@@ -23,6 +23,8 @@ namespace RozkładJazdyv2.Model.Application
                 mainAppFrame.GoBack();
                 e.Handled = true;
             }
+
+            App.Current.Exit();
         }
 
         private static bool IsGoBackFromPageAllowed(Type currentPageType)
