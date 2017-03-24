@@ -74,10 +74,8 @@ namespace RozkładJazdyv2.Pages.Lines
         {
             if(_SelectedBusStop.Hours == null)
                 _SelectedBusStop.Hours = await GetBusStopHoursAsync(_SelectedBusStop);
-
             if (_SelectedBusStop.Hours.Count > 0)
                 await AddAllHoursToViewAsync(_SelectedBusStop.Hours);
-
             AddAdditionalInfoToView(_SelectedBusStop);
         }
 
@@ -85,12 +83,17 @@ namespace RozkładJazdyv2.Pages.Lines
         {
             if(_SelectedBusStop.IsLastStopOnTrack)
                  AddLastStopInfo();
+            AddTicketInfo();
         }
 
         private void AddLastStopInfo()
             => AdditionalInfoListView.Items.Add(new AdditionalInfo() {
                 Info = "Wybrany przystanek jest ostatnim przystankiem na danej trasie. Prezentowane godziny są godzinami przyjazdu." });
-        
+
+        private void AddTicketInfo()
+            => AdditionalInfoListView.Items.Add(new AdditionalInfo() {
+                Info = "Na linii obowiązuje wsiadanie pierwszymi drzwami. Proszę okazać kierowcy ważny bilet lub dokument uprawniający do przejazdu." });
+
         private async Task AddAllHoursToViewAsync(List<Hour> hours)
         {
             await CoreApplication.MainView.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.High, async () =>
