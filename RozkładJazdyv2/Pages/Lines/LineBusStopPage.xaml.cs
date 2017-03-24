@@ -11,6 +11,7 @@ using System.Threading.Tasks;
 using Windows.ApplicationModel.Core;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.UI;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -148,6 +149,20 @@ namespace RozkładJazdyv2.Pages.Lines
                 _SelectedTrack = changeBusStopParametr.Track;
                 _IsRefreshingPageNeeded = true;
             }
+        }
+
+        private void HourGridView_ContainerContentChanging(ListViewBase sender, ContainerContentChangingEventArgs args)
+        {
+            var hourString = (string)args.Item;
+            var hourTextBlock = args.ItemContainer.ContentTemplateRoot as TextBlock;
+            var hourItem = args.ItemContainer as GridViewItem;
+            //due to bug we have to set default template
+            hourTextBlock.Foreground = new SolidColorBrush(Colors.White);
+            hourItem.Background = new SolidColorBrush(Colors.Transparent);
+            bool hasLetter = !Char.IsDigit(hourString.Last());
+            if (hasLetter)
+                hourTextBlock.Foreground = new SolidColorBrush(Colors.Wheat);
+
         }
     }
 }

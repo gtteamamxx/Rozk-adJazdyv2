@@ -72,6 +72,7 @@
                                                    Foreground="#FF9EF08C"
                                                    FontSize="21" />
                                         <GridView ItemsSource="{x:Bind Hours}"
+                                                  ContainerContentChanging="HourGridView_ContainerContentChanging"
                                                   SelectionMode="None">
                                         </GridView>
                                     </StackPanel>
