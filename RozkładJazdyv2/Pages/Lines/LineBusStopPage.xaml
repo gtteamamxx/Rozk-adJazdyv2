@@ -1,4 +1,4 @@
-﻿<Page
+﻿wwwwwwww<Page
     x:Class="RozkładJazdyv2.Pages.Lines.LineBusStopPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -34,22 +34,22 @@
                 <TextBlock VerticalAlignment="Bottom"
                            Margin="0 45 0 0"
                            TextWrapping="Wrap">
-                        <Run Text="Rozkład: " />
-                        <Run x:Name="LineScheduleNameTextBlock"
+                        <Run Text="Rozkład: "
+                        /><Run x:Name="LineScheduleNameTextBlock"
                              FontWeight="Bold"/>
                 </TextBlock>
                 <TextBlock VerticalAlignment="Bottom"
                            Margin="0 85 0 0"
                            TextWrapping="Wrap">
-                    <Run Text="Kierunek: " />
-                    <Run x:Name="LineTrackNameTextBlock"
+                    <Run Text="Kierunek: " 
+                    />w<Run x:Name="LineTrackNameTextBlock"
                          FontWeight="Bold"/>
                 </TextBlock>
                 <TextBlock VerticalAlignment="Bottom"
                            Margin="0 65 0 0"
                            TextWrapping="Wrap">
-                    <Run Text="Przystanek: " />
-                    <Run x:Name="LineBusStopNameTextBlock"
+                    <Run Text="Przystanek: "
+                     /><Run x:Name="LineBusStopNameTextBlock"
                          FontWeight="Bold"/>
                 </TextBlock>
             </RelativePanel>

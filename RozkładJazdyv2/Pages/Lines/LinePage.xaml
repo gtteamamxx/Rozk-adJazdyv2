@@ -46,8 +46,8 @@
                         Name="LineScheduleNameButton"
                         Click="LineScheduleNameButton_Click">
                     <TextBlock>
-                        <Run Text="Rozkład: " />
-                        <Run x:Name="LineScheduleNameTextBlock" />
+                        <Run Text="Rozkład: " 
+                        /><Run x:Name="LineScheduleNameTextBlock" />
                     </TextBlock>
                 </Button>
             </RelativePanel>
