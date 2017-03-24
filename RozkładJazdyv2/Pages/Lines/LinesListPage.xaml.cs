@@ -94,12 +94,17 @@ namespace RozkładJazdyv2.Pages.Lines
             ResetClickedGrids();
         }
 
-        private async Task ShowLinePageBySchedulesAsync(Line line, Grid lineBackgroundGtid)
+        private async Task ShowLinePageBySchedulesAsync(Line line, Grid lineBackgroundGrid)
         {
             if (line.Schedules.Count() == 1)
-                await ShowLinePageAsync(new ChangeLineParameter() { Line = line, SelectedSchedule = line.Schedules.ElementAt(0) });
+            {
+                if (line.Schedules[0].Name.Contains("zawie")) //lien is stopped
+                    Model.LinesPage.FlyoutHelper.ShowFlyOutLineIsStoppedAtLineGrid(lineBackgroundGrid, line);
+                else
+                    await ShowLinePageAsync(new ChangeLineParameter() { Line = line, SelectedSchedule = line.Schedules.ElementAt(0) });
+            }
             else
-                Model.LinesPage.FlyoutHelper.ShowFlyOutAtLineGrid(lineBackgroundGtid, line, ScheduleClickedAsync);
+                Model.LinesPage.FlyoutHelper.ShowFlyOutWithSchedulesAtLineGrid(lineBackgroundGrid, line, ScheduleClickedAsync);
         }
 
         private async Task<Line> FillLineSchedulesAsync(Line line)

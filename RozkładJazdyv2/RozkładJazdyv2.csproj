@@ -102,6 +102,7 @@
     <Compile Include="Model\Animation\AnimationHelper.cs" />
     <Compile Include="Model\Application\BackButtonManager.cs" />
     <Compile Include="Model\Application\Version.cs" />
+    <Compile Include="Model\LinesPage\AdditionalInfo.cs" />
     <Compile Include="Model\LinesPage\ChangeBusStopParametr.cs" />
     <Compile Include="Model\LinesPage\ChangeLineParameter.cs" />
     <Compile Include="Model\LinesPage\FlyoutHelper.cs" />

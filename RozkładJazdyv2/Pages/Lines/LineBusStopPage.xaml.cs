@@ -44,15 +44,21 @@ namespace RozkładJazdyv2.Pages.Lines
         {
             if (_IsRefreshingPageNeeded)
             {
-                DayTypeHoursListView.Items.Clear();
-                LettersListView.Items.Clear();
-                LoadingProgressRing.IsActive = true;
+                ClearListViewItems();
                 UpdateLineHeaderInfo();
+                LoadingProgressRing.IsActive = true;
                 await UpdateHoursAsync();
+                LoadingProgressRing.IsActive = false;
                 await UpdateLettersAsync();
                 _IsRefreshingPageNeeded = false;
-                LoadingProgressRing.IsActive = false;
             }
+        }
+
+        private void ClearListViewItems()
+        {
+            DayTypeHoursListView.Items.Clear();
+            LettersListView.Items.Clear();
+            AdditionalInfoListView.Items.Clear();
         }
 
         private void UpdateLineHeaderInfo()
@@ -67,34 +73,60 @@ namespace RozkładJazdyv2.Pages.Lines
         private async Task UpdateHoursAsync()
         {
             if(_SelectedBusStop.Hours == null)
-            {
-                string query = $"SELECT * FROM Hour WHERE IdOfBusStop = {_SelectedBusStop.Id};";
-                _SelectedBusStop.Hours = await SQLServices.QueryAsync<Hour>(query);
-            }
+                _SelectedBusStop.Hours = await GetBusStopHoursAsync(_SelectedBusStop);
 
-            await CoreApplication.MainView.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.High, () =>
+            if (_SelectedBusStop.Hours.Count > 0)
+                await AddAllHoursToViewAsync(_SelectedBusStop.Hours);
+
+            AddAdditionalInfoToView(_SelectedBusStop);
+        }
+
+        private void AddAdditionalInfoToView(BusStop busStop)
+        {
+            if(_SelectedBusStop.IsLastStopOnTrack)
+                 AddLastStopInfo();
+        }
+
+        private void AddLastStopInfo()
+            => AdditionalInfoListView.Items.Add(new AdditionalInfo() {
+                Info = "Wybrany przystanek jest ostatnim przystankiem na danej trasie. Prezentowane godziny są godzinami przyjazdu." });
+        
+        private async Task AddAllHoursToViewAsync(List<Hour> hours)
+        {
+            await CoreApplication.MainView.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.High, async () =>
             {
-                foreach (var hour in _SelectedBusStop.Hours)
+                foreach (var hour in hours)
                 {
                     var lineViewHour = new LineViewHour
                     {
                         Name = hour.Name,
                         Hours = Regex.Matches(hour.Hours, @"\d?\d:\d\d?[^\s]").Cast<Match>().Select(p => p.Value).ToList()
                     };
-                    DayTypeHoursListView.Items.Add(lineViewHour);
+                    await CoreApplication.MainView.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.High, () =>
+                        DayTypeHoursListView.Items.Add(lineViewHour));
                 }
             });
         }
 
+        private async Task<List<Hour>> GetBusStopHoursAsync(BusStop busStop)
+        {
+            string query = $"SELECT * FROM Hour WHERE IdOfBusStop = {_SelectedBusStop.Id};";
+            List<Hour> hours = await SQLServices.QueryAsync<Hour>(query);
+            return hours;
+        }
+
         private async Task UpdateLettersAsync()
         {
-            var lineViewHourList = DayTypeHoursListView.Items.Select(p => (LineViewHour)p);
-
-            List<Letter> letters = new List<Letter>();
-
-            string query = $"SELECT * FROM Letter WHERE IdOfBusStop = {_SelectedBusStop.Id};";
-            letters = (await SQLServices.QueryAsync<Letter>(query)).GroupBy(p => p.IdOfName).Select(p => p.First()).ToList();
+            var letters = await GetLettersAsync();
             letters.ForEach(p => LettersListView.Items.Add(p));
+        }
+
+        private async Task<List<Letter>> GetLettersAsync()
+        {
+            var lineViewHourList = DayTypeHoursListView.Items.Select(p => (LineViewHour)p);
+            string query = $"SELECT * FROM Letter WHERE IdOfBusStop = {_SelectedBusStop.Id};";
+            var letters = (await SQLServices.QueryAsync<Letter>(query)).GroupBy(p => p.IdOfName).Select(p => p.First()).ToList();
+            return letters;
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)

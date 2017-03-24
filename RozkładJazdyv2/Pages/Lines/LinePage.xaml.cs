@@ -59,7 +59,7 @@ namespace RozkładJazdyv2.Pages.Lines
         private void LineScheduleNameButton_Click(object sender, RoutedEventArgs e)
         {
             if(_SelectedLine.Schedules.Count() > 1)
-                _LastOpenedFlyout = FlyoutHelper.ShowFlyOutAtButtonInLinePage(sender as Button, _SelectedLine, ScheduleClickedAsync);
+                _LastOpenedFlyout = FlyoutHelper.ShowFlyOutWithLSchedulesAtButtonInLinePage(sender as Button, _SelectedLine, ScheduleClickedAsync);
         }
 
         private async void ScheduleClickedAsync(object sender, RoutedEventArgs e)
