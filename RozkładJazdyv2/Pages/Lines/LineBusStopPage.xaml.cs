@@ -142,7 +142,7 @@ namespace RozkładJazdyv2.Pages.Lines
         private async Task<List<Hour>> GetBusStopHoursAsync(BusStop busStop)
         {
             string query = $"SELECT * FROM Hour WHERE IdOfBusStop = {_SelectedBusStop.Id};";
-            List<Hour> hours = await SQLServices.QueryAsync<Hour>(query);
+            List<Hour> hours = await SQLServices.QueryTimetableAsync<Hour>(query);
             return hours;
         }
 
@@ -156,7 +156,7 @@ namespace RozkładJazdyv2.Pages.Lines
         {
             var lineViewHourList = DayTypeHoursListView.Items.Select(p => (LineViewHour)p);
             string query = $"SELECT * FROM Letter WHERE IdOfBusStop = {_SelectedBusStop.Id};";
-            var letters = (await SQLServices.QueryAsync<Letter>(query)).GroupBy(p => p.IdOfName).Select(p => p.First()).ToList();
+            var letters = (await SQLServices.QueryTimetableAsync<Letter>(query)).GroupBy(p => p.IdOfName).Select(p => p.First()).ToList();
             return letters;
         }
         

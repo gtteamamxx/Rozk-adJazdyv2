@@ -21,7 +21,7 @@ namespace RozkładJazdyv2.Model
 
         public static async Task<bool> LoadTimetableFromLocalCacheAsync()
         {
-            if (!(await SQLServices.IsValidDatabaseAsync()))
+            if (!(SQLServices.IsValidTimetableDatabase()))
                 return false;
             bool isTimetableLoaded = await SQLServices.LoadTimetableFromDatabase();
             return isTimetableLoaded;

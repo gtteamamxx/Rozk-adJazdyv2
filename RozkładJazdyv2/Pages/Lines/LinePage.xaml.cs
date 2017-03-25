@@ -58,9 +58,7 @@ namespace RozkładJazdyv2.Pages.Lines
         }
 
         private void HookEvents()
-        {
-            HookBusStopGridPointerEntered();
-        }
+            => HookBusStopGridPointerEntered();
 
         private void HookBusStopGridPointerEntered()
             => BusStopUserControl.OnBusStopGridPointerEntered += LineViewBusStop_PointerEntered;
@@ -126,7 +124,7 @@ namespace RozkładJazdyv2.Pages.Lines
             {
                 query = $"SELECT * FROM BusStop WHERE IdOfTrack = {track.Id} AND IdOfSchedule = {track.IdOfSchedule};";
                 if (track.BusStops == null)
-                    track.BusStops = await SQLServices.QueryAsync<BusStop>(query);
+                    track.BusStops = await SQLServices.QueryTimetableAsync<BusStop>(query);
                 AddStopsToViewByTrack(trackNumber++, track);
                 LineFirstTrackProgressRing.IsActive = false;
                 LineSecondTrackProgressRing.IsActive = false;
@@ -138,7 +136,7 @@ namespace RozkładJazdyv2.Pages.Lines
         {
             string query = $"SELECT * FROM Track WHERE IdOfSchedule = {schedule.Id};";
             if(schedule.Tracks == null)
-                schedule.Tracks = await SQLServices.QueryAsync<Track>(query);
+                schedule.Tracks = await SQLServices.QueryTimetableAsync<Track>(query);
             return schedule;
         }
 
@@ -281,5 +279,10 @@ namespace RozkładJazdyv2.Pages.Lines
                 BusStop = busStop,
                 Track = track
             });
+
+        private void LineFavouriteButton_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
     }
 }

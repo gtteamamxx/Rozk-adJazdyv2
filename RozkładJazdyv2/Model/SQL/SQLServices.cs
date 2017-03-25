@@ -17,11 +17,12 @@ namespace RozkładJazdyv2.Model
     {
         private static readonly string _SQLFileName = "Timetable.sqlite";
         private static readonly string _SQLTempFileName = "Timetable_T.sqlite";
-
+        private static readonly string _SQLFavouriteFileName = "TimetableFavourites.sqlite";
         public static string SQLFilePath = Path.Combine(ApplicationData.Current.LocalFolder.Path, _SQLFileName);
         public static string SQLTempFilePath => Path.Combine(ApplicationData.Current.LocalFolder.Path, _SQLTempFileName);
-
-        private static SQLiteAsyncConnection _SQLConnection;
+        public static string _SQLFavouriteFilePath => Path.Combine(ApplicationData.Current.LocalFolder.Path, _SQLFavouriteFileName);
+        private static SQLiteAsyncConnection _SQLTimetableConnection;
+        private static SQLiteAsyncConnection _SQLTimetableFavouriteConnection;
 
         private static int _SAVING_STEPS = 14;
         private static int _LOADING_STEPS = 6;
@@ -31,59 +32,54 @@ namespace RozkładJazdyv2.Model
         public static void InitSQL()
         {
             RenameDownloadedSqlFile();
-            _SQLConnection = new SQLiteAsyncConnection(new Func<SQLiteConnectionWithLock>(
+            _SQLTimetableConnection = new SQLiteAsyncConnection(new Func<SQLiteConnectionWithLock>(
                    () => new SQLiteConnectionWithLock(new SQLitePlatformWinRT(),
                        new SQLiteConnectionString(SQLFilePath, storeDateTimeAsTicks: false))));
+            _SQLTimetableFavouriteConnection = new SQLiteAsyncConnection(new Func<SQLiteConnectionWithLock>(
+                   () => new SQLiteConnectionWithLock(new SQLitePlatformWinRT(),
+                       new SQLiteConnectionString(_SQLFavouriteFilePath, storeDateTimeAsTicks: false))));
         }
 
         private static void RenameDownloadedSqlFile()
         {
-            if (!IsTempDatabaseExist())
+            if (!IsTempTimetableDatabaseExist())
                 return;
-            using (SQLiteConnection tempConnection = new SQLiteConnection(new SQLitePlatformWinRT(), SQLTempFilePath))
-            {
-                if (tempConnection == null)
-                    return;
-                string timetableExistString = string.Empty;
-                if (string.IsNullOrEmpty((timetableExistString = tempConnection.ExecuteScalar<string>(
-                        "SELECT * FROM sqlite_master WHERE name LIKE 'SQLiteStatus'"))))
-                    return;
-                var sqLiteStatusTable = tempConnection.Table<SQLiteStatus>();
-                if (sqLiteStatusTable == null || sqLiteStatusTable.Count() == 0)
-                    return;
-                SQLiteStatus sqliteStatus = sqLiteStatusTable.ElementAt(0);
-                bool isTableValid = (sqliteStatus != null && sqliteStatus.Status == SQLiteStatus.LoadStatus.Succes);
-                if (!isTableValid)
-                    return;
-                tempConnection.Close();
-            }
-            if (IsDatabaseFileExist())
+            SQLiteConnection tempConnection = new SQLiteConnection(new SQLitePlatformWinRT(), SQLTempFilePath);
+            if (tempConnection == null)
+                return;
+            if (!IsValidTimetableDatabase(tempConnection))
+                return;
+            if (IsTimetableDatabaseFileExist())
                 DeleteFile(SQLFilePath);
-            RenameTempFileToMainFile();
+            RenameTimetableTempFileToMainTimetableFile();
         }
 
-        public static async Task<List<T>> QueryAsync<T>(string query, params object[] args) where T : class
-            => await _SQLConnection.QueryAsync<T>(query, args);
-
-        public static async Task ExecuteQueryAsync(string query, params object[] args)
-            => await _SQLConnection.ExecuteAsync(query, args);
-
-        public static async Task<T> ExecuteScalarAsync<T>(string query, params object[] args) where T : class
-            => await _SQLConnection.ExecuteScalarAsync<T>(query, args);
-
-        public static async Task<bool> IsValidDatabaseAsync()
+        public static bool IsValidTimetableDatabase(SQLiteConnection sqlConnection = null)
         {
-            if (!IsDatabaseFileExist())
+            if(sqlConnection == null)
+                sqlConnection = new SQLiteConnection(new SQLitePlatformWinRT(), SQLFilePath);
+            if (!IsTimetableDatabaseFileExist())
                 return false;
-            string query = "SELECT * FROM sqlite_master WHERE name LIKE 'Line';";
-            string result = await _SQLConnection.ExecuteScalarAsync<string>(query);
-            return result != null && result.Length > 0;
+            string timetableExistString = string.Empty;
+            if (string.IsNullOrEmpty((timetableExistString = sqlConnection.ExecuteScalar<string>(
+                    "SELECT * FROM sqlite_master WHERE name LIKE 'SQLiteStatus'"))))
+                return false;
+            var sqLiteStatusTable = sqlConnection.Table<SQLiteStatus>();
+            if (sqLiteStatusTable == null || sqLiteStatusTable.Count() == 0)
+                return false;
+            SQLiteStatus sqliteStatus = sqLiteStatusTable.ElementAt(0);
+            bool isTableValid = (sqliteStatus != null && sqliteStatus.Status == SQLiteStatus.LoadStatus.Succes);
+            if (!isTableValid)
+                return false;
+            sqlConnection.Dispose();
+            sqlConnection.Close();
+            return true;
         }
 
-        public static async Task<bool> SaveDatabaseAsync()
+        public static async Task<bool> SaveTimetableDatabaseAsync()
         {
             InvokeOnSqlSavingChanged(1, _SAVING_STEPS);
-            if (IsTempDatabaseExist())
+            if (IsTempTimetableDatabaseExist())
             {
                 bool isFileRemoved = DeleteFile(SQLTempFilePath);
                 if (!isFileRemoved)
@@ -93,16 +89,16 @@ namespace RozkładJazdyv2.Model
                 () => new SQLiteConnectionWithLock(
                     new SQLitePlatformWinRT(),
                     new SQLiteConnectionString(SQLTempFilePath, storeDateTimeAsTicks: false))));
-            if (!(await CreateDatabaseAsync(tempSqlConnection)))
+            if (!(await CreateTimetableDatabaseAsync(tempSqlConnection)))
                 return false;
-            if (!(await InsertIntoDatabaseAsync(tempSqlConnection)))
+            if (!(await InsertIntoTimetableDatabaseAsync(tempSqlConnection)))
                 return false;
             InvokeOnSqlSavingChanged(14, _SAVING_STEPS);
             InvokeOnSqlSaved();
             return true;
         }
 
-        private static bool RenameTempFileToMainFile()
+        private static bool RenameTimetableTempFileToMainTimetableFile()
         {
             try
             {
@@ -115,7 +111,7 @@ namespace RozkładJazdyv2.Model
             }
         }
 
-        private static async Task<bool> InsertIntoDatabaseAsync(SQLiteAsyncConnection sqlConnection)
+        private static async Task<bool> InsertIntoTimetableDatabaseAsync(SQLiteAsyncConnection sqlConnection)
         {
             try
             {
@@ -172,7 +168,7 @@ namespace RozkładJazdyv2.Model
             }
         }
 
-        private static async Task<bool> CreateDatabaseAsync(SQLiteAsyncConnection sqlConnection)
+        private static async Task<bool> CreateTimetableDatabaseAsync(SQLiteAsyncConnection sqlConnection)
         {
             try
             {
@@ -216,21 +212,21 @@ namespace RozkładJazdyv2.Model
 
         public static async Task<bool> LoadTimetableFromDatabase()
         {
-            if (_SQLConnection == null)
+            if (_SQLTimetableConnection == null)
                 return false;
             try
             {
                 Timetable.Instance = new Timetable();
                 InvokeOnSqlLoadingChanged(1, _LOADING_STEPS);
-                Timetable.Instance.BusStopsNames = await _SQLConnection.Table<BusStopName>().ToListAsync();
+                Timetable.Instance.BusStopsNames = await _SQLTimetableConnection.Table<BusStopName>().ToListAsync();
                 InvokeOnSqlLoadingChanged(2, _LOADING_STEPS);
-                Timetable.Instance.HoursNames = await _SQLConnection.Table<HourName>().ToListAsync();
+                Timetable.Instance.HoursNames = await _SQLTimetableConnection.Table<HourName>().ToListAsync();
                 InvokeOnSqlLoadingChanged(3, _LOADING_STEPS);
-                Timetable.Instance.LettersNames = await _SQLConnection.Table<LetterName>().ToListAsync();
+                Timetable.Instance.LettersNames = await _SQLTimetableConnection.Table<LetterName>().ToListAsync();
                 InvokeOnSqlLoadingChanged(4, _LOADING_STEPS);
-                Timetable.Instance.TracksNames = await _SQLConnection.Table<TrackName>().ToListAsync();
+                Timetable.Instance.TracksNames = await _SQLTimetableConnection.Table<TrackName>().ToListAsync();
                 InvokeOnSqlLoadingChanged(5, _LOADING_STEPS);
-                Timetable.Instance.Lines = await _SQLConnection.Table<Line>().ToListAsync();
+                Timetable.Instance.Lines = await _SQLTimetableConnection.Table<Line>().ToListAsync();
                 InvokeOnSqlLoadingChanged(6, _LOADING_STEPS);
                 Timetable.Instance.Letters = new List<Letter>();
                 return true;
@@ -241,10 +237,28 @@ namespace RozkładJazdyv2.Model
             }
         }
 
-        private static bool IsDatabaseFileExist()
+        public static async Task<List<T>> QueryTimetableAsync<T>(string query, params object[] args) where T : class
+            => await _SQLTimetableConnection.QueryAsync<T>(query, args);
+
+        public static async Task ExecuteTimetableQueryAsync(string query, params object[] args)
+            => await _SQLTimetableConnection.ExecuteAsync(query, args);
+
+        public static async Task<T> ExecuteTimetableScalarAsync<T>(string query, params object[] args) where T : class
+            => await _SQLTimetableConnection.ExecuteScalarAsync<T>(query, args);
+
+        public static async Task<List<T>> QueryFavouriteAsync<T>(string query, params object[] args) where T : class
+            => await _SQLTimetableConnection.QueryAsync<T>(query, args);
+
+        public static async Task ExecuteFavouriteAsync(string query, params object[] args)
+            => await _SQLTimetableConnection.ExecuteAsync(query, args);
+
+        public static async Task<T> ExecuteFavouriteScalarAsync<T>(string query, params object[] args) where T : class
+            => await _SQLTimetableConnection.ExecuteScalarAsync<T>(query, args);
+
+        private static bool IsTimetableDatabaseFileExist()
             => File.Exists(SQLFilePath);
 
-        private static bool IsTempDatabaseExist()
+        private static bool IsTempTimetableDatabaseExist()
             => File.Exists(SQLTempFilePath);
     }
 }

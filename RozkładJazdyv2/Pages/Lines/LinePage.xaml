@@ -22,10 +22,6 @@
         <Grid Grid.Row="0"
               VerticalAlignment="Top"
               Margin="20">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto"/>
-                <ColumnDefinition />
-            </Grid.ColumnDefinitions>
             <StackPanel>
                 <StackPanel Orientation="Horizontal">
                     <TextBlock FontFamily="Segoe MDL2 Assets"
@@ -33,6 +29,7 @@
                                Text="&#xEB4D;"
                                Margin="0 5"
                                Foreground="#FF959DD3"
+                               VerticalAlignment="Center"
                                x:Name="LineLogoTextBlock"/>
                     <TextBlock VerticalAlignment="Center"
                                FontSize="30"
@@ -40,8 +37,15 @@
                                Text="722"
                                Margin="10 0 0 0"
                                x:Name="LineNumberTextBlock"/>
+                    <Button Margin="10 0 0 0"
+                            Background="#FF131368"
+                            Height="40"
+                            Name="LineFavouriteButton"
+                            Click="LineFavouriteButton_Click">
+                            Dodaj do ulubionych
+                    </Button>
                 </StackPanel>
-                
+
                 <Button Margin="0 5 0 0"
                         Name="LineScheduleNameButton"
                         Click="LineScheduleNameButton_Click">
@@ -51,8 +55,6 @@
                     </TextBlock>
                 </Button>
             </StackPanel>
-
-
         </Grid>
 
         <Grid Grid.Row="1">

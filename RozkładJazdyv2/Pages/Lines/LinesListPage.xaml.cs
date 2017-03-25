@@ -132,7 +132,7 @@ namespace RozkładJazdyv2.Pages.Lines
         private async Task<List<Schedule>> GetLineSchedules(Line line)
         {
             string query = $"SELECT * FROM Schedule WHERE idOfLine = {line.Id};";
-            return await SQLServices.QueryAsync<Schedule>(query);
+            return await SQLServices.QueryTimetableAsync<Schedule>(query);
         }
 
         private void ResetClickedGrids()

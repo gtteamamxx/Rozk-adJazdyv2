@@ -68,7 +68,7 @@ namespace RozkładJazdyv2.Pages.MainPageFrames
             SavingInfoText.Text = "Trwa zapisywanie rozkładu...";
             SetSavingRetryButtonVisibility(Visibility.Collapsed);
             SetSavingTimetableInfoVisibility(Visibility.Visible);
-            var isTimetableSaved = await SQLServices.SaveDatabaseAsync();
+            var isTimetableSaved = await SQLServices.SaveTimetableDatabaseAsync();
             if(!isTimetableSaved)
             {
                 SetSavingTimetableInfoVisibility(Visibility.Collapsed);
