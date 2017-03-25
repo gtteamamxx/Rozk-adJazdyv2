@@ -27,14 +27,37 @@ namespace RozkładJazdyv2.Pages
     /// </summary>
     public sealed partial class MainMenu : Page
     {
-        private string APP_VERSION { get { return Model.Application.Version.VERSION; } }
-        private string TimetableLastUpdate { get { return new FileInfo(SQLServices.SQLFilePath).CreationTime.ToUniversalTime().ToString(); } }
+        private string _APP_VERSION { get { return Model.Application.Version.VERSION; } }
+        private string _TimetableLastUpdate { get { return new FileInfo(SQLServices.SQLFilePath).CreationTime.ToUniversalTime().ToString(); } }
+        private List<Grid> _ListOfGrid = new List<Grid>();
+        private readonly double _SizeMultiplier = 3.75; //if greather then buttons will be smaller
+        private readonly double _MaxSizeOfButton = 215;
 
         public MainMenu()
         {
             this.InitializeComponent();
+            this.SizeChanged += MainMenu_SizeChanged;
             AddButtonsToPage();
             RegisterButtonHooks();
+            this.Loaded += (s, e) => ChangeSizeOfButtons(this.ActualHeight, this.ActualWidth);
+        }
+
+        private void MainMenu_SizeChanged(object sender, SizeChangedEventArgs e)
+            => ChangeSizeOfButtons(e.NewSize.Height, e.NewSize.Width);
+
+        private void ChangeSizeOfButtons(double height, double width)
+        {
+            double size = ((width / _SizeMultiplier) + (height / _SizeMultiplier)) / 2;
+            double multiplier = 0.0;
+            foreach (var buttonGrid in _ListOfGrid)
+            {
+                multiplier = size / buttonGrid.Width;
+                if (buttonGrid.Width * multiplier > _MaxSizeOfButton)
+                    return;
+                buttonGrid.Width = buttonGrid.Height *= multiplier;
+                foreach (TextBlock textBlock in buttonGrid.Children)
+                    textBlock.FontSize *= multiplier;
+            }
         }
 
         private void RegisterButtonHooks()
@@ -42,7 +65,7 @@ namespace RozkładJazdyv2.Pages
 
         private async void ButtonClicked(object sender, SelectionChangedEventArgs e)
         {
-            var clickedButton = ((GridView)sender).SelectedItem as MainMenuButton;
+            var clickedButton = ButtonListGridView.SelectedItem as MainMenuButton;
             if (clickedButton == null)
                 return;
             await Task.Delay(100);
@@ -75,6 +98,9 @@ namespace RozkładJazdyv2.Pages
         private void ButtonListGridViewContentChanged(ListViewBase sender, ContainerContentChangingEventArgs args)
         {
             var gridOfButton = ((Grid)args.ItemContainer.ContentTemplateRoot);
+            var isd = _ListOfGrid.FirstOrDefault(p => p == gridOfButton);
+            if (isd == null)
+                _ListOfGrid.Add(gridOfButton);
             MainMenuButton buttonClass = ((MainMenuButton)args.Item);
             gridOfButton.Background = buttonClass.BackgroundColor;
         }

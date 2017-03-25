@@ -11,6 +11,10 @@
 
     <Grid Name="MainGrid" 
           Background="Black">
+        <Grid.RowDefinitions>
+            <RowDefinition />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
         <ScrollViewer>
             <Grid>
                 <GridView Name="ButtonListGridView"
@@ -57,65 +61,67 @@
                         </DataTemplate>
                     </GridView.ItemTemplate>
                 </GridView>
-
-                <Viewbox VerticalAlignment="Bottom"
-                         Stretch="UniformToFill"
-                         StretchDirection="DownOnly">
-                    <StackPanel Orientation="Horizontal">
-                        <Button Foreground="White"
-                                    Background="Transparent">
-                            <Button.Flyout>
-                                <Flyout>
-                                    <StackPanel>
-                                        <TextBlock>
-                                                <Run Foreground="LightSeaGreen"
-                                                     Text="Rozkład jazdy KZKGOP | UWP"
-                                                 /><Run Text="&#x0a;Autor: Grzegorz Stanik&#x0a;Wersja: " 
-                                                /><Run Foreground="Yellow" Text="{x:Bind APP_VERSION}"/>
-                                        </TextBlock>
-                                        <HyperlinkButton Content="Kontakt: grs4_98@o2.pl" 
-                                                         Margin="0 -8"
-                                                         Foreground="Red"
-                                                         NavigateUri="mailto:grs4_98@o2.pl" />
-                                        <TextBlock>
-                                            <Run Foreground="Pink"
-                                                 Text="Podziękowania dla"
-                                            /><Run Foreground="DeepPink"
-                                                   Text=" Dominiki M." />
-                                        </TextBlock>
-                                    </StackPanel>
-                                </Flyout>
-                            </Button.Flyout>
-
-                            <Grid BorderBrush="White"
-                                      BorderThickness="0 0 0 1">
-                                <TextBlock Text="Autor"/>
-                            </Grid>
-                        </Button>
-
-                        <Button Margin="10 0 0 0"
-                                Background="Transparent"
-                                Foreground="White" 
-                                Click="RefreshTimetableButton_Click">
-                            <Grid BorderBrush="White"
-                                      BorderThickness="0 0 0 1">
-                                <TextBlock Text="Odśwież rozkład"/>
-                            </Grid>
-                        </Button>
-                        
-                        <Button VerticalAlignment="Center"
-                                Background="Transparent">
-                            <TextBlock TextAlignment="Right"
-                                       Foreground="White">
-                                <Run Text="{x:Bind APP_VERSION}" />
-                                <Run Text="&#x0a;"/>
-                                <Run Text="Rozkład z dnia: "/>
-                                <Run Text="{x:Bind TimetableLastUpdate}" />
-                            </TextBlock>
-                        </Button>
-                    </StackPanel>
-                </Viewbox>
             </Grid>
         </ScrollViewer>
+        
+        <Viewbox VerticalAlignment="Bottom"
+                 Stretch="UniformToFill"
+                 StretchDirection="DownOnly"
+                 Grid.Row="1">
+            <StackPanel Orientation="Horizontal">
+                <Button Foreground="White"
+                        Background="Transparent">
+                    <Button.Flyout>
+                        <Flyout>
+                            <StackPanel>
+                                <TextBlock>
+                                    <Run Foreground="LightSeaGreen"
+                                         Text="Rozkład jazdy KZKGOP | UWP"
+                                    /><Run Text="&#x0a;Autor: Grzegorz Stanik&#x0a;Wersja: " 
+                                    /><Run Foreground="Yellow" 
+                                           Text="{x:Bind _APP_VERSION}"/>
+                                </TextBlock>
+                                <HyperlinkButton Content="Kontakt: grs4_98@o2.pl" 
+                                                 Margin="0 -8"
+                                                 Foreground="Red"
+                                                 NavigateUri="mailto:grs4_98@o2.pl" />
+                                <TextBlock>
+                                    <Run Foreground="Pink"
+                                         Text="Podziękowania dla"
+                                    /><Run Foreground="DeepPink"
+                                           Text=" Dominiki M." />
+                                </TextBlock>
+                            </StackPanel>
+                        </Flyout>
+                    </Button.Flyout>
+
+                    <Grid BorderBrush="White"
+                          BorderThickness="0 0 0 1">
+                        <TextBlock Text="Autor"/>
+                    </Grid>
+                </Button>
+
+                <Button Margin="10 0 0 0"
+                        Background="Transparent"
+                        Foreground="White" 
+                        Click="RefreshTimetableButton_Click">
+                    <Grid BorderBrush="White"
+                          BorderThickness="0 0 0 1">
+                        <TextBlock Text="Odśwież rozkład"/>
+                    </Grid>
+                </Button>
+
+                <Button VerticalAlignment="Center"
+                        Background="Transparent">
+                    <TextBlock TextAlignment="Right"
+                               Foreground="White">
+                        <Run Text="{x:Bind _APP_VERSION}"
+                        /><Run Text="&#x0a;"
+                        /><Run Text="Rozkład z dnia: "
+                       /> <Run Text="{x:Bind _TimetableLastUpdate}"/>
+                    </TextBlock>
+                </Button>
+            </StackPanel>
+        </Viewbox>
     </Grid>
 </Page>
