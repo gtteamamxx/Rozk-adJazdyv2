@@ -63,19 +63,26 @@ namespace RozkładJazdyv2.Pages.Lines
 
         private async Task LoadLinesToView()
         {
+            _IsPageCached = true;
             Model.LinesPage.LinesViewManager.SetInstance(LinesScrollViewer);
-            int busBits = Line.BUS_BITS;
-            busBits &= ~(Line.FAST_BUS_BIT);
+            int busBits = GetBusBitsWithoutFastBus();
             await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync("Ulubione", Line.FAVOURITE_BIT, this, LineSelectionChangedAsync);
             await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync("Tramwaje", Line.TRAM_BITS, this, LineSelectionChangedAsync);
+            await Task.Delay(100);
             await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync("Autobusy", busBits, this, LineSelectionChangedAsync);
             await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync("Autobusy przyśpieszone", Line.FAST_BUS_BIT, this, LineSelectionChangedAsync);
             await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync("Nocne", Line.NIGHT_BUS_BIT, this, LineSelectionChangedAsync);
             await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync("Minibusy", Line.MINI_BIT, this, LineSelectionChangedAsync);
             await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync("Inne", Line.AIRPORT_BIT, this, LineSelectionChangedAsync);
-            _IsPageCached = true;
         }
 
+        private int GetBusBitsWithoutFastBus()
+        {
+            int busBits = Line.BUS_BITS;
+            busBits &= ~(Line.FAST_BUS_BIT);
+            return busBits;
+        }
+        
         private async Task ShowLinePageAsync(ChangeLineParameter changeLineParameter)
         {
             await Task.Delay(100);

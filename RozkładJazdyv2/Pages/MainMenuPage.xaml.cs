@@ -45,7 +45,7 @@ namespace RozkładJazdyv2.Pages
         private void ChangeSizeOfButtons(double height, double width)
         {
             double size = ((width / _SizeMultiplier) + (height / _SizeMultiplier)) / 2;
-            double multiplier = 0.0;
+            double multiplier = 1;
             foreach (var buttonGrid in _ListOfGrid)
             {
                 multiplier = size / buttonGrid.Width;

@@ -11,14 +11,6 @@
 
     <Page.Resources>
         <DataTemplate x:Key="BusStopListViewStyle" x:DataType="local:LineViewBusStop">
-            <!-- <Grid HorizontalAlignment="Center"
-                  PointerExited="LineViewBusStop_PointerEntered">
-                <TextBlock Text="{x:Bind Name}"
-                           FontSize="13"
-                           Width="200"
-                           TextAlignment="Left"
-                           TextWrapping="Wrap" />
-            </Grid>-->
             <local1:BusStopUserControl DataContext="{Binding}" />
         </DataTemplate>
     </Page.Resources>
@@ -30,21 +22,27 @@
         <Grid Grid.Row="0"
               VerticalAlignment="Top"
               Margin="20">
-            <RelativePanel>
-                <TextBlock FontFamily="Segoe MDL2 Assets"
-                           FontSize="30"
-                           Text="&#xEB4D;"
-                           Margin="0 5"
-                           Foreground="#FF959DD3"
-                           x:Name="LineLogoTextBlock"/>
-                <TextBlock VerticalAlignment="Center"
-                           FontSize="30"
-                           Foreground="White"
-                           Text="722"
-                           Margin="10 0 0 0"
-                           RelativePanel.RightOf="LineLogoTextBlock"
-                           x:Name="LineNumberTextBlock"/>
-                <Button Margin="0 55 0 0"
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition />
+            </Grid.ColumnDefinitions>
+            <StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock FontFamily="Segoe MDL2 Assets"
+                               FontSize="30"
+                               Text="&#xEB4D;"
+                               Margin="0 5"
+                               Foreground="#FF959DD3"
+                               x:Name="LineLogoTextBlock"/>
+                    <TextBlock VerticalAlignment="Center"
+                               FontSize="30"
+                               Foreground="White"
+                               Text="722"
+                               Margin="10 0 0 0"
+                               x:Name="LineNumberTextBlock"/>
+                </StackPanel>
+                
+                <Button Margin="0 5 0 0"
                         Name="LineScheduleNameButton"
                         Click="LineScheduleNameButton_Click">
                     <TextBlock>
@@ -52,7 +50,9 @@
                         /><Run x:Name="LineScheduleNameTextBlock" />
                     </TextBlock>
                 </Button>
-            </RelativePanel>
+            </StackPanel>
+
+
         </Grid>
 
         <Grid Grid.Row="1">

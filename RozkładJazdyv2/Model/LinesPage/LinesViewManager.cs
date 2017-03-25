@@ -30,23 +30,26 @@ namespace RozkładJazdyv2.Model.LinesPage
         public static async Task AddLineTypeToListViewAsync(string name, int acceptedLinesBit, Pages.Lines.LinesViewPage page,
                                                             SelectionChangedEventHandler selectionChangedFunction)
         {
-            await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+            await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.High, async () =>
             {
                 var contentGrid = new Grid();
                 AddRowDefinitionsToContentGrid(ref contentGrid);
                 AddPanelGridToContentGrid(ref contentGrid, name);
-                AddLinesGridViewToContentGrid(ref contentGrid, acceptedLinesBit, page, ref selectionChangedFunction);
+                await AddLinesGridViewToContentGridAsync(contentGrid, acceptedLinesBit, page, selectionChangedFunction);
                 bool isLineTypeEmpty = IsLineTypEmpty(contentGrid);
                 if (isLineTypeEmpty)
                     return;
-                AddContentGridToPage(contentGrid);
+                await AddContentGridToPageAsync(contentGrid);
             });
         }
 
-        private static void AddContentGridToPage(Grid grid)
+        private static async Task AddContentGridToPageAsync(Grid grid)
         {
-            var scrollViewerGrid = _LinesTypeScrollViewer.Content as StackPanel;
-            scrollViewerGrid.Children.Add(grid);
+            await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.High, () =>
+            {
+                var scrollViewerGrid = _LinesTypeScrollViewer.Content as StackPanel;
+                scrollViewerGrid.Children.Add(grid);
+            });
         }
 
         private static bool IsLineTypEmpty(Grid grid)
@@ -55,8 +58,8 @@ namespace RozkładJazdyv2.Model.LinesPage
             return linesGridView.Items.Count() == 0;
         }
 
-        private static void AddLinesGridViewToContentGrid(ref Grid grid, int acceptedLinesBit,
-                                                            Pages.Lines.LinesViewPage page, ref SelectionChangedEventHandler selectionChangedFunction)
+        private static async Task AddLinesGridViewToContentGridAsync(Grid grid, int acceptedLinesBit,
+                            Pages.Lines.LinesViewPage page, SelectionChangedEventHandler selectionChangedFunction)
         {
             var linesGridView = new GridView()
             {
@@ -71,7 +74,8 @@ namespace RozkładJazdyv2.Model.LinesPage
             foreach (var line in Timetable.Instance.Lines)
                 if ((line.Type & acceptedLinesBit) > 0)
                     linesGridView.Items.Add(line);
-            grid.Children.Add(linesGridView);
+            await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.High, () =>
+                grid.Children.Add(linesGridView) );
         }
 
         private static void LinesGridView_ContainerContentChanging(ListViewBase sender, ContainerContentChangingEventArgs args)
