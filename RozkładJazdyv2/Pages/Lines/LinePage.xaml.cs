@@ -53,8 +53,17 @@ namespace RozkładJazdyv2.Pages.Lines
             _LineSecondTrackBusStops = new ObservableCollection<LineViewBusStop>();
             _ListViewsList = new List<ListView>().Add<ListView>(LineFirstTrackListView)
                 .Add<ListView>(LineSecondTrackListView);
+            HookEvents();
             this.Loaded += LinePage_LoadedAsync;
         }
+
+        private void HookEvents()
+        {
+            HookBusStopGridPointerEntered();
+        }
+
+        private void HookBusStopGridPointerEntered()
+            => BusStopUserControl.OnBusStopGridPointerEntered += LineViewBusStop_PointerEntered;
 
         private void LineScheduleNameButton_Click(object sender, RoutedEventArgs e)
         {
@@ -179,25 +188,7 @@ namespace RozkładJazdyv2.Pages.Lines
 
         private void SetBusStopViewAttribute(ListViewBase sender, ContainerContentChangingEventArgs args)
         {
-            var busStop = (args.Item as LineViewBusStop).BusStop;
-            var textBlock = ((Grid)args.ItemContainer.ContentTemplateRoot).Children[0] as TextBlock;
-            // due to bug, we have to set default style firstly
-            textBlock.Foreground = new SolidColorBrush(Colors.White);
-            textBlock.FontWeight = FontWeights.Normal;
-            if (busStop.IsLastStopOnTrack)
-            {
-                textBlock.Foreground = new SolidColorBrush(Color.FromArgb(127, 255, 0, 0));
-                textBlock.FontWeight = FontWeights.ExtraBold;
-            }
-            else if (busStop.IsVariant)
-            {
-                textBlock.Foreground = new SolidColorBrush(Colors.DarkGray);
-                textBlock.FontWeight = FontWeights.ExtraLight;
-            }
-            else if (busStop.IsOnDemand)
-                textBlock.Foreground = new SolidColorBrush(Color.FromArgb(255, 0, 120, 215));
-            else if (busStop.IsBusStopZone)
-                textBlock.Foreground = new SolidColorBrush(Colors.Yellow);
+
         }
 
         private void UpdateLineHeaderTexts()
@@ -245,7 +236,7 @@ namespace RozkładJazdyv2.Pages.Lines
             listView.SelectedItem = -1;
         }
 
-        private void LineViewBusStop_PointerExited(object sender, PointerRoutedEventArgs e)
+        private void LineViewBusStop_PointerEntered(object sender, PointerRoutedEventArgs e)
         {
             if (_SelectedSchedule.Tracks.Count() == 1)
                 return;

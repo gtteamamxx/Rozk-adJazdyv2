@@ -5,19 +5,21 @@
     xmlns:local="using:RozkładJazdyv2.Model.LinesPage"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:local1="using:RozkładJazdyv2.Pages.Lines"
     NavigationCacheMode="Required"
     mc:Ignorable="d">
 
     <Page.Resources>
         <DataTemplate x:Key="BusStopListViewStyle" x:DataType="local:LineViewBusStop">
-            <Grid HorizontalAlignment="Center"
-                  PointerExited="LineViewBusStop_PointerExited">
+            <!-- <Grid HorizontalAlignment="Center"
+                  PointerExited="LineViewBusStop_PointerEntered">
                 <TextBlock Text="{x:Bind Name}"
                            FontSize="13"
                            Width="200"
                            TextAlignment="Left"
                            TextWrapping="Wrap" />
-            </Grid>
+            </Grid>-->
+            <local1:BusStopUserControl DataContext="{Binding}" />
         </DataTemplate>
     </Page.Resources>
     <Grid Background="Black">
@@ -82,7 +84,6 @@
                 <ListView Name="LineFirstTrackListView"
                           ItemsSource="{x:Bind _LineFirstTrackBusStops}"
                           Grid.Row="1"
-                          ContainerContentChanging="SetBusStopViewAttribute"
                           ItemTemplate="{StaticResource BusStopListViewStyle}"
                           SelectionChanged="LineTrackListView_SelectionChangedAsync">
                     <ListView.ItemsPanel>
@@ -119,7 +120,6 @@
                 <ListView Grid.Row="1"
                           Name="LineSecondTrackListView"
                           ItemsSource="{x:Bind _LineSecondTrackBusStops}"
-                          ContainerContentChanging="SetBusStopViewAttribute"
                           ItemTemplate="{StaticResource BusStopListViewStyle}"
                           SelectionMode="Single"
                           SelectionChanged="LineTrackListView_SelectionChangedAsync">

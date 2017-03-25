@@ -131,6 +131,9 @@
     <Compile Include="Model\Services\TimetableDownloadService.cs" />
     <Compile Include="Model\Timetable\Track.cs" />
     <Compile Include="Model\Timetable\Names\TrackName.cs" />
+    <Compile Include="Pages\Lines\BusStopUserControl.xaml.cs">
+      <DependentUpon>BusStopUserControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Pages\Lines\LineBusStopPage.xaml.cs">
       <DependentUpon>LineBusStopPage.xaml</DependentUpon>
     </Compile>
@@ -178,6 +181,10 @@
     <Page Include="MainPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Pages\Lines\BusStopUserControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Pages\Lines\LineBusStopPage.xaml">
       <SubType>Designer</SubType>
