@@ -6,6 +6,7 @@
     xmlns:local2="using:RozkładJazdyv2.Model"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:lines="using:RozkładJazdyv2.Pages.Lines"
     NavigationCacheMode="Required"
     mc:Ignorable="d">
 
@@ -17,42 +18,49 @@
         <Grid Grid.Row="0"
               VerticalAlignment="Top"
               Margin="20">
-            <RelativePanel>
-                <TextBlock FontFamily="Segoe MDL2 Assets"
-                           FontSize="30"
-                           Text="&#xEB4D;"
-                           Margin="0 5"
-                           Foreground="#FF959DD3"
-                           x:Name="LineLogoTextBlock"/>
-                <TextBlock VerticalAlignment="Center"
-                           FontSize="30"
-                           Foreground="White"
-                           Text="722"
-                           Margin="10 0 0 0"
-                           RelativePanel.RightOf="LineLogoTextBlock"
-                           x:Name="LineNumberTextBlock"/>
-                <TextBlock VerticalAlignment="Bottom"
-                           Margin="0 45 0 0"
-                           TextWrapping="Wrap">
+            <StackPanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock FontFamily="Segoe MDL2 Assets"
+                               FontSize="30"
+                               Text="&#xEB4D;"
+                               Margin="0 5"
+                               Foreground="#FF959DD3"
+                               x:Name="LineLogoTextBlock"/>
+                    <TextBlock VerticalAlignment="Center"
+                               FontSize="30"
+                               Foreground="White"
+                               Text="722"
+                               Margin="10 0 0 0"
+                               RelativePanel.RightOf="LineLogoTextBlock"
+                               x:Name="LineNumberTextBlock"/>
+                </StackPanel>
+                <TextBlock TextWrapping="Wrap">
                         <Run Text="Rozkład: "
                         /><Run x:Name="LineScheduleNameTextBlock"
-                             FontWeight="Bold"/>
+                               FontWeight="Bold"/>
                 </TextBlock>
-                <TextBlock VerticalAlignment="Bottom"
-                           Margin="0 85 0 0"
-                           TextWrapping="Wrap">
+                <TextBlock TextWrapping="Wrap">
                     <Run Text="Kierunek: " 
                     /><Run x:Name="LineTrackNameTextBlock"
-                         FontWeight="Bold"/>
+                           FontWeight="Bold"/>
                 </TextBlock>
-                <TextBlock VerticalAlignment="Bottom"
-                           Margin="0 65 0 0"
-                           TextWrapping="Wrap">
-                    <Run Text="Przystanek: "
-                     /><Run x:Name="LineBusStopNameTextBlock"
-                         FontWeight="Bold"/>
-                </TextBlock>
-            </RelativePanel>
+                <StackPanel Orientation="Horizontal">
+                    <TextBlock VerticalAlignment="Center">Przystanek:</TextBlock>
+                    <ComboBox Margin="10 0 0 0"
+                              Width="200"
+                              Name="BusStopsComboBox"
+                              ItemsSource="{x:Bind _BusStopsInTrack}"
+                              SelectionChanged="BusStopsComboBox_SelectionChanged">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate x:DataType="local:LineViewBusStop">
+                                <lines:BusStopUserControl DataContext="{Binding}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                </StackPanel>
+
+
+            </StackPanel>
         </Grid>
 
         <Grid Grid.Row="1">
@@ -73,7 +81,6 @@
                                                    FontSize="21" />
                                         <GridView ItemsSource="{x:Bind Hours}"
                                                   ContainerContentChanging="HourGridView_ContainerContentChanging"
-                                                  
                                                   SelectionMode="None">
                                         </GridView>
                                     </StackPanel>

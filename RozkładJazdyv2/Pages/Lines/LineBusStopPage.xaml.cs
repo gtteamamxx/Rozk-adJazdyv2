@@ -29,17 +29,19 @@ namespace RozkładJazdyv2.Pages.Lines
     /// </summary>
     public sealed partial class LineBusStopPage : Page
     {
+        private ObservableCollection<LineViewBusStop> _BusStopsInTrack;
         private static BusStop _SelectedBusStop;
         private static Line _SelectedLine => LinePage.ActualShowingLineParameters.Line;
         private static Schedule _SelectedSchedule => LinePage.ActualShowingLineParameters.SelectedSchedule;
         private static Track _SelectedTrack;
         private static bool _IsRefreshingPageNeeded;
-        private int[] _LastHourHours = new int[3] { 0, 0, 0 };
+        private int[] _LastHourHours = new int[3] { 0, 0, 0 }; // hour, minute, state
         private object _LastHourItemSource;
 
         public LineBusStopPage()
         {
             this.InitializeComponent();
+            _BusStopsInTrack = new ObservableCollection<LineViewBusStop>();
             this.Loaded += LineBusStopPage_LoadedAsync;
         }
 
@@ -48,6 +50,7 @@ namespace RozkładJazdyv2.Pages.Lines
             if (_IsRefreshingPageNeeded)
             {
                 ClearListViewItems();
+                _BusStopsInTrack.Clear();
                 UpdateLineHeaderInfo();
                 LoadingProgressRing.IsActive = true;
                 await UpdateHoursAsync();
@@ -66,11 +69,27 @@ namespace RozkładJazdyv2.Pages.Lines
 
         private void UpdateLineHeaderInfo()
         {
-            LineBusStopNameTextBlock.Text = _SelectedBusStop.Name;
             LineScheduleNameTextBlock.Text = _SelectedSchedule.Name;
             LineNumberTextBlock.Text = _SelectedLine.EditedName;
             LineLogoTextBlock.Text = _SelectedLine.GetLineLogoByType();
             LineTrackNameTextBlock.Text = _SelectedTrack.Name;
+            UpdateStopsInComboBox();
+        }
+
+        private void UpdateStopsInComboBox()
+        {
+            foreach (var busStop in _SelectedTrack.BusStops)
+            {
+                string editedName = busStop.GetBusStopEditedName();
+                var editedBusStop = new LineViewBusStop()
+                {
+                    Name = editedName,
+                    BusStop = busStop
+                };
+                _BusStopsInTrack.Add(editedBusStop);
+                if (busStop.Id == _SelectedBusStop.Id)
+                    BusStopsComboBox.SelectedItem = editedBusStop;
+            }
         }
 
         private async Task UpdateHoursAsync()
@@ -139,24 +158,6 @@ namespace RozkładJazdyv2.Pages.Lines
             var letters = (await SQLServices.QueryAsync<Letter>(query)).GroupBy(p => p.IdOfName).Select(p => p.First()).ToList();
             return letters;
         }
-
-        protected override void OnNavigatedTo(NavigationEventArgs e)
-        {
-            var changeBusStopParametr = e.Parameter as ChangeBusStopParametr;
-            var busStop = changeBusStopParametr.BusStop;
-            if (_SelectedBusStop == null)
-            {
-                _SelectedBusStop = busStop;
-                _SelectedTrack = changeBusStopParametr.Track;
-                _IsRefreshingPageNeeded = true;
-            }
-            else if (busStop.Id != _SelectedBusStop.Id)
-            {
-                _SelectedBusStop = busStop;
-                _SelectedTrack = changeBusStopParametr.Track;
-                _IsRefreshingPageNeeded = true;
-            }
-        }
         
         private void HourGridView_ContainerContentChanging(ListViewBase sender, ContainerContentChangingEventArgs args)
         {
@@ -218,5 +219,43 @@ namespace RozkładJazdyv2.Pages.Lines
             hour = int.Parse(splittedHour[0]);
             minute = int.Parse(splittedHour[1]);
         }
+
+        private void BusStopsComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var selectedItem = BusStopsComboBox.SelectedItem as LineViewBusStop;
+            if (selectedItem == null || selectedItem.BusStop.Id == _SelectedBusStop.Id)
+                return;
+            MainFrameHelper.GetMainFrame().Navigate(typeof(LineBusStopPage), new ChangeBusStopParametr()
+            {
+                BusStop = selectedItem.BusStop,
+                Track = _SelectedTrack
+            });
+        }
+
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            var changeBusStopParametr = e.Parameter as ChangeBusStopParametr;
+            var busStop = changeBusStopParametr.BusStop;
+            if (_SelectedBusStop == null)
+            {
+                _SelectedBusStop = busStop;
+                _SelectedTrack = changeBusStopParametr.Track;
+                _IsRefreshingPageNeeded = true;
+            }
+            else if (busStop.Id != _SelectedBusStop.Id)
+            {
+                bool isRefreshPage = false;
+                _SelectedBusStop = busStop;
+                if (_SelectedTrack.Id == changeBusStopParametr.Track.Id)
+                    isRefreshPage = true;
+                _SelectedTrack = changeBusStopParametr.Track;
+                _IsRefreshingPageNeeded = true;
+                if (isRefreshPage)
+                    RefreshPage();
+            }
+        }
+
+        private void RefreshPage()
+            => LineBusStopPage_LoadedAsync(this, null);
     }
 }
