@@ -34,6 +34,8 @@ namespace RozkładJazdyv2.Pages.Lines
         private static Schedule _SelectedSchedule => LinePage.ActualShowingLineParameters.SelectedSchedule;
         private static Track _SelectedTrack;
         private static bool _IsRefreshingPageNeeded;
+        private int[] _LastHourHours = new int[3] { 0, 0, 0 };
+        private object _LastHourItemSource;
 
         public LineBusStopPage()
         {
@@ -73,7 +75,7 @@ namespace RozkładJazdyv2.Pages.Lines
 
         private async Task UpdateHoursAsync()
         {
-            if(_SelectedBusStop.Hours == null)
+            if (_SelectedBusStop.Hours == null)
                 _SelectedBusStop.Hours = await GetBusStopHoursAsync(_SelectedBusStop);
             if (_SelectedBusStop.Hours.Count > 0)
                 await AddAllHoursToViewAsync(_SelectedBusStop.Hours);
@@ -82,18 +84,22 @@ namespace RozkładJazdyv2.Pages.Lines
 
         private void AddAdditionalInfoToView(BusStop busStop)
         {
-            if(_SelectedBusStop.IsLastStopOnTrack)
-                 AddLastStopInfo();
+            if (_SelectedBusStop.IsLastStopOnTrack)
+                AddLastStopInfo();
             AddTicketInfo();
         }
 
         private void AddLastStopInfo()
-            => AdditionalInfoListView.Items.Add(new AdditionalInfo() {
-                Info = "Wybrany przystanek jest ostatnim przystankiem na danej trasie. Prezentowane godziny są godzinami przyjazdu." });
+            => AdditionalInfoListView.Items.Add(new AdditionalInfo()
+            {
+                Info = "Wybrany przystanek jest ostatnim przystankiem na danej trasie. Prezentowane godziny są godzinami przyjazdu."
+            });
 
         private void AddTicketInfo()
-            => AdditionalInfoListView.Items.Add(new AdditionalInfo() {
-                Info = "Na linii obowiązuje wsiadanie pierwszymi drzwami. Proszę okazać kierowcy ważny bilet lub dokument uprawniający do przejazdu." });
+            => AdditionalInfoListView.Items.Add(new AdditionalInfo()
+            {
+                Info = "Na linii obowiązuje wsiadanie pierwszymi drzwami. Proszę okazać kierowcy ważny bilet lub dokument uprawniający do przejazdu."
+            });
 
         private async Task AddAllHoursToViewAsync(List<Hour> hours)
         {
@@ -108,6 +114,7 @@ namespace RozkładJazdyv2.Pages.Lines
                     };
                     await CoreApplication.MainView.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.High, () =>
                         DayTypeHoursListView.Items.Add(lineViewHour));
+                    _LastHourHours = new int[3] { 0, 0, 0 };
                 }
             });
         }
@@ -150,10 +157,10 @@ namespace RozkładJazdyv2.Pages.Lines
                 _IsRefreshingPageNeeded = true;
             }
         }
-
+        
         private void HourGridView_ContainerContentChanging(ListViewBase sender, ContainerContentChangingEventArgs args)
         {
-            var hourString = (string)args.Item;
+            var hourString = ((string)args.Item);
             var hourTextBlock = args.ItemContainer.ContentTemplateRoot as TextBlock;
             var hourItem = args.ItemContainer as GridViewItem;
             //due to bug we have to set default template
@@ -161,8 +168,55 @@ namespace RozkładJazdyv2.Pages.Lines
             hourItem.Background = new SolidColorBrush(Colors.Transparent);
             bool hasLetter = !Char.IsDigit(hourString.Last());
             if (hasLetter)
+            {
                 hourTextBlock.Foreground = new SolidColorBrush(Colors.Wheat);
+                hourString = hourString.Remove(hourString.Length - 1, 1);
+            }
+            AddBackgroudEffectToLHour(sender, hourString, hourItem, hourTextBlock);
+        }
 
+        private void AddBackgroudEffectToLHour(ListViewBase sender, string hourString, GridViewItem hourGrid, TextBlock hourTextBlock)
+        {
+            if (_LastHourItemSource != sender.ItemsSource)
+                _LastHourHours = new int[3] { 0, 0, 0 };
+            int hour = 0, minute = 0, checkHour = 0, checkMinute = 0;
+            bool isFirstHourToCheck = _LastHourHours[2] == 0, isCheckAvailable = _LastHourHours[2] <= 1;
+            SplitHourStringToHourAndMinute(hourString, ref hour, ref minute);
+            GetCheckHoursAndMinutes(isFirstHourToCheck, ref checkHour, ref checkMinute);
+            CheckIfBackgroundEffectIsAvailable(sender, isCheckAvailable, isFirstHourToCheck,
+                hour, checkHour, minute, checkMinute, hourTextBlock, hourGrid);
+        }
+
+        private void CheckIfBackgroundEffectIsAvailable(ListViewBase sender, bool isCheckAvailable, 
+            bool isFirstHourToCheck, int hour, int checkHour, int minute, 
+                int checkMinute, TextBlock hourTextBlock, GridViewItem hourGrid)
+        {
+            if (isCheckAvailable)
+                if (hour > checkHour || (hour == checkHour && minute >= checkMinute))
+                    AddEffectToLHour(sender, isFirstHourToCheck, hourTextBlock, hourGrid);
+        }
+
+        private void AddEffectToLHour(ListViewBase sender, bool isFirstHourToCheck, TextBlock hourTextBlock, 
+                                        GridViewItem hourGrid)
+        {
+            hourTextBlock.Foreground = new SolidColorBrush(Colors.White);
+            hourGrid.Background = new SolidColorBrush(isFirstHourToCheck
+                ? Color.FromArgb(100, 255, 0, 0) : Color.FromArgb(100, 255, 255, 0));
+            _LastHourHours = new int[3] { 0, 0, isFirstHourToCheck ? 1 : 2 };
+            _LastHourItemSource = sender.ItemsSource;
+        }
+
+        private void GetCheckHoursAndMinutes(bool isFirstHourToCheck, ref int checkHour, ref int checkMinute)
+        {
+            checkHour = isFirstHourToCheck ? DateTime.Now.Hour : _LastHourHours[0];
+            checkMinute = isFirstHourToCheck ? DateTime.Now.Minute : _LastHourHours[1];
+        }
+
+        private void SplitHourStringToHourAndMinute(string hourString, ref int hour, ref int minute)
+        {
+            var splittedHour = hourString.Split(":".ToArray(), StringSplitOptions.RemoveEmptyEntries);
+            hour = int.Parse(splittedHour[0]);
+            minute = int.Parse(splittedHour[1]);
         }
     }
 }
