@@ -69,14 +69,20 @@
                                     <StackPanel>
                                         <TextBlock>
                                                 <Run Foreground="LightSeaGreen"
-                                                     Text="Rozkład jazdy KZKGOP | UWP" />
-                                                <Run Text="&#x0a;Autor: Grzegorz Stanik&#x0a;Wersja: " />
-                                                <Run Foreground="Yellow" Text="{x:Bind APP_VERSION}"/>
+                                                     Text="Rozkład jazdy KZKGOP | UWP"
+                                                 /><Run Text="&#x0a;Autor: Grzegorz Stanik&#x0a;Wersja: " 
+                                                /><Run Foreground="Yellow" Text="{x:Bind APP_VERSION}"/>
                                         </TextBlock>
                                         <HyperlinkButton Content="Kontakt: grs4_98@o2.pl" 
                                                          Margin="0 -8"
                                                          Foreground="Red"
                                                          NavigateUri="mailto:grs4_98@o2.pl" />
+                                        <TextBlock>
+                                            <Run Foreground="Pink"
+                                                 Text="Podziękowania dla"
+                                            /><Run Foreground="DeepPink"
+                                                   Text=" Dominiki M." />
+                                        </TextBlock>
                                     </StackPanel>
                                 </Flyout>
                             </Button.Flyout>

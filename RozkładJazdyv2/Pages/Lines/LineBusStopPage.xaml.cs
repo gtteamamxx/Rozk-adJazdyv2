@@ -50,7 +50,6 @@ namespace RozkładJazdyv2.Pages.Lines
             if (_IsRefreshingPageNeeded)
             {
                 ClearListViewItems();
-                _BusStopsInTrack.Clear();
                 UpdateLineHeaderInfo();
                 LoadingProgressRing.IsActive = true;
                 await UpdateHoursAsync();
@@ -65,6 +64,7 @@ namespace RozkładJazdyv2.Pages.Lines
             DayTypeHoursListView.Items.Clear();
             LettersListView.Items.Clear();
             AdditionalInfoListView.Items.Clear();
+            _BusStopsInTrack.Clear();
         }
 
         private void UpdateLineHeaderInfo()

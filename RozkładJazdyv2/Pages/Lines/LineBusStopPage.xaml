@@ -47,7 +47,6 @@
                 <StackPanel Orientation="Horizontal">
                     <TextBlock VerticalAlignment="Center">Przystanek:</TextBlock>
                     <ComboBox Margin="10 0 0 0"
-                              Width="200"
                               Name="BusStopsComboBox"
                               ItemsSource="{x:Bind _BusStopsInTrack}"
                               SelectionChanged="BusStopsComboBox_SelectionChanged">
@@ -58,8 +57,6 @@
                         </ComboBox.ItemTemplate>
                     </ComboBox>
                 </StackPanel>
-
-
             </StackPanel>
         </Grid>
 
