@@ -47,15 +47,16 @@ namespace RozkładJazdyv2.Pages.Lines
 
         private async void LineBusStopPage_LoadedAsync(object sender, RoutedEventArgs e)
         {
+            await Task.Delay(100);
             if (_IsRefreshingPageNeeded)
             {
+                _IsRefreshingPageNeeded = false;
                 ClearListViewItems();
                 UpdateLineHeaderInfo();
                 LoadingProgressRing.IsActive = true;
                 await UpdateHoursAsync();
                 LoadingProgressRing.IsActive = false;
                 await UpdateLettersAsync();
-                _IsRefreshingPageNeeded = false;
             }
         }
 

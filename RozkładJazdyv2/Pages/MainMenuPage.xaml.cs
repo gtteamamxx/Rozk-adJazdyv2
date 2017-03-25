@@ -42,9 +42,6 @@ namespace RozkładJazdyv2.Pages
             this.Loaded += (s, e) => ChangeSizeOfButtons(this.ActualHeight, this.ActualWidth);
         }
 
-        private void MainMenu_SizeChanged(object sender, SizeChangedEventArgs e)
-            => ChangeSizeOfButtons(e.NewSize.Height, e.NewSize.Width);
-
         private void ChangeSizeOfButtons(double height, double width)
         {
             double size = ((width / _SizeMultiplier) + (height / _SizeMultiplier)) / 2;
@@ -59,9 +56,6 @@ namespace RozkładJazdyv2.Pages
                     textBlock.FontSize *= multiplier;
             }
         }
-
-        private void RegisterButtonHooks()
-            => ButtonListGridView.SelectionChanged += ButtonClicked;
 
         private async void ButtonClicked(object sender, SelectionChangedEventArgs e)
         {
@@ -98,12 +92,18 @@ namespace RozkładJazdyv2.Pages
         private void ButtonListGridViewContentChanged(ListViewBase sender, ContainerContentChangingEventArgs args)
         {
             var gridOfButton = ((Grid)args.ItemContainer.ContentTemplateRoot);
-            var isd = _ListOfGrid.FirstOrDefault(p => p == gridOfButton);
-            if (isd == null)
+            bool isGridInList = _ListOfGrid.FirstOrDefault(p => p == gridOfButton) != null;
+            if (!isGridInList)
                 _ListOfGrid.Add(gridOfButton);
             MainMenuButton buttonClass = ((MainMenuButton)args.Item);
             gridOfButton.Background = buttonClass.BackgroundColor;
         }
+
+        private void RegisterButtonHooks()
+            => ButtonListGridView.SelectionChanged += ButtonClicked;
+
+        private void MainMenu_SizeChanged(object sender, SizeChangedEventArgs e)
+            => ChangeSizeOfButtons(e.NewSize.Height, e.NewSize.Width);
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
             => ResetButtonSelected();
