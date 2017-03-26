@@ -22,6 +22,7 @@ namespace RozkładJazdyv2.Model.LinesPage
 
         private static List<Tuple<LinesViewPage.LinesType, GridView>> _LinesTypesGridView;
         private static ScrollViewer _LinesTypeScrollViewer;
+        private static int _LastAcceptedLineBits;
 
         public static void SetInstance(ScrollViewer linesScrollViewer)
         {
@@ -41,6 +42,7 @@ namespace RozkładJazdyv2.Model.LinesPage
                     return;
             }
             gridView.Items.Clear();
+            _LastAcceptedLineBits = acceptedLinesBit;
             AddLinesToGridView(ref gridView, acceptedLinesBit);
             CheckIfLineIsEmptyAndHideGridViewIfItIs(contentGrid);
         }
@@ -118,6 +120,8 @@ namespace RozkładJazdyv2.Model.LinesPage
         private static void LinesGridView_ContainerContentChanging(ListViewBase sender, ContainerContentChangingEventArgs args)
         {
             var gridOfLine = ((Grid)args.ItemContainer.ContentTemplateRoot);
+            if ((_LastAcceptedLineBits & Line.FAVOURITE_BIT) == Line.FAVOURITE_BIT)
+                return;
             Line lineClass = ((Line)args.Item);
             lineClass.GridObjectInLinesList = gridOfLine;
         }

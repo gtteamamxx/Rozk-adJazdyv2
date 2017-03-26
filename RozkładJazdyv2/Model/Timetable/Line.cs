@@ -37,11 +37,11 @@ namespace RozkładJazdyv2.Model
         public List<Schedule> Schedules { get; set; }
 
         [Ignore]
-        public string EditedName { get => (this.Type & TRAM_BIT) == TRAM_BIT ? $"{this.Name}T" : this.Name; }
+        public string EditedName => (this.Type & TRAM_BIT) == TRAM_BIT ? $"{this.Name}T" : this.Name;
         [Ignore]
         public Grid GridObjectInLinesList { get; set; }
         [Ignore]
-        public string FavouriteText { get => IsLineFavourite ? "\xE00B" : "\x0000"; }
+        public string FavouriteText => IsLineFavourite ? "\xE00B" : "\x0000";
 
         public bool IsLineFavourite
         {
@@ -60,10 +60,14 @@ namespace RozkładJazdyv2.Model
                     this.Type |= FAVOURITE_BIT;
                     AddLineToFavouriteAsync();
                 }
-                Pages.Lines.LinesViewPage.RefreshLineGridView(Pages.Lines.LinesViewPage.LinesType.Favourites, FAVOURITE_BIT);
                 IsLineFavourite = value;
+                Pages.Lines.LinesViewPage.RefreshLineGridView(Pages.Lines.LinesViewPage.LinesType.Favourites, FAVOURITE_BIT);
+                RefreshLineGridInLinesList();
             }
         }
+
+        private void RefreshLineGridInLinesList()
+            => (this.GridObjectInLinesList.Children[1] as TextBlock).Text = this.FavouriteText; // how to force update bindings?
 
         private async void RemoveLineFromFavouritesAsync()
             => await SQLServices.ExecuteFavouriteAsync($"DELETE FROM Line WHERE Name = '{this.EditedName}';");
