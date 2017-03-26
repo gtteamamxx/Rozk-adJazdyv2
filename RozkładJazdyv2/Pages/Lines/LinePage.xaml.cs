@@ -31,13 +31,13 @@ namespace RozkładJazdyv2.Pages.Lines
         public static ChangeLineParameter ActualShowingLineParameters;
         private static Line _SelectedLine
         {
-            get { return ActualShowingLineParameters.Line; }
-            set { ActualShowingLineParameters.Line = value; }
+            get => ActualShowingLineParameters.Line;
+            set => ActualShowingLineParameters.Line = value;
         }
         private static Schedule _SelectedSchedule
         {
-            get{ return ActualShowingLineParameters.SelectedSchedule; }
-            set { ActualShowingLineParameters.SelectedSchedule = value; }
+            get => ActualShowingLineParameters.SelectedSchedule;
+            set => ActualShowingLineParameters.SelectedSchedule = value;
         }
         private static bool _IsRefreshingPageNeeded;
         private static bool _IsOppositeBusStopSelecting;
@@ -65,7 +65,7 @@ namespace RozkładJazdyv2.Pages.Lines
 
         private void LineScheduleNameButton_Click(object sender, RoutedEventArgs e)
         {
-            if(_SelectedLine.Schedules.Count() > 1)
+            if (_SelectedLine.Schedules.Count() > 1)
                 _LastOpenedFlyout = FlyoutHelper.ShowFlyOutWithLSchedulesAtButtonInLinePage(sender as Button, _SelectedLine, ScheduleClickedAsync);
         }
 
@@ -79,7 +79,7 @@ namespace RozkładJazdyv2.Pages.Lines
 
         private void HideFlyOutOnScheduleButton()
         {
-            if(_LastOpenedFlyout != null)
+            if (_LastOpenedFlyout != null)
             {
                 _LastOpenedFlyout.Hide();
                 _LastOpenedFlyout = null;
@@ -116,6 +116,23 @@ namespace RozkładJazdyv2.Pages.Lines
             _SelectedSchedule = await GetTracksBusStopsAsync(_SelectedSchedule);
         }
 
+        private void UpdateLineHeaderTexts()
+        {
+            LineScheduleNameTextBlock.Text = _SelectedSchedule.Name;
+            LineNumberTextBlock.Text = _SelectedLine.EditedName;
+            LineLogoTextBlock.Text = _SelectedLine.GetLineLogoByType();
+            UpdateFavouriteText();
+        }
+
+        private void UpdateFavouriteText()
+        {
+            LineFavouriteButtonContentTextBlock.Text = _SelectedLine.IsLineFavourite ?
+                "Usuń linię z ulubionych" : "Dodaj linię do ulubionych";
+            LineFavouriteHeartSignTextBlock.Text = _SelectedLine.IsLineFavourite ? "\xE00C" : "\xE00B";
+            LineFavouriteHeartSignTextBlock.Foreground = new SolidColorBrush(_SelectedLine.IsLineFavourite ?
+                Colors.GreenYellow : Colors.White);
+        }
+
         private async Task<Schedule> GetTracksBusStopsAsync(Schedule schedule)
         {
             string query = string.Empty;
@@ -134,9 +151,11 @@ namespace RozkładJazdyv2.Pages.Lines
 
         private async Task<Schedule> GetScheduleTracksAsync(Schedule schedule)
         {
-            string query = $"SELECT * FROM Track WHERE IdOfSchedule = {schedule.Id};";
-            if(schedule.Tracks == null)
+            if (schedule.Tracks == null)
+            {
+                string query = $"SELECT * FROM Track WHERE IdOfSchedule = {schedule.Id};";
                 schedule.Tracks = await SQLServices.QueryTimetableAsync<Track>(query);
+            }
             return schedule;
         }
 
@@ -184,18 +203,6 @@ namespace RozkładJazdyv2.Pages.Lines
                 _LineSecondTrackBusStops.Add(editedBusStop);
         }
 
-        private void SetBusStopViewAttribute(ListViewBase sender, ContainerContentChangingEventArgs args)
-        {
-
-        }
-
-        private void UpdateLineHeaderTexts()
-        {
-            LineScheduleNameTextBlock.Text = _SelectedSchedule.Name;
-            LineNumberTextBlock.Text = _SelectedLine.EditedName;
-            LineLogoTextBlock.Text = _SelectedLine.GetLineLogoByType();
-        }
-
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
             var changeLineParameter = e.Parameter as ChangeLineParameter;
@@ -219,7 +226,7 @@ namespace RozkładJazdyv2.Pages.Lines
         private async void LineTrackListView_SelectionChangedAsync(object sender, SelectionChangedEventArgs e)
         {
             var listView = sender as ListView;
-            if(_IsOppositeBusStopSelecting)
+            if (_IsOppositeBusStopSelecting)
             {
                 listView.ScrollIntoView(listView.SelectedItem);
                 return;
@@ -227,7 +234,7 @@ namespace RozkładJazdyv2.Pages.Lines
             var selectedItem = (listView.SelectedItem as LineViewBusStop);
             if (listView.SelectedIndex == -1 || selectedItem == null)
                 return;
-            var selectedTrack = listView.Name.Contains("First") 
+            var selectedTrack = listView.Name.Contains("First")
                 ? _SelectedSchedule.Tracks[0] : _SelectedSchedule.Tracks[1];
             await Task.Delay(100);
             ChangePageToBusPage(selectedItem.BusStop, selectedTrack);
@@ -248,9 +255,9 @@ namespace RozkładJazdyv2.Pages.Lines
             if (trackId == 0)
                 return;
             var oppositeListView = _ListViewsList[trackId == 2 ? 0 : 1];
-            foreach(LineViewBusStop lineViewBusStop in oppositeListView.Items)
+            foreach (LineViewBusStop lineViewBusStop in oppositeListView.Items)
             {
-                if(selectedBusStop.Name == lineViewBusStop.BusStop.Name)
+                if (selectedBusStop.Name == lineViewBusStop.BusStop.Name)
                 {
                     _IsOppositeBusStopSelecting = true;
                     oppositeListView.SelectedItem = lineViewBusStop;
@@ -262,11 +269,9 @@ namespace RozkładJazdyv2.Pages.Lines
         private int GetTrackIdByBusStop(BusStop busStop)
         {
             int tracksCount = _SelectedSchedule.Tracks.Count();
-            for(int i = 1; i <= tracksCount; i++)
-            {
-                if (busStop.IdOfTrack == _SelectedSchedule.Tracks[i-1].Id)
+            for (int i = 1; i <= tracksCount; i++)
+                if (busStop.IdOfTrack == _SelectedSchedule.Tracks[i - 1].Id)
                     return i;
-            }
             return 0;
         }
 
@@ -282,7 +287,8 @@ namespace RozkładJazdyv2.Pages.Lines
 
         private void LineFavouriteButton_Click(object sender, RoutedEventArgs e)
         {
-
+            _SelectedLine.IsLineFavourite = !_SelectedLine.IsLineFavourite;
+            UpdateFavouriteText();
         }
     }
 }

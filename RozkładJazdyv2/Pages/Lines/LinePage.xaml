@@ -22,30 +22,43 @@
         <Grid Grid.Row="0"
               VerticalAlignment="Top"
               Margin="20">
+            
             <StackPanel>
-                <StackPanel Orientation="Horizontal">
-                    <TextBlock FontFamily="Segoe MDL2 Assets"
-                               FontSize="30"
-                               Text="&#xEB4D;"
-                               Margin="0 5"
-                               Foreground="#FF959DD3"
-                               VerticalAlignment="Center"
-                               x:Name="LineLogoTextBlock"/>
-                    <TextBlock VerticalAlignment="Center"
-                               FontSize="30"
-                               Foreground="White"
-                               Text="722"
-                               Margin="10 0 0 0"
-                               x:Name="LineNumberTextBlock"/>
-                    <Button Margin="10 0 0 0"
-                            Background="#FF131368"
+                <Grid>
+                    <StackPanel Orientation="Horizontal">
+                        <TextBlock FontFamily="Segoe MDL2 Assets"
+                                   FontSize="30"
+                                   Text="&#xEB4D;"
+                                   Margin="0 5"
+                                   Foreground="#FF959DD3"
+                                   VerticalAlignment="Center"
+                                   x:Name="LineLogoTextBlock"/>
+                        <TextBlock VerticalAlignment="Center"
+                                   FontSize="30"
+                                   Foreground="White"
+                                   Text="722"
+                                   Margin="10 0 0 0"
+                                   x:Name="LineNumberTextBlock"/>
+                    </StackPanel>
+
+                    <Button HorizontalAlignment="Right"
                             Height="40"
                             Name="LineFavouriteButton"
                             Click="LineFavouriteButton_Click">
-                            Dodaj do ulubionych
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock VerticalAlignment="Center"
+                                       FontFamily="Segoe MDL2 Assets"
+                                       Text="&#xE00B;"
+                                       Foreground="Red"
+                                       Name="LineFavouriteHeartSignTextBlock"
+                                       FontSize="21"/>
+                            <TextBlock VerticalAlignment="Center"
+                                       Margin="10 0 0 0"
+                                       Text="Dodaj do ulubionych"
+                                       Name="LineFavouriteButtonContentTextBlock" />
+                        </StackPanel>
                     </Button>
-                </StackPanel>
-
+                </Grid>
                 <Button Margin="0 5 0 0"
                         Name="LineScheduleNameButton"
                         Click="LineScheduleNameButton_Click">

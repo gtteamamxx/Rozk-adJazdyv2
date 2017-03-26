@@ -27,18 +27,32 @@ namespace RozkładJazdyv2.Pages.Lines
     /// </summary>
     public sealed partial class LinesViewPage : Page
     {
+        public enum LinesType
+        {
+            Favourites,
+            Trams,
+            Busses,
+            Fast_Busses,
+            Night_Busses,
+            Mini_Busses,
+            Others
+        }
+
         private ObservableCollection<Grid> _SearchLinesGrids;
-        private List<GridView> _ClickedGridViews;
+        private static List<Tuple<LinesType, GridView>> _LinesGridViews;
         private bool _IsPageCached;
 
         public LinesViewPage()
         {
             this.InitializeComponent();
-            _ClickedGridViews = new List<GridView>();
+            _LinesGridViews = new List<Tuple<LinesType, GridView>>();
             _SearchLinesGrids = new ObservableCollection<Grid>();
             RegisterHooks();
             this.Loaded += LinesViewPage_Loaded;
         }
+
+        public static void RefreshLineGridView(LinesType type, int acceptedLinesSumBit)
+            => Model.LinesPage.LinesViewManager.RefreshGridView(_LinesGridViews.First(p => p.Item1 == type).Item2, acceptedLinesSumBit);
 
         private void RegisterHooks()
             => SearchLineAutoSuggestBox.SuggestionChosen += SearchLineAutoSuggestBox_SuggestionChosenAsync;
@@ -66,14 +80,15 @@ namespace RozkładJazdyv2.Pages.Lines
             _IsPageCached = true;
             Model.LinesPage.LinesViewManager.SetInstance(LinesScrollViewer);
             int busBits = GetBusBitsWithoutFastBus();
-            await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync("Ulubione", Line.FAVOURITE_BIT, this, LineSelectionChangedAsync);
-            await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync("Tramwaje", Line.TRAM_BITS, this, LineSelectionChangedAsync);
+            await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync(LinesType.Favourites, "Ulubione", Line.FAVOURITE_BIT, this, LineSelectionChangedAsync);
+            await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync(LinesType.Trams, "Tramwaje", Line.TRAM_BITS, this, LineSelectionChangedAsync);
             await Task.Delay(100);
-            await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync("Autobusy", busBits, this, LineSelectionChangedAsync);
-            await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync("Autobusy przyśpieszone", Line.FAST_BUS_BIT, this, LineSelectionChangedAsync);
-            await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync("Nocne", Line.NIGHT_BUS_BIT, this, LineSelectionChangedAsync);
-            await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync("Minibusy", Line.MINI_BIT, this, LineSelectionChangedAsync);
-            await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync("Inne", Line.AIRPORT_BIT, this, LineSelectionChangedAsync);
+            await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync(LinesType.Busses, "Autobusy", busBits, this, LineSelectionChangedAsync);
+            await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync(LinesType.Fast_Busses, "Autobusy przyśpieszone", Line.FAST_BUS_BIT, this, LineSelectionChangedAsync);
+            await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync(LinesType.Night_Busses, "Nocne", Line.NIGHT_BUS_BIT, this, LineSelectionChangedAsync);
+            await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync(LinesType.Mini_Busses, "Minibusy", Line.MINI_BIT, this, LineSelectionChangedAsync);
+            await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync(LinesType.Others, "Inne", Line.AIRPORT_BIT, this, LineSelectionChangedAsync);
+            _LinesGridViews = Model.LinesPage.LinesViewManager.GetLineTypesGridViewList();
         }
 
         private int GetBusBitsWithoutFastBus()
@@ -82,7 +97,7 @@ namespace RozkładJazdyv2.Pages.Lines
             busBits &= ~(Line.FAST_BUS_BIT);
             return busBits;
         }
-        
+
         private async Task ShowLinePageAsync(ChangeLineParameter changeLineParameter)
         {
             await Task.Delay(100);
@@ -94,7 +109,6 @@ namespace RozkładJazdyv2.Pages.Lines
             var gridView = sender as GridView;
             if (gridView.SelectedIndex == -1)
                 return;
-            AddGridViewToCacheList(gridView);
             var line = gridView.SelectedItem as Line;
             line = await FillLineSchedulesAsync(line);
             await ShowLinePageBySchedulesAsync(line, line.GridObjectInLinesList);
@@ -105,7 +119,7 @@ namespace RozkładJazdyv2.Pages.Lines
         {
             if (line.Schedules.Count() == 1)
             {
-                if (line.Schedules[0].Name.Contains("zawie")) //lien is stopped
+                if (line.Schedules[0].Name.Contains("zawie")) //line is stopped
                     Model.LinesPage.FlyoutHelper.ShowFlyOutLineIsStoppedAtLineGrid(lineBackgroundGrid, line);
                 else
                     await ShowLinePageAsync(new ChangeLineParameter() { Line = line, SelectedSchedule = line.Schedules.ElementAt(0) });
@@ -137,14 +151,8 @@ namespace RozkładJazdyv2.Pages.Lines
 
         private void ResetClickedGrids()
         {
-            foreach(var gridView in _ClickedGridViews)
-                gridView.SelectedIndex = -1;
-        }
-
-        private void AddGridViewToCacheList(GridView gridView)
-        {
-            if (_ClickedGridViews.FirstOrDefault(p => p == gridView) == null)
-                _ClickedGridViews.Add(gridView);
+            foreach (var tuple in _LinesGridViews)
+                tuple.Item2.SelectedIndex = -1;
         }
 
         private void SearchLineAutoSuggestBox_TextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)

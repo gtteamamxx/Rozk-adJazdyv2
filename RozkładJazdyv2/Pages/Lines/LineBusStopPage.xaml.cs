@@ -159,7 +159,7 @@ namespace RozkładJazdyv2.Pages.Lines
             var letters = (await SQLServices.QueryTimetableAsync<Letter>(query)).GroupBy(p => p.IdOfName).Select(p => p.First()).ToList();
             return letters;
         }
-        
+
         private void HourGridView_ContainerContentChanging(ListViewBase sender, ContainerContentChangingEventArgs args)
         {
             var hourString = ((string)args.Item);
@@ -189,8 +189,8 @@ namespace RozkładJazdyv2.Pages.Lines
                 hour, checkHour, minute, checkMinute, hourTextBlock, hourGrid);
         }
 
-        private void CheckIfBackgroundEffectIsAvailable(ListViewBase sender, bool isCheckAvailable, 
-            bool isFirstHourToCheck, int hour, int checkHour, int minute, 
+        private void CheckIfBackgroundEffectIsAvailable(ListViewBase sender, bool isCheckAvailable,
+            bool isFirstHourToCheck, int hour, int checkHour, int minute,
                 int checkMinute, TextBlock hourTextBlock, GridViewItem hourGrid)
         {
             if (isCheckAvailable)
@@ -198,7 +198,7 @@ namespace RozkładJazdyv2.Pages.Lines
                     AddEffectToLHour(sender, isFirstHourToCheck, hourTextBlock, hourGrid);
         }
 
-        private void AddEffectToLHour(ListViewBase sender, bool isFirstHourToCheck, TextBlock hourTextBlock, 
+        private void AddEffectToLHour(ListViewBase sender, bool isFirstHourToCheck, TextBlock hourTextBlock,
                                         GridViewItem hourGrid)
         {
             hourTextBlock.Foreground = new SolidColorBrush(Colors.White);

@@ -122,7 +122,7 @@
     <Compile Include="Model\Timetable\Names\LetterName.cs" />
     <Compile Include="Model\Timetable\Line.cs" />
     <Compile Include="Model\Extensions\ListExtension.cs" />
-    <Compile Include="Model\MainFrameHelper.cs" />
+    <Compile Include="Pages\MainFrameHelper.cs" />
     <Compile Include="Model\Timetable\Schedule.cs" />
     <Compile Include="Model\Timetable\SQLiteStatus.cs" />
     <Compile Include="Model\SQL\SQLServices.cs" />

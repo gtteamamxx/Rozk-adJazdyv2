@@ -37,12 +37,39 @@ namespace RozkładJazdyv2.Model
         public List<Schedule> Schedules { get; set; }
 
         [Ignore]
-        public string EditedName { get { return (this.Type & TRAM_BIT) == TRAM_BIT ? $"{this.Name}T" : this.Name; } }
+        public string EditedName { get => (this.Type & TRAM_BIT) == TRAM_BIT ? $"{this.Name}T" : this.Name; }
         [Ignore]
         public Grid GridObjectInLinesList { get; set; }
+        [Ignore]
+        public string FavouriteText { get => IsLineFavourite ? "\xE00B" : "\x0000"; }
 
-        public override string ToString()
-            => this.EditedName;
+        public bool IsLineFavourite
+        {
+            get => (this.Type & FAVOURITE_BIT) == FAVOURITE_BIT;
+            set
+            {
+                if ((!value && !IsLineFavourite) || (value && IsLineFavourite))
+                    return;
+                if (!value)
+                {
+                    this.Type &= ~(FAVOURITE_BIT);
+                    RemoveLineFromFavouritesAsync();
+                }
+                else
+                {
+                    this.Type |= FAVOURITE_BIT;
+                    AddLineToFavouriteAsync();
+                }
+                Pages.Lines.LinesViewPage.RefreshLineGridView(Pages.Lines.LinesViewPage.LinesType.Favourites, FAVOURITE_BIT);
+                IsLineFavourite = value;
+            }
+        }
+
+        private async void RemoveLineFromFavouritesAsync()
+            => await SQLServices.ExecuteFavouriteAsync($"DELETE FROM Line WHERE Name = '{this.EditedName}';");
+
+        private async void AddLineToFavouriteAsync()
+            => await SQLServices.ExecuteFavouriteAsync($"INSERT INTO Line(Id, Name) VALUES(NULL,'{this.EditedName}');");
 
         public string GetLineLogoByType()
         {

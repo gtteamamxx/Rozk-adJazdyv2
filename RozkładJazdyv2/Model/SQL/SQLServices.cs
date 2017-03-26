@@ -32,12 +32,13 @@ namespace RozkładJazdyv2.Model
         public static void InitSQL()
         {
             RenameDownloadedSqlFile();
+            CreateFavouriteDatabaseIfNotExist();
             _SQLTimetableConnection = new SQLiteAsyncConnection(new Func<SQLiteConnectionWithLock>(
                    () => new SQLiteConnectionWithLock(new SQLitePlatformWinRT(),
-                       new SQLiteConnectionString(SQLFilePath, storeDateTimeAsTicks: false))));
+                       new SQLiteConnectionString(SQLFilePath, false))));
             _SQLTimetableFavouriteConnection = new SQLiteAsyncConnection(new Func<SQLiteConnectionWithLock>(
                    () => new SQLiteConnectionWithLock(new SQLitePlatformWinRT(),
-                       new SQLiteConnectionString(_SQLFavouriteFilePath, storeDateTimeAsTicks: false))));
+                       new SQLiteConnectionString(_SQLFavouriteFilePath, false))));
         }
 
         private static void RenameDownloadedSqlFile()
@@ -49,16 +50,34 @@ namespace RozkładJazdyv2.Model
                 return;
             if (!IsValidTimetableDatabase(tempConnection))
                 return;
-            if (IsTimetableDatabaseFileExist())
+            if (IsDatabaseFileExist(SQLFilePath))
                 DeleteFile(SQLFilePath);
             RenameTimetableTempFileToMainTimetableFile();
         }
 
+        private static void CreateFavouriteDatabaseIfNotExist()
+        {
+            using (SQLiteConnection favSqlConnection = new SQLiteConnection(new SQLitePlatformWinRT(), _SQLFavouriteFilePath))
+            {
+                if(!IsValidTimetableDatabase(favSqlConnection))
+                    CreateFavouriteDatabase(favSqlConnection);
+                favSqlConnection.Close();
+            }
+        }
+
+        private static void CreateFavouriteDatabase(SQLiteConnection favSqlConnection)
+        {
+            favSqlConnection.CreateTable<Line>();
+            favSqlConnection.CreateTable<BusStop>();
+            favSqlConnection.CreateTable<SQLiteStatus>();
+            favSqlConnection.Insert(new SQLiteStatus() { Status = SQLiteStatus.LoadStatus.Succes });
+        }
+
         public static bool IsValidTimetableDatabase(SQLiteConnection sqlConnection = null)
         {
-            if(sqlConnection == null)
+            if (sqlConnection == null)
                 sqlConnection = new SQLiteConnection(new SQLitePlatformWinRT(), SQLFilePath);
-            if (!IsTimetableDatabaseFileExist())
+            if (!IsDatabaseFileExist(sqlConnection.DatabasePath))
                 return false;
             string timetableExistString = string.Empty;
             if (string.IsNullOrEmpty((timetableExistString = sqlConnection.ExecuteScalar<string>(
@@ -84,7 +103,7 @@ namespace RozkładJazdyv2.Model
                 bool isFileRemoved = DeleteFile(SQLTempFilePath);
                 if (!isFileRemoved)
                     return false;
-            } 
+            }
             SQLiteAsyncConnection tempSqlConnection = new SQLiteAsyncConnection(new Func<SQLiteConnectionWithLock>(
                 () => new SQLiteConnectionWithLock(
                     new SQLitePlatformWinRT(),
@@ -228,12 +247,25 @@ namespace RozkładJazdyv2.Model
                 InvokeOnSqlLoadingChanged(5, _LOADING_STEPS);
                 Timetable.Instance.Lines = await _SQLTimetableConnection.Table<Line>().ToListAsync();
                 InvokeOnSqlLoadingChanged(6, _LOADING_STEPS);
+                await UpdateFavourites();
                 Timetable.Instance.Letters = new List<Letter>();
                 return true;
-            }   
+            }
             catch
             {
                 return false;
+            }
+        }
+
+        private static async Task UpdateFavourites()
+        {
+            var favLines = await _SQLTimetableFavouriteConnection.Table<Line>().ToListAsync();
+            foreach (var favLine in favLines)
+            {
+                var lineToUpdate = Timetable.Instance.Lines.FirstOrDefault(p => p.EditedName == favLine.Name);
+                if (lineToUpdate == null)
+                    continue;
+                lineToUpdate.Type |= Line.FAVOURITE_BIT;
             }
         }
 
@@ -247,16 +279,19 @@ namespace RozkładJazdyv2.Model
             => await _SQLTimetableConnection.ExecuteScalarAsync<T>(query, args);
 
         public static async Task<List<T>> QueryFavouriteAsync<T>(string query, params object[] args) where T : class
-            => await _SQLTimetableConnection.QueryAsync<T>(query, args);
+            => await _SQLTimetableFavouriteConnection.QueryAsync<T>(query, args);
 
         public static async Task ExecuteFavouriteAsync(string query, params object[] args)
-            => await _SQLTimetableConnection.ExecuteAsync(query, args);
+            => await _SQLTimetableFavouriteConnection.ExecuteAsync(query, args);
 
         public static async Task<T> ExecuteFavouriteScalarAsync<T>(string query, params object[] args) where T : class
-            => await _SQLTimetableConnection.ExecuteScalarAsync<T>(query, args);
+            => await _SQLTimetableFavouriteConnection.ExecuteScalarAsync<T>(query, args);
 
-        private static bool IsTimetableDatabaseFileExist()
-            => File.Exists(SQLFilePath);
+        public static async Task InsertFavouriteAsync<T>(T item) where T : class
+            => await _SQLTimetableFavouriteConnection.InsertAsync(item);
+
+        private static bool IsDatabaseFileExist(string path)
+            => File.Exists(path);
 
         private static bool IsTempTimetableDatabaseExist()
             => File.Exists(SQLTempFilePath);

@@ -17,6 +17,12 @@
                            VerticalAlignment="Center"
                            Foreground="White"
                            Text="{x:Bind EditedName}"/>
+                <TextBlock HorizontalAlignment="Right"
+                           VerticalAlignment="Top"
+                           Foreground="GreenYellow"
+                           FontFamily="Segoe MDL2 Assets"
+                           FontSize="10"
+                           Text="{Binding FavouriteText}" />
             </Grid>
         </DataTemplate>
 
