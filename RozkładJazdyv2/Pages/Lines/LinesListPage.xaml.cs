@@ -177,6 +177,18 @@ namespace RozkładJazdyv2.Pages.Lines
                     Foreground = new SolidColorBrush(Colors.White),
                     Text = p.EditedName
                 });
+                if(p.IsLineFavourite)
+                {
+                    searchLineGrid.Children.Add(new TextBlock()
+                    {
+                        HorizontalAlignment = HorizontalAlignment.Right,
+                        VerticalAlignment = VerticalAlignment.Top,
+                        Foreground = new SolidColorBrush(Colors.Yellow),
+                        FontSize = 10,
+                        FontFamily = new FontFamily("Segoe MDL2 Assets"),
+                        Text = "\xE00B"
+                    });
+                }
                 _SearchLinesGrids.Add(searchLineGrid);
             });
         }
