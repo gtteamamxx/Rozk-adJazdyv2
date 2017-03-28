@@ -1,4 +1,5 @@
-﻿using SQLite.Net.Attributes;
+﻿using RozkładJazdyv2.Pages.Lines;
+using SQLite.Net.Attributes;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,13 +30,14 @@ namespace RozkładJazdyv2.Model
         [PrimaryKey]
         [Indexed]
         public int Id { get; set; }
-        [Ignore]
-        public string Url { get; set; }
+
         public string Name { get; set; }
         public int Type { get; set; }
+
+        [Ignore]
+        public string Url { get; set; }
         [Ignore]
         public List<Schedule> Schedules { get; set; }
-
         [Ignore]
         public string EditedName => (this.Type & TRAM_BIT) == TRAM_BIT ? $"{this.Name}T" : this.Name;
         [Ignore]
@@ -43,6 +45,7 @@ namespace RozkładJazdyv2.Model
         [Ignore]
         public string FavouriteText => IsLineFavourite ? "\xE00B" : "\x0000";
 
+        #region Class methods
         public bool IsLineFavourite
         {
             get => (this.Type & FAVOURITE_BIT) == FAVOURITE_BIT;
@@ -50,6 +53,7 @@ namespace RozkładJazdyv2.Model
             {
                 if ((!value && !IsLineFavourite) || (value && IsLineFavourite))
                     return;
+
                 if (!value)
                 {
                     this.Type &= ~(FAVOURITE_BIT);
@@ -60,20 +64,13 @@ namespace RozkładJazdyv2.Model
                     this.Type |= FAVOURITE_BIT;
                     AddLineToFavouriteAsync();
                 }
+
                 IsLineFavourite = value;
-                Pages.Lines.LinesViewPage.RefreshLineGridView(Pages.Lines.LinesViewPage.LinesType.Favourites, FAVOURITE_BIT);
+
+                LinesViewPage.RefreshLineGridView(Pages.Lines.LinesViewPage.LinesType.Favourites, FAVOURITE_BIT);
                 RefreshLineGridInLinesList();
             }
         }
-
-        private void RefreshLineGridInLinesList()
-            => (this.GridObjectInLinesList.Children[1] as TextBlock).Text = this.FavouriteText; // how to force update bindings?
-
-        private async void RemoveLineFromFavouritesAsync()
-            => await SQLServices.ExecuteFavouriteAsync($"DELETE FROM Line WHERE Name = '{this.EditedName}';");
-
-        private async void AddLineToFavouriteAsync()
-            => await SQLServices.ExecuteFavouriteAsync($"INSERT INTO Line(Id, Name) VALUES(NULL,'{this.EditedName}');");
 
         public string GetLineLogoByType()
         {
@@ -87,5 +84,16 @@ namespace RozkładJazdyv2.Model
                 return "\xE7C0";
             return "\xE806";
         }
+
+        private void RefreshLineGridInLinesList()
+            => (this.GridObjectInLinesList.Children[1] as TextBlock).Text = this.FavouriteText; // how to force update bindings?
+
+        private async void RemoveLineFromFavouritesAsync()
+            => await SQLServices.ExecuteFavouriteAsync($"DELETE FROM Line WHERE Name = '{this.EditedName}';");
+
+        private async void AddLineToFavouriteAsync()
+            => await SQLServices.ExecuteFavouriteAsync($"INSERT INTO Line(Id, Name) VALUES(NULL,'{this.EditedName}');");
+
+        #endregion
     }
 }

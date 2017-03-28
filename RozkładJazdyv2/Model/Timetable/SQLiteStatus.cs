@@ -14,6 +14,7 @@ namespace RozkładJazdyv2.Model
             Failed = 0,
             Succes
         }
+
         [PrimaryKey]
         [Unique]
         public LoadStatus Status { get; set; }

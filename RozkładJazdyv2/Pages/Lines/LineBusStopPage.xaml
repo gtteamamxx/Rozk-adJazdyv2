@@ -11,21 +11,27 @@
     mc:Ignorable="d">
 
     <Grid Background="Black">
+        
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition />
         </Grid.RowDefinitions>
+        
         <Grid Grid.Row="0"
               VerticalAlignment="Top"
               Margin="20">
+            
             <StackPanel>
+                
                 <StackPanel Orientation="Horizontal">
+                    
                     <TextBlock FontFamily="Segoe MDL2 Assets"
                                FontSize="30"
                                Text="&#xEB4D;"
                                Margin="0 5"
                                Foreground="#FF959DD3"
                                x:Name="LineLogoTextBlock"/>
+                    
                     <TextBlock VerticalAlignment="Center"
                                FontSize="30"
                                Foreground="White"
@@ -34,44 +40,57 @@
                                RelativePanel.RightOf="LineLogoTextBlock"
                                x:Name="LineNumberTextBlock"/>
                 </StackPanel>
+                
                 <TextBlock TextWrapping="Wrap">
                         <Run Text="Rozkład: "
                         /><Run x:Name="LineScheduleNameTextBlock"
                                FontWeight="Bold"/>
                 </TextBlock>
+                
                 <TextBlock TextWrapping="Wrap">
                     <Run Text="Kierunek: " 
                     /><Run x:Name="LineTrackNameTextBlock"
                            FontWeight="Bold"/>
                 </TextBlock>
+                
                 <StackPanel Orientation="Horizontal">
                     <TextBlock VerticalAlignment="Center">Przystanek:</TextBlock>
+                    
                     <ComboBox Margin="10 0 0 0"
                               Name="BusStopsComboBox"
                               ItemsSource="{x:Bind _BusStopsInTrack}"
                               SelectionChanged="BusStopsComboBox_SelectionChanged">
+                        
                         <ComboBox.ItemTemplate>
                             <DataTemplate x:DataType="local:LineViewBusStop">
                                 <lines:BusStopUserControl DataContext="{Binding}" />
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
+                        
                     </ComboBox>
+                    
                 </StackPanel>
+                
             </StackPanel>
         </Grid>
 
         <Grid Grid.Row="1">
             <ScrollViewer VerticalScrollBarVisibility="Auto">
                 <Grid Margin="10">
+                    
                    <ProgressRing Width="50"
                                  Height="50"
                                  Name="LoadingProgressRing"
                                  IsActive="True"/>
+                    
                     <StackPanel>
+                        
                         <ListView Name="DayTypeHoursListView"
                                   SelectionMode="None">
+                            
                             <ListView.ItemTemplate>
                                 <DataTemplate x:DataType="local:LineViewHour">
+                                    
                                     <StackPanel>
                                         <TextBlock Text="{x:Bind Name}"
                                                    Foreground="#FF9EF08C"
@@ -81,12 +100,16 @@
                                                   SelectionMode="None">
                                         </GridView>
                                     </StackPanel>
+                                    
                                 </DataTemplate>
                             </ListView.ItemTemplate>
+                            
                         </ListView>
+                        
                         <ListView Name="LettersListView" 
                                   Margin="0 10 0 0"
                                   SelectionMode="None">
+                            
                             <ListView.ItemTemplate>
                                 <DataTemplate x:DataType="local2:Letter">
                                     <Grid>
@@ -96,10 +119,13 @@
                                     </Grid>
                                 </DataTemplate>
                             </ListView.ItemTemplate>
+                            
                         </ListView>
+                        
                         <ListView Name="AdditionalInfoListView"
                                   Margin="0 10 0 0"
                                   SelectionMode="None">
+                            
                             <ListView.ItemTemplate>
                                 <DataTemplate x:DataType="local:AdditionalInfo">
                                     <Grid>
@@ -109,7 +135,9 @@
                                     </Grid>
                                 </DataTemplate>
                             </ListView.ItemTemplate>
+                            
                         </ListView>
+                        
                     </StackPanel>
                 </Grid>
             </ScrollViewer>

@@ -13,10 +13,12 @@
             <Grid Width="50"
                   Height="50"
                   Background="#373A45">
+                
                 <TextBlock HorizontalAlignment="Center"
                            VerticalAlignment="Center"
                            Foreground="White"
                            Text="{x:Bind EditedName}"/>
+                
                 <TextBlock HorizontalAlignment="Right"
                            VerticalAlignment="Top"
                            Foreground="GreenYellow"
@@ -31,9 +33,11 @@
                            HorizontalAlignment="Center"
                            VerticalAlignment="Center"/>
         </ItemsPanelTemplate>
+        
     </Page.Resources>
     
     <Grid Background="Black">
+        
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition />
@@ -52,20 +56,26 @@
                     VerticalAlignment="Center"
                     Grid.RowSpan="2"
                     Name="LoadingStackPanel">
+            
             <ProgressRing Width="50"
                           Height="50"
                           IsActive="True"
                           HorizontalAlignment="Center"
                           Canvas.ZIndex="10" />
+            
             <TextBlock Margin="0 10 0 0"
                        Name="LoadingTextBlock"
                        Text="Wczytywanie linii..." />
         </StackPanel>
         
         <Grid Grid.Row="1">
+            
             <ScrollViewer Name="LinesScrollViewer">
-                <StackPanel></StackPanel>
+                
+                <StackPanel />
+                
             </ScrollViewer>
+            
         </Grid>
     </Grid>
 </Page>

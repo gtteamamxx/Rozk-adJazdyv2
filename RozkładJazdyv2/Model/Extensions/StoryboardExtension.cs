@@ -15,6 +15,7 @@ namespace RozkładJazdyv2.Model
         {
             Storyboard.SetTarget(storyBoard, target);
             Storyboard.SetTargetProperty(storyBoard, new PropertyPath(property).Path);
+
             return storyBoard;
         }
     }

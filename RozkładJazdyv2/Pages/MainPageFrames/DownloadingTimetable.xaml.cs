@@ -53,20 +53,25 @@ namespace RozkładJazdyv2.Pages.MainPageFrames
             _MainPageInstance.ChangeTextInInfoStackPanel(MainPage.InfoStackPanelTextIndex.Downloading_Timetable, 
                                                             "Pobieranie rozkładu zakończone...");
             DownloadingInfoText.Text = "Pobieranie rozkładu zakończone. Trwa zapisywanie ...";
+
             _MainPageInstance.ChangePage(typeof(SavingTimetable), _MainPageInstance);
         }
 
         private void EventHelper_OnLineDownloaded(Line line, int linesCount)
         {
             double percent = ((line.Id + 1) * 100.0 / linesCount);
+
             DownloadingProgressBar.Value = percent;
+
             int busStopsCount = 0;
             if (line.Schedules[0].Name.Contains("zawiesz"))
                 busStopsCount = 0;
             else
                 busStopsCount = (line.Schedules.SelectMany(p => p.Tracks.SelectMany(f => f.BusStops))).Count();
+
             DownloadingInfoText.Text = string.Format("Pobieranie linii: {0} [{1:00}%]{2}Przystanków: {3}", line.Name, percent,
                                                         Environment.NewLine, busStopsCount);
+
             _MainPageInstance.ChangeTextInInfoStackPanel(MainPage.InfoStackPanelTextIndex.Downloading_Timetable, 
                                                             "Trwa pobieranie linii: {0} / {1}", line.Id + 1, linesCount);
         }
@@ -75,6 +80,7 @@ namespace RozkładJazdyv2.Pages.MainPageFrames
         {
             SetProgressRingVisiblity(Visibility.Collapsed);
             SetDownloadButtonVisibility(Visibility.Visible);
+
             DownloadingInfoText.Text = $"Wymagany jest rozkład offine.{Environment.NewLine}Czy chcesz go teraz pobrać?";
         }
 
@@ -82,15 +88,20 @@ namespace RozkładJazdyv2.Pages.MainPageFrames
         {
             SetDownloadInfoVisibility(Visibility.Visible);
             SetDownloadButtonVisibility(Visibility.Collapsed);
+
             DownloadingInfoText.Text = "Trwa pobieranie informacji o liniach...";
+
             _MainPageInstance.ChangeTextInInfoStackPanel(MainPage.InfoStackPanelTextIndex.Downloading_Timetable, "Pobieranie linii...");
+
             bool isTimetableDownloaded = await Timetable.DownloadTimetableFromInternetAsync();
             SetDownloadInfoVisibility(Visibility.Collapsed);
+
             if (!isTimetableDownloaded)
             {
                 _MainPageInstance.ChangeTextInInfoStackPanel(MainPage.InfoStackPanelTextIndex.Downloading_Timetable,
                                                                 "Błąd podczas pobierania linii...");
                 DownloadingInfoText.Text = $"Wystąpil problem podczas pobierania linii.{Environment.NewLine}Sprawdź połączenie z internetem i spróbuj ponownie.";
+
                 SetDownloadButtonVisibility(Visibility.Visible);
             }
         }

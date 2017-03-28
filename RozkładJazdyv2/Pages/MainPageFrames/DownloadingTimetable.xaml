@@ -9,6 +9,7 @@
     mc:Ignorable="d">
 
     <Grid Background="Transparent">
+        
         <ProgressRing Name="DownloadingProgressRing" 
                       HorizontalAlignment="Right"
                       VerticalAlignment="Bottom"
@@ -38,6 +39,7 @@
                     Name="DownloadButton"
                     HorizontalAlignment="Center"
                     Visibility="Collapsed"/>
+            
         </StackPanel>
     </Grid>
 </Page>

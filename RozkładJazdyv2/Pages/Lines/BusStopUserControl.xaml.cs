@@ -39,26 +39,52 @@ namespace RozkładJazdyv2.Pages.Lines
 
         private void UpdateViewLayout(LineViewBusStop lineViewBusStop)
         {
-            var busStop = lineViewBusStop.BusStop;
-            BusStopNameTextBlock.Text = lineViewBusStop.Name;
-            // due to bug, we have to set default style firstly
+            BusStop busStop = lineViewBusStop.BusStop;
+
+            UpdateBusStopName(lineViewBusStop);
+
+            SetDefaultStyle();
+            SetBusStopStyle(busStop);
+        }
+
+        private void SetBusStopStyle(BusStop busStop)
+        {
+            if (busStop.IsLastStopOnTrack)
+                SetLastStopOnTrackStyle();
+            else if (busStop.IsVariant)
+                SetIsVariantStyle();
+            else if (busStop.IsOnDemand)
+                SetIsOnDemandStyle();
+            else if (busStop.IsBusStopZone)
+                SetIsBusStopZoneStyle();
+        }
+
+        private void SetIsVariantStyle()
+        {
+            BusStopNameTextBlock.Foreground = new SolidColorBrush(Colors.DarkGray);
+            BusStopNameTextBlock.FontWeight = FontWeights.ExtraLight;
+        }
+
+        private void SetLastStopOnTrackStyle()
+        {
+            BusStopNameTextBlock.Foreground = new SolidColorBrush(Color.FromArgb(127, 255, 0, 0));
+            BusStopNameTextBlock.FontWeight = FontWeights.ExtraBold;
+        }
+
+        private void SetDefaultStyle()
+        {
             BusStopNameTextBlock.Foreground = new SolidColorBrush(Colors.White);
             BusStopNameTextBlock.FontWeight = FontWeights.Normal;
-            if (busStop.IsLastStopOnTrack)
-            {
-                BusStopNameTextBlock.Foreground = new SolidColorBrush(Color.FromArgb(127, 255, 0, 0));
-                BusStopNameTextBlock.FontWeight = FontWeights.ExtraBold;
-            }
-            else if (busStop.IsVariant)
-            {
-                BusStopNameTextBlock.Foreground = new SolidColorBrush(Colors.DarkGray);
-                BusStopNameTextBlock.FontWeight = FontWeights.ExtraLight;
-            }
-            else if (busStop.IsOnDemand)
-                BusStopNameTextBlock.Foreground = new SolidColorBrush(Color.FromArgb(255, 0, 120, 215));
-            else if (busStop.IsBusStopZone)
-                BusStopNameTextBlock.Foreground = new SolidColorBrush(Colors.Yellow);
         }
+
+        private void SetIsBusStopZoneStyle()
+            => BusStopNameTextBlock.Foreground = new SolidColorBrush(Colors.Yellow);
+
+        private void SetIsOnDemandStyle()
+            => BusStopNameTextBlock.Foreground = new SolidColorBrush(Color.FromArgb(255, 0, 120, 215));
+
+        private void UpdateBusStopName(LineViewBusStop lineViewBusStop)
+            => BusStopNameTextBlock.Text = lineViewBusStop.Name;
 
         private void LineViewBusStop_PointerEntered(object sender, PointerRoutedEventArgs e)
             => OnBusStopGridPointerEntered?.Invoke(sender, e);

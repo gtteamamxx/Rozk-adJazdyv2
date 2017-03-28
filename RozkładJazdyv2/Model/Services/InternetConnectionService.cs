@@ -14,7 +14,7 @@ namespace RozkładJazdyv2.Model
 
         public static bool IsInternetConnectionAvailable()
         {
-            var profile = NetworkInformation.GetInternetConnectionProfile();
+            ConnectionProfile profile = NetworkInformation.GetInternetConnectionProfile();
             return (profile != null && profile.GetNetworkConnectivityLevel() == NetworkConnectivityLevel.InternetAccess);
         }
     }

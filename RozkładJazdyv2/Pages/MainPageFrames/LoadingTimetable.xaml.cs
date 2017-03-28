@@ -41,8 +41,10 @@ namespace RozkładJazdyv2.Pages.MainPageFrames
         private void EventHelper_OnSqlLoadingChanged(int step, int maxSteps)
         {
             double percent = ((step * 100.0) / maxSteps);
+
             _MainPageInstance.ChangeTextInInfoStackPanel(MainPage.InfoStackPanelTextIndex.Loading_Timetable, "Wczytywanie rozkładu jazdy... {0} / {1}", step, maxSteps);
             LoadingInfoText.Text = string.Format("Trwa wczytywanie rozkładu [{0:00}%]", percent);
+
             LoadingProgressBar.Value = percent;
         }
 
@@ -61,7 +63,9 @@ namespace RozkładJazdyv2.Pages.MainPageFrames
                 _MainPageInstance.ChangePage(typeof(DownloadingTimetable), _MainPageInstance);
                 return;
             }
+
             TimetableLoaded();
+
             await Task.Delay(500);
             ShowMainMenu();
         }
@@ -70,6 +74,7 @@ namespace RozkładJazdyv2.Pages.MainPageFrames
         {
             LoadingProgressRing.Visibility = Visibility.Collapsed;
             LoadingProgressBar.Value = 100;
+
             LoadingInfoText.Text = "Rozkład wczytany...";
             _MainPageInstance.ChangeTextInInfoStackPanel(MainPage.InfoStackPanelTextIndex.Loading_Timetable, "Rozkład wczytany...");
         }

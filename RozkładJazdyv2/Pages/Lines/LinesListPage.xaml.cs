@@ -38,16 +38,22 @@ namespace RozkładJazdyv2.Pages.Lines
             Others
         }
 
-        private ObservableCollection<Grid> _SearchLinesGrids;
         private static List<Tuple<LinesType, GridView>> _LinesGridViews;
+
         private bool _IsPageCached;
+
+        private ObservableCollection<Grid> _SearchLinesGrids;
 
         public LinesViewPage()
         {
             this.InitializeComponent();
+            this.SetIsBackFromPageAllowed(true);
+
             _LinesGridViews = new List<Tuple<LinesType, GridView>>();
             _SearchLinesGrids = new ObservableCollection<Grid>();
+
             RegisterHooks();
+
             this.Loaded += LinesViewPage_Loaded;
         }
 
@@ -59,18 +65,22 @@ namespace RozkładJazdyv2.Pages.Lines
 
         private async void SearchLineAutoSuggestBox_SuggestionChosenAsync(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs args)
         {
-            var grid = sender.Parent as Grid;
-            var selectedGrid = args.SelectedItem as Grid;
-            var selectedLine = selectedGrid.DataContext as Line;
+            Grid mainGrid = (Grid)sender.Parent;
+            Grid selectedGrid = args.SelectedItem as Grid;
+            Line selectedLine = selectedGrid.DataContext as Line;
+
             selectedLine = await FillLineSchedulesAsync(selectedLine);
-            await ShowLinePageBySchedulesAsync(selectedLine, grid);
+
+            await ShowLinePageBySchedulesAsync(selectedLine, mainGrid);
         }
 
         private async void LinesViewPage_Loaded(object sender, RoutedEventArgs e)
         {
             if (_IsPageCached == true)
                 return;
+
             await LoadLinesToView();
+
             HideLoadingStackPanel();
             ShowSearchLineAutoSuggestBox();
         }
@@ -78,17 +88,21 @@ namespace RozkładJazdyv2.Pages.Lines
         private async Task LoadLinesToView()
         {
             _IsPageCached = true;
-            Model.LinesPage.LinesViewManager.SetInstance(LinesScrollViewer);
+
+            LinesViewManager.SetInstance(LinesScrollViewer);
             int busBits = GetBusBitsWithoutFastBus();
-            await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync(LinesType.Favourites, "Ulubione", Line.FAVOURITE_BIT, this, LineSelectionChangedAsync);
-            await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync(LinesType.Trams, "Tramwaje", Line.TRAM_BITS, this, LineSelectionChangedAsync);
+
+            await LinesViewManager.AddLineTypeToListViewAsync(LinesType.Favourites, "Ulubione", Line.FAVOURITE_BIT, this, LineSelectionChangedAsync);
+            await LinesViewManager.AddLineTypeToListViewAsync(LinesType.Trams, "Tramwaje", Line.TRAM_BITS, this, LineSelectionChangedAsync);
             await Task.Delay(100);
-            await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync(LinesType.Busses, "Autobusy", busBits, this, LineSelectionChangedAsync);
-            await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync(LinesType.Fast_Busses, "Autobusy przyśpieszone", Line.FAST_BUS_BIT, this, LineSelectionChangedAsync);
-            await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync(LinesType.Night_Busses, "Nocne", Line.NIGHT_BUS_BIT, this, LineSelectionChangedAsync);
-            await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync(LinesType.Mini_Busses, "Minibusy", Line.MINI_BIT, this, LineSelectionChangedAsync);
-            await Model.LinesPage.LinesViewManager.AddLineTypeToListViewAsync(LinesType.Others, "Inne", Line.AIRPORT_BIT, this, LineSelectionChangedAsync);
-            _LinesGridViews = Model.LinesPage.LinesViewManager.GetLineTypesGridViewList();
+
+            await LinesViewManager.AddLineTypeToListViewAsync(LinesType.Busses, "Autobusy", busBits, this, LineSelectionChangedAsync);
+            await LinesViewManager.AddLineTypeToListViewAsync(LinesType.Fast_Busses, "Autobusy przyśpieszone", Line.FAST_BUS_BIT, this, LineSelectionChangedAsync);
+            await LinesViewManager.AddLineTypeToListViewAsync(LinesType.Night_Busses, "Nocne", Line.NIGHT_BUS_BIT, this, LineSelectionChangedAsync);
+            await LinesViewManager.AddLineTypeToListViewAsync(LinesType.Mini_Busses, "Minibusy", Line.MINI_BIT, this, LineSelectionChangedAsync);
+            await LinesViewManager.AddLineTypeToListViewAsync(LinesType.Others, "Inne", Line.AIRPORT_BIT, this, LineSelectionChangedAsync);
+
+            _LinesGridViews = LinesViewManager.GetLineTypesGridViewList();
         }
 
         private int GetBusBitsWithoutFastBus()
@@ -109,9 +123,12 @@ namespace RozkładJazdyv2.Pages.Lines
             var gridView = sender as GridView;
             if (gridView.SelectedIndex == -1)
                 return;
+
             var line = gridView.SelectedItem as Line;
             line = await FillLineSchedulesAsync(line);
+
             await ShowLinePageBySchedulesAsync(line, line.GridObjectInLinesList);
+
             ResetClickedGrids();
         }
 
@@ -120,27 +137,34 @@ namespace RozkładJazdyv2.Pages.Lines
             if (line.Schedules.Count() == 1)
             {
                 if (line.Schedules[0].Name.Contains("zawie")) //line is stopped
-                    Model.LinesPage.FlyoutHelper.ShowFlyOutLineIsStoppedAtLineGrid(lineBackgroundGrid, line);
+                    FlyoutHelper.ShowFlyOutLineIsStoppedAtLineGrid(lineBackgroundGrid, line);
                 else
                     await ShowLinePageAsync(new ChangeLineParameter() { Line = line, SelectedSchedule = line.Schedules.ElementAt(0) });
             }
             else
-                Model.LinesPage.FlyoutHelper.ShowFlyOutWithSchedulesAtLineGrid(lineBackgroundGrid, line, ScheduleClickedAsync);
+                FlyoutHelper.ShowFlyOutWithSchedulesAtLineGrid(lineBackgroundGrid, line, ScheduleClickedAsync);
         }
 
         private async Task<Line> FillLineSchedulesAsync(Line line)
         {
             if (line.Schedules == null)
                 line.Schedules = await GetLineSchedules(line);
+
             return line;
         }
 
         private async void ScheduleClickedAsync(object sender, RoutedEventArgs e)
         {
-            var clickedButton = (Button)sender;
-            var selectedLine = (Line)(clickedButton.DataContext);
-            var selectedSchedule = selectedLine.Schedules.First(p => p.Name == (string)clickedButton.Content);
-            await ShowLinePageAsync(new ChangeLineParameter() { Line = selectedLine, SelectedSchedule = selectedSchedule });
+            Button clickedButton = (Button)sender;
+            Line selectedLine = (Line)(clickedButton.DataContext);
+            Schedule selectedSchedule = selectedLine.Schedules.First(p => p.Name == (string)clickedButton.Content);
+
+            await ShowLinePageAsync(
+                new ChangeLineParameter()
+                {
+                    Line = selectedLine,
+                    SelectedSchedule = selectedSchedule
+                });
         }
 
         private async Task<List<Schedule>> GetLineSchedules(Line line)
@@ -160,6 +184,7 @@ namespace RozkładJazdyv2.Pages.Lines
             _SearchLinesGrids.Clear();
             if (sender.Text.Trim().Length == 0)
                 return;
+
             Timetable.Instance.Lines.Where(p => p.EditedName.StartsWith(sender.Text)).ToList().ForEach(p =>
             {
                 var searchLineGrid = new Grid()
@@ -170,6 +195,7 @@ namespace RozkładJazdyv2.Pages.Lines
                     Background = new SolidColorBrush(Color.FromArgb(255, 55, 58, 69)),
                     DataContext = p
                 };
+
                 searchLineGrid.Children.Add(new TextBlock()
                 {
                     HorizontalAlignment = HorizontalAlignment.Center,
@@ -177,7 +203,8 @@ namespace RozkładJazdyv2.Pages.Lines
                     Foreground = new SolidColorBrush(Colors.White),
                     Text = p.EditedName
                 });
-                if(p.IsLineFavourite)
+
+                if (p.IsLineFavourite)
                 {
                     searchLineGrid.Children.Add(new TextBlock()
                     {
@@ -189,6 +216,7 @@ namespace RozkładJazdyv2.Pages.Lines
                         Text = "\xE00B"
                     });
                 }
+
                 _SearchLinesGrids.Add(searchLineGrid);
             });
         }

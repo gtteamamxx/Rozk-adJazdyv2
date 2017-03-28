@@ -14,8 +14,9 @@ namespace RozkładJazdyv2.Model
         public int Id { get; set; }
         public int IdOfName { get; set; }
         public int IdOfBusStop { get; set; }
+        public string Hours { get; set; }
+
         [Ignore]
         public string Name { get { return Timetable.Instance.HoursNames.First(p => p.Id == this.IdOfName).Name; } }
-        public string Hours { get; set; }
     }
 }

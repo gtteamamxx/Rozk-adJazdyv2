@@ -30,6 +30,7 @@ namespace RozkładJazdyv2.Pages.MainPageFrames
         {
             this.InitializeComponent();
             HookEvents();
+
             this.Loaded += async (s, e) => await SaveTimetableAsync();
         }
 
@@ -46,8 +47,10 @@ namespace RozkładJazdyv2.Pages.MainPageFrames
         private async Task EventHelper_OnSqlSavedAsync()
         {
             SetSavingTimetableInfoVisibility(Visibility.Collapsed);
+
             _MainPageInstance.ChangeTextInInfoStackPanel(MainPage.InfoStackPanelTextIndex.Saving_Timetable,
                                                             "Rozkład zapisany...");
+
             await Task.Delay(500);
             ShowMainMenu();
         }
@@ -55,9 +58,11 @@ namespace RozkładJazdyv2.Pages.MainPageFrames
         private void EventHelper_OnSqlSavingChanged(int step, int maxSteps)
         {
             double percent = ((step * 100.0) / maxSteps);
+
             _MainPageInstance.ChangeTextInInfoStackPanel(MainPage.InfoStackPanelTextIndex.Saving_Timetable,
                                                             "Zapisywanie rozkładu... {0} / {1}", step, maxSteps);
             SavingInfoText.Text = string.Format("Trwa zapisywanie rozkładu [{0:00}%]", percent);
+
             SavingProgressBar.Value = percent;
         }
 
@@ -66,13 +71,16 @@ namespace RozkładJazdyv2.Pages.MainPageFrames
             _MainPageInstance.ChangeTextInInfoStackPanel(MainPage.InfoStackPanelTextIndex.Saving_Timetable, 
                                                             "Zapisywanie rozkładu...");
             SavingInfoText.Text = "Trwa zapisywanie rozkładu...";
+
             SetSavingRetryButtonVisibility(Visibility.Collapsed);
             SetSavingTimetableInfoVisibility(Visibility.Visible);
+
             var isTimetableSaved = await SQLServices.SaveTimetableDatabaseAsync();
             if(!isTimetableSaved)
             {
                 SetSavingTimetableInfoVisibility(Visibility.Collapsed);
                 SetSavingRetryButtonVisibility(Visibility.Visible);
+
                 _MainPageInstance.ChangeTextInInfoStackPanel(MainPage.InfoStackPanelTextIndex.Saving_Timetable,
                                                                 "Bład podczas zapisywania rozkładu...");
                 SavingInfoText.Text = $"Wystąpił problem podczas zapisywania rozkładu.{Environment.NewLine}Czy chcesz spróbować ponownie?";

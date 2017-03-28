@@ -12,9 +12,11 @@ namespace RozkładJazdyv2.Model
         [PrimaryKey]
         [Indexed]
         public int Id { get; set; }
+
         public int IdOfName { get; set; }
         public int IdOfLine { get; set; }
         public int IdOfSchedule { get; set; }
+
         [Ignore]
         public string Name { get { return Timetable.Instance.TracksNames.First(p => p.Id == this.IdOfName).Name; } }
         [Ignore]

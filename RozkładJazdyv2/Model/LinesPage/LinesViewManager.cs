@@ -28,20 +28,25 @@ namespace RozkładJazdyv2.Model.LinesPage
         {
             if (_LinesTypeScrollViewer == null)
                 _LinesTypeScrollViewer = linesScrollViewer;
+
             if (_LinesTypesGridView == null)
                 _LinesTypesGridView = new List<Tuple<LinesViewPage.LinesType, GridView>>();
         }
 
         public static void RefreshGridView(GridView gridView, int acceptedLinesBit)
         {
-            var contentGrid = gridView.Parent as Grid;
+            Grid contentGrid = gridView.Parent as Grid;
+
             if (!(contentGrid is Grid))
             {
                 contentGrid = gridView.DataContext as Grid;
+
                 if (!(contentGrid is Grid))
                     return;
             }
+
             gridView.Items.Clear();
+
             _LastAcceptedLineBits = acceptedLinesBit;
             AddLinesToGridView(ref gridView, acceptedLinesBit);
             CheckIfLineIsEmptyAndHideGridViewIfItIs(contentGrid);
@@ -55,23 +60,20 @@ namespace RozkładJazdyv2.Model.LinesPage
         {
             await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.High, async () =>
             {
-                var contentGrid = new Grid();
+                Grid contentGrid = new Grid();
                 AddRowDefinitionsToContentGrid(ref contentGrid);
                 AddPanelGridToContentGrid(ref contentGrid, name);
-                var gridView = AddLinesGridViewToContentGrid(contentGrid, acceptedLinesBit, page, selectionChangedFunction);
+
+                GridView gridView = AddLinesGridViewToContentGrid(contentGrid, acceptedLinesBit, page, selectionChangedFunction);
+
                 CheckIfLineIsEmptyAndHideGridViewIfItIs(contentGrid);
                 await AddContentGridToPageAsync(contentGrid, gridView, type);
             });
         }
         private static void CheckIfLineIsEmptyAndHideGridViewIfItIs(Grid grid)
-        {
-            bool isLineTypeEmpty = IsLineTypeEmpty(grid);
-            if (isLineTypeEmpty)
-                SetContentGridVisible(grid, Visibility.Collapsed);
-            else
-                SetContentGridVisible(grid, Visibility.Visible);
-        }
-
+            => SetContentGridVisible(grid, IsLineTypeEmpty(grid) 
+                ? Visibility.Collapsed : Visibility.Visible);
+        
         private static void SetContentGridVisible(Grid grid, Visibility visibleState)
             => grid.Visibility = visibleState;
 
@@ -79,8 +81,9 @@ namespace RozkładJazdyv2.Model.LinesPage
         {
             await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.High, () =>
             {
-                var scrollViewerGrid = _LinesTypeScrollViewer.Content as StackPanel;
-                scrollViewerGrid.Children.Add(grid);
+                StackPanel scrollViewerStacKPanel = _LinesTypeScrollViewer.Content as StackPanel;
+                scrollViewerStacKPanel.Children.Add(grid);
+
                 gridView.DataContext = grid;
                 _LinesTypesGridView.Add(new Tuple<LinesViewPage.LinesType, GridView>(type, gridView));
             });
@@ -88,24 +91,29 @@ namespace RozkładJazdyv2.Model.LinesPage
 
         private static bool IsLineTypeEmpty(Grid grid)
         {
-            var linesGridView = grid.Children.ElementAt(1) as GridView;
+            GridView linesGridView = grid.Children.ElementAt(1) as GridView;
             return linesGridView.Items.Count() == 0;
         }
 
         private static GridView AddLinesGridViewToContentGrid(Grid grid, int acceptedLinesBit,
                             Pages.Lines.LinesViewPage page, SelectionChangedEventHandler selectionChangedFunction)
         {
-            var linesGridView = new GridView()
+            GridView linesGridView = new GridView()
             {
                 Margin = new Thickness(10),
                 HorizontalContentAlignment = HorizontalAlignment.Center
             };
+
             linesGridView.SelectionChanged += selectionChangedFunction;
             linesGridView.ContainerContentChanging += LinesGridView_ContainerContentChanging;
+
             Grid.SetRow(linesGridView, 1);
+
             linesGridView.ItemsPanel = page.Resources["LinesGridViewItemPanelTemplate"] as ItemsPanelTemplate;
             linesGridView.ItemTemplate = page.Resources["LineDataTemplate"] as DataTemplate;
+
             AddLinesToGridView(ref linesGridView, acceptedLinesBit);
+
             grid.Children.Add(linesGridView);
             return linesGridView;
         }
@@ -119,16 +127,18 @@ namespace RozkładJazdyv2.Model.LinesPage
 
         private static void LinesGridView_ContainerContentChanging(ListViewBase sender, ContainerContentChangingEventArgs args)
         {
-            var gridOfLine = ((Grid)args.ItemContainer.ContentTemplateRoot);
+            Grid gridOfLine = ((Grid)args.ItemContainer.ContentTemplateRoot);
+
             if ((_LastAcceptedLineBits & Line.FAVOURITE_BIT) == Line.FAVOURITE_BIT)
                 return;
+
             Line lineClass = ((Line)args.Item);
             lineClass.GridObjectInLinesList = gridOfLine;
         }
 
         private static void AddPanelGridToContentGrid(ref Grid grid, string name)
         {
-            var panelGrid = new Grid()
+            Grid panelGrid = new Grid()
             {
                 Height = 30,
                 Background = new SolidColorBrush(Colors.AliceBlue),
@@ -136,6 +146,7 @@ namespace RozkładJazdyv2.Model.LinesPage
                 BorderThickness = new Thickness(1),
                 Margin = new Thickness(0, 2, 0, 2)
             };
+
             panelGrid.Children.Add(new TextBlock()
             {
                 Text = name,
@@ -144,6 +155,7 @@ namespace RozkładJazdyv2.Model.LinesPage
                 Foreground = new SolidColorBrush(Colors.Black),
                 FontSize = 20
             });
+
             panelGrid.Children.Add(new TextBlock()
             {
                 Text = "\xE74B",
@@ -155,6 +167,7 @@ namespace RozkładJazdyv2.Model.LinesPage
                 HorizontalAlignment = HorizontalAlignment.Right,
                 VerticalAlignment = VerticalAlignment.Center
             });
+
             panelGrid.Tapped += PannelGridTapped;
             grid.Children.Add(panelGrid);
         }
@@ -167,9 +180,10 @@ namespace RozkładJazdyv2.Model.LinesPage
 
         private static void PannelGridTapped(object sender, TappedRoutedEventArgs e)
         {
-            var panelGrid = sender as Grid;
-            var linesGridView = ((Grid)panelGrid.Parent).Children.ElementAt(1);
-            var arrowTextBlock = panelGrid.Children.ElementAt(1) as TextBlock;
+            Grid panelGrid = (Grid)sender;
+            GridView linesGridView = (GridView)((Grid)panelGrid.Parent).Children.ElementAt(1);
+            TextBlock arrowTextBlock = (TextBlock)panelGrid.Children.ElementAt(1);
+
             if (linesGridView.Visibility == Visibility.Collapsed)
             {
                 arrowTextBlock.Text = "\xE74B";

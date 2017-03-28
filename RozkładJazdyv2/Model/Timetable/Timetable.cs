@@ -23,6 +23,7 @@ namespace RozkładJazdyv2.Model
         {
             if (!(SQLServices.IsValidTimetableDatabase()))
                 return false;
+
             bool isTimetableLoaded = await SQLServices.LoadTimetableFromDatabase();
             return isTimetableLoaded;
         }
@@ -31,6 +32,7 @@ namespace RozkładJazdyv2.Model
         {
             if (!(InternetConnectionService.IsInternetConnectionAvailable()))
                 return false;
+
             bool isTimetableDownloaded = await TimetableDownloadService.DownloadNewTimetableAsync();
             return isTimetableDownloaded;
         }

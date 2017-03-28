@@ -9,6 +9,7 @@
     mc:Ignorable="d">
 
     <Grid Background="Transparent">
+        
         <ProgressRing Name="LoadingProgressRing" 
                       HorizontalAlignment="Right"
                       VerticalAlignment="Bottom"

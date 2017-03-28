@@ -29,29 +29,37 @@ namespace RozkładJazdyv2.Pages
     {
         private string _APP_VERSION { get { return Model.Application.Version.VERSION; } }
         private string _TimetableLastUpdate { get { return new FileInfo(SQLServices.SQLFilePath).CreationTime.ToUniversalTime().ToString(); } }
+
         private List<Grid> _ListOfGrid = new List<Grid>();
+
         private readonly double _SizeMultiplier = 3.75; //if greather then buttons will be smaller
         private readonly double _MaxSizeOfButton = 215;
 
         public MainMenu()
         {
             this.InitializeComponent();
-            this.SizeChanged += MainMenu_SizeChanged;
+            this.SetIsBackFromPageAllowed(false);
+            
             AddButtonsToPage();
             RegisterButtonHooks();
+
             this.Loaded += (s, e) => ChangeSizeOfButtons(this.ActualHeight, this.ActualWidth);
+            this.SizeChanged += MainMenu_SizeChanged;
         }
 
         private void ChangeSizeOfButtons(double height, double width)
         {
             double size = ((width / _SizeMultiplier) + (height / _SizeMultiplier)) / 2;
             double multiplier = 1;
+
             foreach (var buttonGrid in _ListOfGrid)
             {
                 multiplier = size / buttonGrid.Width;
                 if (buttonGrid.Width * multiplier > _MaxSizeOfButton)
                     return;
+
                 buttonGrid.Width = buttonGrid.Height *= multiplier;
+
                 foreach (TextBlock textBlock in buttonGrid.Children)
                     textBlock.FontSize *= multiplier;
             }
@@ -62,18 +70,25 @@ namespace RozkładJazdyv2.Pages
             var clickedButton = ButtonListGridView.SelectedItem as MainMenuButton;
             if (clickedButton == null)
                 return;
+
             await Task.Delay(100);
+
             switch(clickedButton.Type)
             {
                 case MainMenuButton.ButtonType.Lines:
                     MainFrameHelper.GetMainFrame().Navigate(typeof(Pages.Lines.LinesViewPage));
                     break;
+
                 case MainMenuButton.ButtonType.Stops:
                     break;
+
                 case MainMenuButton.ButtonType.Favourites:
+                    MainFrameHelper.GetMainFrame().Navigate(typeof(Pages.Favourites.FavouritePage));
                     break;
+
                 case MainMenuButton.ButtonType.Communicates:
                     break;
+
                 default:
                     break;
             }
@@ -83,6 +98,7 @@ namespace RozkładJazdyv2.Pages
         {
             ButtonHelper.CreateButtonList(ButtonListGridView);
             var backgroundColor = new Color() { R = 121, G = 124, B = 129, A = 255 }; //"gray"
+
             ButtonHelper.AddButton("Zobacz listę linii", "Linie", "\xE806", backgroundColor, MainMenuButton.ButtonType.Lines);
             ButtonHelper.AddButton("Zobacz listę przystanków", "Przystanki", "\xE174", backgroundColor, MainMenuButton.ButtonType.Stops);
             ButtonHelper.AddButton("Zobacz ulubione", "Ulubione", "\xE082", backgroundColor, MainMenuButton.ButtonType.Favourites);
@@ -93,8 +109,10 @@ namespace RozkładJazdyv2.Pages
         {
             var gridOfButton = ((Grid)args.ItemContainer.ContentTemplateRoot);
             bool isGridInList = _ListOfGrid.FirstOrDefault(p => p == gridOfButton) != null;
+
             if (!isGridInList)
                 _ListOfGrid.Add(gridOfButton);
+
             MainMenuButton buttonClass = ((MainMenuButton)args.Item);
             gridOfButton.Background = buttonClass.BackgroundColor;
         }

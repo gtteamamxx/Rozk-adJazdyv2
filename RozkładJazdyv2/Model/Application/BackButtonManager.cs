@@ -16,34 +16,33 @@ namespace RozkładJazdyv2.Model.Application
         public static void BackButtonPressed(object sender, BackRequestedEventArgs e)
         {
             Frame mainAppFrame = MainFrameHelper.GetMainFrame();
-            Type currentPageType = mainAppFrame.CurrentSourcePageType;
-            bool goBack = IsGoBackFromPageAllowed(currentPageType);
-            if (goBack)
+
+            if (IsGoBackFromPageAllowed(mainAppFrame))
             {
                 mainAppFrame.GoBack();
                 e.Handled = true;
                 return;
             }
-            App.Current.Exit();
+
+            e.Handled = false;
+            //App.Current.Exit(); 
         }
 
-        private static bool IsGoBackFromPageAllowed(Type currentPageType)
+        private static bool IsGoBackFromPageAllowed(Frame mainAppFrame)
         {
-            if (currentPageType == typeof(Pages.Lines.LinesViewPage))
-                return true;
-            if (currentPageType == typeof(Pages.Lines.LinePage))
-                return true;
-            if (currentPageType == typeof(Pages.Lines.LineBusStopPage))
-            {
+            var currentPageType = mainAppFrame.CurrentSourcePageType;
+            bool isBackAllowed = ((Page)mainAppFrame.Content).GetIsBackFromPageAllowed();
+
+            if (currentPageType == typeof(Pages.Lines.LineBusStopPage) && isBackAllowed)
                 RemoveLineBusStopPageStackFromFrame();
-                return true;
-            }
-            return false;
+
+            return isBackAllowed;
         }
 
         private static void RemoveLineBusStopPageStackFromFrame()
         {
             Frame mainAppFrame = MainFrameHelper.GetMainFrame();
+
             mainAppFrame.BackStack.ToList().ForEach(p =>
             {
                 if (p.SourcePageType == typeof(Pages.Lines.LineBusStopPage))

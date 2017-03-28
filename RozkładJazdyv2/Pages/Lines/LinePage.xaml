@@ -10,15 +10,20 @@
     mc:Ignorable="d">
 
     <Page.Resources>
+        
         <DataTemplate x:Key="BusStopListViewStyle" x:DataType="local:LineViewBusStop">
             <local1:BusStopUserControl DataContext="{Binding}" />
         </DataTemplate>
+        
     </Page.Resources>
+    
     <Grid Background="Black">
+        
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition />
         </Grid.RowDefinitions>
+        
         <Grid Grid.Row="0"
               VerticalAlignment="Top"
               Margin="20">
@@ -26,6 +31,7 @@
             <StackPanel>
                 <Grid>
                     <StackPanel Orientation="Horizontal">
+                        
                         <TextBlock FontFamily="Segoe MDL2 Assets"
                                    FontSize="30"
                                    Text="&#xEB4D;"
@@ -33,50 +39,61 @@
                                    Foreground="#FF959DD3"
                                    VerticalAlignment="Center"
                                    x:Name="LineLogoTextBlock"/>
+                        
                         <TextBlock VerticalAlignment="Center"
                                    FontSize="30"
                                    Foreground="White"
                                    Text="722"
                                    Margin="10 0 0 0"
                                    x:Name="LineNumberTextBlock"/>
+                        
                     </StackPanel>
 
                     <Button HorizontalAlignment="Right"
                             Height="40"
                             Name="LineFavouriteButton"
                             Click="LineFavouriteButton_Click">
+                        
                         <StackPanel Orientation="Horizontal">
+                            
                             <TextBlock VerticalAlignment="Center"
                                        FontFamily="Segoe MDL2 Assets"
                                        Text="&#xE00B;"
                                        Foreground="Red"
                                        Name="LineFavouriteHeartSignTextBlock"
                                        FontSize="21"/>
+                            
                             <TextBlock VerticalAlignment="Center"
                                        Margin="10 0 0 0"
                                        Text="Dodaj do ulubionych"
                                        Name="LineFavouriteButtonContentTextBlock" />
+                            
                         </StackPanel>
                     </Button>
                 </Grid>
+                
                 <Button Margin="0 5 0 0"
                         Name="LineScheduleNameButton"
                         Click="LineScheduleNameButton_Click">
+                    
                     <TextBlock>
                         <Run Text="Rozkład: " 
                         /><Run x:Name="LineScheduleNameTextBlock" />
                     </TextBlock>
+                    
                 </Button>
             </StackPanel>
         </Grid>
 
         <Grid Grid.Row="1">
+            
             <Grid.ColumnDefinitions>
                 <ColumnDefinition />
                 <ColumnDefinition />
             </Grid.ColumnDefinitions>
 
             <Grid Name="LineFirstGrid">
+                
                 <Grid.RowDefinitions>
                     <RowDefinition Height="50" />
                     <RowDefinition />
@@ -84,11 +101,13 @@
 
                 <Border BorderBrush="White"
                         BorderThickness="0 1 0 1" />
+                
                 <ProgressRing Grid.RowSpan="2"
                               Name="LineFirstTrackProgressRing"
                               IsActive="True"
                               Width="50"
                               Height="50" />
+                
                 <TextBlock Name="LineFirstTrackName"
                            HorizontalAlignment="Center"
                            VerticalAlignment="Center"
@@ -96,11 +115,13 @@
                            FontSize="14"
                            TextWrapping="Wrap"
                            Margin="5"/>
+                
                 <ListView Name="LineFirstTrackListView"
                           ItemsSource="{x:Bind _LineFirstTrackBusStops}"
                           Grid.Row="1"
                           ItemTemplate="{StaticResource BusStopListViewStyle}"
                           SelectionChanged="LineTrackListView_SelectionChangedAsync">
+                    
                     <ListView.ItemsPanel>
                         <ItemsPanelTemplate>
                             <ItemsWrapGrid HorizontalAlignment="Center"
@@ -108,23 +129,29 @@
                                            MaximumRowsOrColumns="1"/>
                         </ItemsPanelTemplate>
                     </ListView.ItemsPanel>
+                    
                 </ListView>
             </Grid>
+            
             <Grid Name="LineSecondGrid"
                   Grid.Column="1"
                   BorderBrush="White"
                   BorderThickness="1 0 0 0">
+                
                 <Grid.RowDefinitions>
                     <RowDefinition Height="50" />
                     <RowDefinition />
                 </Grid.RowDefinitions>
+                
                 <ProgressRing Grid.RowSpan="2"
                               Name="LineSecondTrackProgressRing"
                               Width="50"
                               Height="50"
                               IsActive="True" />
+                
                 <Border BorderBrush="White"
                         BorderThickness="0 1 0 1" />
+                
                 <TextBlock Name="LineSecondTrackName"
                            HorizontalAlignment="Center"
                            VerticalAlignment="Center"
@@ -132,12 +159,14 @@
                            FontSize="14"
                            TextWrapping="Wrap"
                            Margin="5"/>
+                
                 <ListView Grid.Row="1"
                           Name="LineSecondTrackListView"
                           ItemsSource="{x:Bind _LineSecondTrackBusStops}"
                           ItemTemplate="{StaticResource BusStopListViewStyle}"
                           SelectionMode="Single"
                           SelectionChanged="LineTrackListView_SelectionChangedAsync">
+                    
                     <ListView.ItemsPanel>
                         <ItemsPanelTemplate>
                             <ItemsWrapGrid HorizontalAlignment="Center"
@@ -145,6 +174,7 @@
                                            MaximumRowsOrColumns="1"/>
                         </ItemsPanelTemplate>
                     </ListView.ItemsPanel>
+                    
                 </ListView>
             </Grid>
         </Grid>

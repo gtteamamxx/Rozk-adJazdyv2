@@ -51,15 +51,19 @@ namespace RozkładJazdyv2
         {
             this.InitializeComponent();
             SetPhoneStatusBarColor(Colors.White, Colors.Black);
+
             ShowBackButton();
             RegisterBackButtonPress();
+
             FadeInLogoOnStart();
+
             this.Loaded += MainPage_Loaded;
         }
 
         private void MainPage_Loaded(object sender, RoutedEventArgs e)
         {
             ChangeTextInInfoStackPanel(InfoStackPanelTextIndex.App_Run, "Uruchamianie aplikacji... OK");
+
             SetActionFrame();
             MainFrameHelper.SetMainFrame(this.Frame);
         }
@@ -67,6 +71,7 @@ namespace RozkładJazdyv2
         public void ChangeTextInInfoStackPanel(InfoStackPanelTextIndex index, string text, params object[] args)
         {
             bool editText = InfoStackPanel.Children.Count() - 1 >= (int)index;
+
             if (editText)
                 ((TextBlock)InfoStackPanel.Children[(int)index]).Text = string.Format(text, args);
             else

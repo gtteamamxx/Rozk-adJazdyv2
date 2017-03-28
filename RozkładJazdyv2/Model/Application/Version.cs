@@ -8,6 +8,6 @@ namespace RozkładJazdyv2.Model.Application
 {
     public class Version
     {
-        public static readonly string VERSION = "v 0.1.0";
+        public static readonly string VERSION = "v 0.2.1";
     }
 }

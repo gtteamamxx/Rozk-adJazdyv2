@@ -16,34 +16,42 @@ namespace RozkładJazdyv2.Model.LinesPage
 
         public static void ShowFlyOutLineIsStoppedAtLineGrid(Grid lineGrid, Line line)
         {
-            var inivisibleButton = GetLineGridInvisibleButton(lineGrid);
-            var grid = new Grid();
+            Button inivisibleButton = GetLineGridInvisibleButton(lineGrid);
+            Grid grid = new Grid();
+
             grid.Children.Add(new TextBlock() { Text = $"Linia {line.EditedName} jest zawieszona." });
-            var flyout = new Flyout() { Content = grid };
+
+            Flyout flyout = new Flyout() { Content = grid };
             flyout.Closed += (s, e) => lineGrid.Children.Remove(inivisibleButton);
+
             flyout.ShowAt(lineGrid);
         }
 
         public static void ShowFlyOutWithSchedulesAtLineGrid(Grid lineGrid, Line line, RoutedEventHandler scheduleClickedEvent)
         {
-            var inivisibleButton = GetLineGridInvisibleButton(lineGrid);
-            var flyout = CreateFlyOutAtButton(ref inivisibleButton, line, ref scheduleClickedEvent);
+            Button inivisibleButton = GetLineGridInvisibleButton(lineGrid);
+            Flyout flyout = CreateFlyOutAtButton(ref inivisibleButton, line, ref scheduleClickedEvent);
             bool isGridLineGrid = lineGrid == line.GridObjectInLinesList;
+
             flyout.Closed += (s, e) =>
             {
                 lineGrid.Children.Remove(inivisibleButton);
                 if (isGridLineGrid)
                     RemoveLineGridBorder(ref lineGrid);
             };
+
             if(isGridLineGrid)
                 SetLineGridBorder(ref lineGrid);
+
             lineGrid.Children.Add(inivisibleButton);
+
             flyout.ShowAt(inivisibleButton);
         }
 
         public static Flyout ShowFlyOutWithLSchedulesAtButtonInLinePage(Button button, Line line, RoutedEventHandler scheduleClickedEven)
         {
-            var flyout = CreateFlyOutAtButton(ref button, line, ref scheduleClickedEven, true);
+            Flyout flyout = CreateFlyOutAtButton(ref button, line, ref scheduleClickedEven, true);
+
             flyout.ShowAt(button);
             return flyout; 
         }
@@ -57,8 +65,9 @@ namespace RozkładJazdyv2.Model.LinesPage
         private static Flyout CreateFlyOutAtButton(ref Button button, Line line, 
                 ref RoutedEventHandler scheduleClickedEvent, bool hideActuallyShowedSchedule = false)
         {
-            var contentGrid = new Grid();
+            Grid contentGrid = new Grid();
             List<Schedule> schedules = new List<Schedule>();
+
             if (hideActuallyShowedSchedule)
             {
                 var actuallyShowedSchedule = Pages.Lines.LinePage.ActualShowingLineParameters.SelectedSchedule;
@@ -66,9 +75,11 @@ namespace RozkładJazdyv2.Model.LinesPage
             }
             else
                 schedules = line.Schedules;
+
             AddRowsToGridBySchedulesNum(ref contentGrid, schedules);
             AddHeaderToContentGrid(ref contentGrid);
             AddSchedulesToGridContent(ref contentGrid, schedules, ref scheduleClickedEvent, line);
+
             return new Flyout() { Content = contentGrid };
         }
 
@@ -87,8 +98,9 @@ namespace RozkładJazdyv2.Model.LinesPage
             int schedulesCount = listOfSchedules.Count();
             for (int i = 0; i < schedulesCount; i++)
             {
-                var schedule = listOfSchedules[i];
-                var scheduleButton = new Button()
+                Schedule schedule = listOfSchedules[i];
+
+                Button scheduleButton = new Button()
                 {
                     Content = schedule.Name,
                     BorderBrush = new SolidColorBrush(Colors.Blue),
@@ -96,7 +108,9 @@ namespace RozkładJazdyv2.Model.LinesPage
                     Margin = new Thickness(5),
                     DataContext = line
                 };
+
                 Grid.SetRow(scheduleButton, i+1);
+                 
                 contentGrid.Children.Add(scheduleButton);
                 scheduleButton.Click += scheduleClickedEvent;
             }
@@ -106,8 +120,7 @@ namespace RozkładJazdyv2.Model.LinesPage
         {
             int schedulesCount = listOfSchedules.Count();
             for (int i = 0; i <= schedulesCount; i++)
-                contentGrid.RowDefinitions.Add(
-                    new RowDefinition() { Height = GridLength.Auto });
+                contentGrid.RowDefinitions.Add( new RowDefinition() { Height = GridLength.Auto });
         }
 
         private static Button GetLineGridInvisibleButton(Grid lineGrid)
