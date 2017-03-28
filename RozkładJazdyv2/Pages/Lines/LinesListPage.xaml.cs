@@ -70,8 +70,6 @@ namespace RozkładJazdyv2.Pages.Lines
             Grid selectedGrid = args.SelectedItem as Grid;
             Line selectedLine = selectedGrid.DataContext as Line;
 
-            selectedLine = await FillLineSchedulesAsync(selectedLine);
-
             await ShowLinePageBySchedulesAsync(selectedLine, mainGrid, ScheduleClickedAsync);
         }
 
@@ -89,9 +87,7 @@ namespace RozkładJazdyv2.Pages.Lines
 
         public static async Task ShowLinePageBySchedulesAsync(Line line, Grid lineBackgroundGrid, RoutedEventHandler scheduleClickedAsyncFunction)
         {
-            if (line.Schedules == null)
-                line.Schedules = await GetLineSchedules(line);
-
+            await line.GetSchedules();
             if (line.Schedules.Count() == 1)
             {
                 if (line.Schedules[0].Name.Contains("zawie")) //line is stopped
@@ -109,25 +105,17 @@ namespace RozkładJazdyv2.Pages.Lines
             _IsPageCached = true;
 
             LinesListViewManager.SetInstance(LinesScrollViewer);
-            int busBits = GetBusBitsWithoutFastBus();
 
             await LinesListViewManager.AddLineTypeToListViewAsync(LinesType.Favourites, "Ulubione", Line.FAVOURITE_BIT, LineSelectionChangedAsync);
             await LinesListViewManager.AddLineTypeToListViewAsync(LinesType.Trams, "Tramwaje", Line.TRAM_BITS, LineSelectionChangedAsync);
             await Task.Delay(100);
-            await LinesListViewManager.AddLineTypeToListViewAsync(LinesType.Busses, "Autobusy", busBits, LineSelectionChangedAsync);
+            await LinesListViewManager.AddLineTypeToListViewAsync(LinesType.Busses, "Autobusy", Line.GetBusBitsWithoutFastBus(), LineSelectionChangedAsync);
             await LinesListViewManager.AddLineTypeToListViewAsync(LinesType.Fast_Busses, "Autobusy przyśpieszone", Line.FAST_BUS_BIT, LineSelectionChangedAsync);
             await LinesListViewManager.AddLineTypeToListViewAsync(LinesType.Night_Busses, "Nocne", Line.NIGHT_BUS_BIT, LineSelectionChangedAsync);
             await LinesListViewManager.AddLineTypeToListViewAsync(LinesType.Mini_Busses, "Minibusy", Line.MINI_BIT, LineSelectionChangedAsync);
             await LinesListViewManager.AddLineTypeToListViewAsync(LinesType.Others, "Inne", Line.AIRPORT_BIT, LineSelectionChangedAsync);
 
             _LinesGridViews = LinesListViewManager.GetLineTypesGridViewList();
-        }
-
-        private int GetBusBitsWithoutFastBus()
-        {
-            int busBits = Line.BUS_BITS;
-            busBits &= ~(Line.FAST_BUS_BIT);
-            return busBits;
         }
 
         private static async Task ShowLinePageAsync(ChangeLineParameter changeLineParameter)
@@ -142,26 +130,17 @@ namespace RozkładJazdyv2.Pages.Lines
             if (gridView.SelectedIndex == -1)
                 return;
 
-            var line = gridView.SelectedItem as Line;
-            line = await FillLineSchedulesAsync(line);
+            Line line = gridView.SelectedItem as Line;
 
             await ShowLinePageBySchedulesAsync(line, line.GridObjectInLinesList, ScheduleClickedAsync);
-
             ResetClickedGrids();
-        }
-
-        private async Task<Line> FillLineSchedulesAsync(Line line)
-        {
-            if (line.Schedules == null)
-                line.Schedules = await GetLineSchedules(line);
-
-            return line;
         }
 
         public static async void ScheduleClickedAsync(object sender, RoutedEventArgs e)
         {
             Button clickedButton = (Button)sender;
             Line selectedLine = (Line)(clickedButton.DataContext);
+            await selectedLine.GetSchedules();
 
             Schedule selectedSchedule = selectedLine.Schedules.First(p => p.Name == (string)clickedButton.Content);
 
@@ -171,12 +150,6 @@ namespace RozkładJazdyv2.Pages.Lines
                     Line = selectedLine,
                     SelectedSchedule = selectedSchedule
                 });
-        }
-
-        private static async Task<List<Schedule>> GetLineSchedules(Line line)
-        {
-            string query = $"SELECT * FROM Schedule WHERE idOfLine = {line.Id};";
-            return await SQLServices.QueryTimetableAsync<Schedule>(query);
         }
 
         private void ResetClickedGrids()

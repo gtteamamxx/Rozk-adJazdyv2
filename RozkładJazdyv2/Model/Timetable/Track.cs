@@ -23,5 +23,14 @@ namespace RozkładJazdyv2.Model
         public string Url { get; set; }
         [Ignore]
         public List<BusStop> BusStops { get; set; }
+
+        public async Task GetBusStops()
+        {
+            if (this.BusStops != null)
+                return;
+
+            string query = $"SELECT * FROM BusStop WHERE IdOfTrack = {this.Id} AND IdOfSchedule = {this.IdOfSchedule};";
+            this.BusStops = await SQLServices.QueryTimetableAsync<BusStop>(query);
+        }
     }
 }

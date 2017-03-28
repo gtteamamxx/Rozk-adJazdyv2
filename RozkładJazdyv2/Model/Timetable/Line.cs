@@ -27,6 +27,13 @@ namespace RozkładJazdyv2.Model
         public const int TRAIN_BIT = 1 << 11;
         public const int FAVOURITE_BIT = 1 << 12;
 
+        public static int GetBusBitsWithoutFastBus()
+        {
+            int busBits = Line.BUS_BITS;
+            busBits &= ~(Line.FAST_BUS_BIT);
+            return busBits;
+        }
+
         [PrimaryKey]
         [Indexed]
         public int Id { get; set; }
@@ -45,7 +52,6 @@ namespace RozkładJazdyv2.Model
         [Ignore]
         public string FavouriteText => IsFavourite ? "\xE00B" : "\x0000";
 
-        
         public bool IsFavourite
         {
             get => (this.Type & FAVOURITE_BIT) == FAVOURITE_BIT;
@@ -73,6 +79,7 @@ namespace RozkładJazdyv2.Model
         }
 
         #region Class methods
+
         public string GetLineLogoByType()
         {
             if ((this.Type & Line.BIG_BUS_BIT) > 0)
@@ -84,6 +91,14 @@ namespace RozkładJazdyv2.Model
             if ((this.Type & Line.TRAIN_BIT) > 0)
                 return "\xE7C0";
             return "\xE806";
+        }
+
+        public async Task GetSchedules()
+        {
+            if (this.Schedules != null)
+                return;
+            string query = $"SELECT * FROM Schedule WHERE idOfLine = {this.Id};";
+            this.Schedules = await SQLServices.QueryTimetableAsync<Schedule>(query);
         }
 
         private void RefreshLineGridInLinesList()

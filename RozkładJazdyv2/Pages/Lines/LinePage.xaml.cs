@@ -120,7 +120,7 @@ namespace RozkładJazdyv2.Pages.Lines
             _LineFirstTrackBusStops.Clear();
             _LineSecondTrackBusStops.Clear();
 
-            _SelectedSchedule = await GetScheduleTracksAsync(_SelectedSchedule);
+            await _SelectedSchedule.GetTracks();
             SetTrackGridStyle(_SelectedSchedule.Tracks);
 
             _SelectedSchedule = await GetTracksBusStopsAsync(_SelectedSchedule);
@@ -152,25 +152,12 @@ namespace RozkładJazdyv2.Pages.Lines
 
             foreach (var track in schedule.Tracks)
             {
-                query = $"SELECT * FROM BusStop WHERE IdOfTrack = {track.Id} AND IdOfSchedule = {track.IdOfSchedule};";
-
-                if (track.BusStops == null)
-                    track.BusStops = await SQLServices.QueryTimetableAsync<BusStop>(query);
+                await track.GetBusStops();
 
                 AddStopsToViewByTrack(trackNumber++, track);
 
                 LineFirstTrackProgressRing.IsActive = false;
                 LineSecondTrackProgressRing.IsActive = false;
-            }
-            return schedule;
-        }
-
-        private async Task<Schedule> GetScheduleTracksAsync(Schedule schedule)
-        {
-            if (schedule.Tracks == null)
-            {
-                string query = $"SELECT * FROM Track WHERE IdOfSchedule = {schedule.Id};";
-                schedule.Tracks = await SQLServices.QueryTimetableAsync<Track>(query);
             }
             return schedule;
         }

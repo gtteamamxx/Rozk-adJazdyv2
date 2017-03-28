@@ -109,8 +109,7 @@ namespace RozkładJazdyv2.Pages.Lines
 
         private async Task UpdateHoursAsync()
         {
-            if (_SelectedBusStop.Hours == null)
-                _SelectedBusStop.Hours = await GetBusStopHoursAsync(_SelectedBusStop);
+            await _SelectedBusStop.GetHours();
 
             if (_SelectedBusStop.Hours.Count > 0)
                 await AddAllHoursToViewAsync(_SelectedBusStop.Hours);
@@ -146,27 +145,10 @@ namespace RozkładJazdyv2.Pages.Lines
             });
         }
 
-        private async Task<List<Hour>> GetBusStopHoursAsync(BusStop busStop)
-        {
-            string query = $"SELECT * FROM Hour WHERE IdOfBusStop = {_SelectedBusStop.Id};";
-            List<Hour> hours = await SQLServices.QueryTimetableAsync<Hour>(query);
-            return hours;
-        }
-
         private async Task UpdateLettersAsync()
         {
-            var letters = await GetLettersAsync();
+            List<Letter> letters = await _SelectedBusStop.GetLetters();
             letters.ForEach(p => LettersListView.Items.Add(p));
-        }
-
-        private async Task<List<Letter>> GetLettersAsync()
-        {
-            IEnumerable<LineViewHour> lineViewHourList = DayTypeHoursListView.Items.Select(p => (LineViewHour)p);
-
-            string query = $"SELECT * FROM Letter WHERE IdOfBusStop = {_SelectedBusStop.Id};";
-            List<Letter> letters = (await SQLServices.QueryTimetableAsync<Letter>(query)).GroupBy(p => p.IdOfName).Select(p => p.First()).ToList();
-
-            return letters;
         }
 
         private void HourGridView_ContainerContentChanging(ListViewBase sender, ContainerContentChangingEventArgs args)
