@@ -51,7 +51,7 @@ namespace RozkładJazdyv2.Pages.Favourites
             {
                 HideNoItemsInFavouritesInfo();
 
-                if(areBussesInFavourites) // if we have both busses & favourites, we have to show left border on busses grid
+                if (areBussesInFavourites) // if we have both busses & favourites, we have to show left border on busses grid
                     ShowFavouritesBussesColumn(hideLeftBorder: !areStopsInFavourites);
 
                 if (areStopsInFavourites)
@@ -75,12 +75,12 @@ namespace RozkładJazdyv2.Pages.Favourites
         {
             _FavouriteLines.Clear();
 
-            foreach(Line line in Timetable.Instance.Lines)
+            foreach (Line line in Timetable.Instance.Lines)
             {
                 if (_FavouriteLines.FirstOrDefault(p => p == line) != null)
                     continue;
 
-                if(line.IsFavourite)
+                if (line.IsFavourite)
                     _FavouriteLines.Add(line);
             }
 

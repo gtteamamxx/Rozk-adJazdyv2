@@ -63,7 +63,7 @@ namespace RozkładJazdyv2.Pages.Lines
         private void RegisterHooks()
             => SearchLineAutoSuggestBox.SuggestionChosen += SearchLineAutoSuggestBox_SuggestionChosenAsync;
 
-        
+
         private async void SearchLineAutoSuggestBox_SuggestionChosenAsync(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs args)
         {
             Grid mainGrid = (Grid)sender.Parent;
