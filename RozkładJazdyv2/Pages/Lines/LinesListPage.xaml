@@ -36,7 +36,7 @@
             
             <TextBlock Margin="0 10 0 0"
                        Name="LoadingTextBlock"
-                       Text="Wczytywanie linii..." />
+                       Text="Dodawanie linii do widoku..." />
         </StackPanel>
         
         <Grid Grid.Row="1">
