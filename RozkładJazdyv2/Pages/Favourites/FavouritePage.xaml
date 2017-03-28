@@ -6,7 +6,8 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     NavigationCacheMode="Required"
-    mc:Ignorable="d">
+    mc:Ignorable="d"
+    Background="Black">
 
     <Grid Background="Black">
         
@@ -15,8 +16,7 @@
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
 
-        <StackPanel Name="InfoStackPanel"
-                    HorizontalAlignment="Center"
+        <StackPanel HorizontalAlignment="Center"
                     VerticalAlignment="Center"
                     Grid.ColumnSpan="2">
             
@@ -24,18 +24,68 @@
                           Width="50"
                           Height="50"
                           IsActive="True" />
+
+            <TextBlock FontFamily="Segoe MDL2 Assets"
+                       HorizontalAlignment="Center"
+                       FontSize="50"
+                       Foreground="LimeGreen"
+                       Name="InfoStackPanelLogoTextBlock"
+                       Visibility="Collapsed"
+                       Text="&#xE735;" />
             
             <TextBlock HorizontalAlignment="Center"
                        Margin="0 10 0 0"
                        VerticalAlignment="Center"
                        Name="InfoStackPanelTextBlock"
+                       TextAlignment="Center"
                        TextWrapping="Wrap"
-                       Text="Nie masz żadnej rzeczy w ulubionych."
                        Visibility="Collapsed"/>
         </StackPanel>
 
-        <Grid Grid.Row="1"
-              Name="ContentGrid">
+        <Grid Name="BusStopsColumnGrid">
+            <Grid>
+
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition />
+                </Grid.RowDefinitions>
+                
+                <Grid BorderBrush="White"
+                      BorderThickness="0 0 0 1">
+                    <TextBlock Text="Ulubione przystanki:"
+                               HorizontalAlignment="Center"/>
+                </Grid>
+
+                <ListView Name="FavouritesBusStopsListView"
+                          Grid.Row="1">
+                    
+                </ListView>
+            </Grid>
+        </Grid>
+
+        <Grid Grid.Column="1"
+              Name="LinesColumnGrid"
+              BorderBrush="White"
+              BorderThickness="1 0 0 0">
+
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            
+            <Grid BorderBrush="White"
+                  BorderThickness="0 0 0 1">
+                <TextBlock Text="Ulubione linie:"
+                            HorizontalAlignment="Center"/>
+            </Grid>
+
+            <GridView Name="FavouritesLinesGridView"
+                      ItemsSource="{x:Bind _FavouriteLines}"
+                      SelectionChanged="FavouritesLinesGridView_SelectionChanged"
+                      Padding="5"
+                      Grid.Row="1">
+            </GridView>
+
         </Grid>
     </Grid>
 </Page>

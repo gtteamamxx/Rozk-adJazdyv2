@@ -43,15 +43,15 @@ namespace RozkładJazdyv2.Model
         [Ignore]
         public Grid GridObjectInLinesList { get; set; }
         [Ignore]
-        public string FavouriteText => IsLineFavourite ? "\xE00B" : "\x0000";
+        public string FavouriteText => IsFavourite ? "\xE00B" : "\x0000";
 
-        #region Class methods
-        public bool IsLineFavourite
+        
+        public bool IsFavourite
         {
             get => (this.Type & FAVOURITE_BIT) == FAVOURITE_BIT;
             set
             {
-                if ((!value && !IsLineFavourite) || (value && IsLineFavourite))
+                if ((!value && !IsFavourite) || (value && IsFavourite))
                     return;
 
                 if (!value)
@@ -65,13 +65,14 @@ namespace RozkładJazdyv2.Model
                     AddLineToFavouriteAsync();
                 }
 
-                IsLineFavourite = value;
+                IsFavourite = value;
 
                 LinesViewPage.RefreshLineGridView(Pages.Lines.LinesViewPage.LinesType.Favourites, FAVOURITE_BIT);
                 RefreshLineGridInLinesList();
             }
         }
 
+        #region Class methods
         public string GetLineLogoByType()
         {
             if ((this.Type & Line.BIG_BUS_BIT) > 0)

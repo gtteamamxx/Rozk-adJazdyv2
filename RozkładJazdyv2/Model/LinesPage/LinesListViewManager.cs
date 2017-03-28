@@ -16,9 +16,9 @@ using Windows.UI.Xaml.Media;
 
 namespace RozkładJazdyv2.Model.LinesPage
 {
-    public class LinesViewManager
+    public class LinesListViewManager
     {
-        private LinesViewManager() { }
+        private LinesListViewManager() { }
 
         private static List<Tuple<LinesViewPage.LinesType, GridView>> _LinesTypesGridView;
         private static ScrollViewer _LinesTypeScrollViewer;
@@ -55,7 +55,7 @@ namespace RozkładJazdyv2.Model.LinesPage
         public static List<Tuple<LinesViewPage.LinesType, GridView>> GetLineTypesGridViewList()
             => _LinesTypesGridView;
 
-        public static async Task AddLineTypeToListViewAsync(LinesViewPage.LinesType type, string name, int acceptedLinesBit, Pages.Lines.LinesViewPage page,
+        public static async Task AddLineTypeToListViewAsync(LinesViewPage.LinesType type, string name, int acceptedLinesBit,
                                                             SelectionChangedEventHandler selectionChangedFunction)
         {
             await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.High, async () =>
@@ -64,7 +64,7 @@ namespace RozkładJazdyv2.Model.LinesPage
                 AddRowDefinitionsToContentGrid(ref contentGrid);
                 AddPanelGridToContentGrid(ref contentGrid, name);
 
-                GridView gridView = AddLinesGridViewToContentGrid(contentGrid, acceptedLinesBit, page, selectionChangedFunction);
+                GridView gridView = AddLinesGridViewToContentGrid(contentGrid, acceptedLinesBit, selectionChangedFunction);
 
                 CheckIfLineIsEmptyAndHideGridViewIfItIs(contentGrid);
                 await AddContentGridToPageAsync(contentGrid, gridView, type);
@@ -95,8 +95,7 @@ namespace RozkładJazdyv2.Model.LinesPage
             return linesGridView.Items.Count() == 0;
         }
 
-        private static GridView AddLinesGridViewToContentGrid(Grid grid, int acceptedLinesBit,
-                            Pages.Lines.LinesViewPage page, SelectionChangedEventHandler selectionChangedFunction)
+        private static GridView AddLinesGridViewToContentGrid(Grid grid, int acceptedLinesBit, SelectionChangedEventHandler selectionChangedFunction)
         {
             GridView linesGridView = new GridView()
             {
@@ -109,8 +108,8 @@ namespace RozkładJazdyv2.Model.LinesPage
 
             Grid.SetRow(linesGridView, 1);
 
-            linesGridView.ItemsPanel = page.Resources["LinesGridViewItemPanelTemplate"] as ItemsPanelTemplate;
-            linesGridView.ItemTemplate = page.Resources["LineDataTemplate"] as DataTemplate;
+            linesGridView.ItemsPanel = App.Current.Resources["LinesGridViewItemPanelTemplate"] as ItemsPanelTemplate;
+            linesGridView.ItemTemplate = App.Current.Resources["LineDataTemplate"] as DataTemplate;
 
             AddLinesToGridView(ref linesGridView, acceptedLinesBit);
 

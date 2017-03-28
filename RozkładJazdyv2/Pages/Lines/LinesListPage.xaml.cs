@@ -58,11 +58,12 @@ namespace RozkładJazdyv2.Pages.Lines
         }
 
         public static void RefreshLineGridView(LinesType type, int acceptedLinesSumBit)
-            => Model.LinesPage.LinesViewManager.RefreshGridView(_LinesGridViews.First(p => p.Item1 == type).Item2, acceptedLinesSumBit);
+            => Model.LinesPage.LinesListViewManager.RefreshGridView(_LinesGridViews.First(p => p.Item1 == type).Item2, acceptedLinesSumBit);
 
         private void RegisterHooks()
             => SearchLineAutoSuggestBox.SuggestionChosen += SearchLineAutoSuggestBox_SuggestionChosenAsync;
 
+        
         private async void SearchLineAutoSuggestBox_SuggestionChosenAsync(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs args)
         {
             Grid mainGrid = (Grid)sender.Parent;
@@ -71,7 +72,7 @@ namespace RozkładJazdyv2.Pages.Lines
 
             selectedLine = await FillLineSchedulesAsync(selectedLine);
 
-            await ShowLinePageBySchedulesAsync(selectedLine, mainGrid);
+            await ShowLinePageBySchedulesAsync(selectedLine, mainGrid, ScheduleClickedAsync);
         }
 
         private async void LinesViewPage_Loaded(object sender, RoutedEventArgs e)
@@ -85,24 +86,41 @@ namespace RozkładJazdyv2.Pages.Lines
             ShowSearchLineAutoSuggestBox();
         }
 
+
+        public static async Task ShowLinePageBySchedulesAsync(Line line, Grid lineBackgroundGrid, RoutedEventHandler scheduleClickedAsyncFunction)
+        {
+            if (line.Schedules == null)
+                line.Schedules = await GetLineSchedules(line);
+
+            if (line.Schedules.Count() == 1)
+            {
+                if (line.Schedules[0].Name.Contains("zawie")) //line is stopped
+                    FlyoutHelper.ShowFlyOutLineIsStoppedAtLineGrid(lineBackgroundGrid, line);
+                else
+                    await ShowLinePageAsync(new ChangeLineParameter() { Line = line, SelectedSchedule = line.Schedules.ElementAt(0) });
+            }
+            else
+                FlyoutHelper.ShowFlyOutWithSchedulesAtLineGrid(lineBackgroundGrid, line, scheduleClickedAsyncFunction);
+        }
+
+
         private async Task LoadLinesToView()
         {
             _IsPageCached = true;
 
-            LinesViewManager.SetInstance(LinesScrollViewer);
+            LinesListViewManager.SetInstance(LinesScrollViewer);
             int busBits = GetBusBitsWithoutFastBus();
 
-            await LinesViewManager.AddLineTypeToListViewAsync(LinesType.Favourites, "Ulubione", Line.FAVOURITE_BIT, this, LineSelectionChangedAsync);
-            await LinesViewManager.AddLineTypeToListViewAsync(LinesType.Trams, "Tramwaje", Line.TRAM_BITS, this, LineSelectionChangedAsync);
+            await LinesListViewManager.AddLineTypeToListViewAsync(LinesType.Favourites, "Ulubione", Line.FAVOURITE_BIT, LineSelectionChangedAsync);
+            await LinesListViewManager.AddLineTypeToListViewAsync(LinesType.Trams, "Tramwaje", Line.TRAM_BITS, LineSelectionChangedAsync);
             await Task.Delay(100);
+            await LinesListViewManager.AddLineTypeToListViewAsync(LinesType.Busses, "Autobusy", busBits, LineSelectionChangedAsync);
+            await LinesListViewManager.AddLineTypeToListViewAsync(LinesType.Fast_Busses, "Autobusy przyśpieszone", Line.FAST_BUS_BIT, LineSelectionChangedAsync);
+            await LinesListViewManager.AddLineTypeToListViewAsync(LinesType.Night_Busses, "Nocne", Line.NIGHT_BUS_BIT, LineSelectionChangedAsync);
+            await LinesListViewManager.AddLineTypeToListViewAsync(LinesType.Mini_Busses, "Minibusy", Line.MINI_BIT, LineSelectionChangedAsync);
+            await LinesListViewManager.AddLineTypeToListViewAsync(LinesType.Others, "Inne", Line.AIRPORT_BIT, LineSelectionChangedAsync);
 
-            await LinesViewManager.AddLineTypeToListViewAsync(LinesType.Busses, "Autobusy", busBits, this, LineSelectionChangedAsync);
-            await LinesViewManager.AddLineTypeToListViewAsync(LinesType.Fast_Busses, "Autobusy przyśpieszone", Line.FAST_BUS_BIT, this, LineSelectionChangedAsync);
-            await LinesViewManager.AddLineTypeToListViewAsync(LinesType.Night_Busses, "Nocne", Line.NIGHT_BUS_BIT, this, LineSelectionChangedAsync);
-            await LinesViewManager.AddLineTypeToListViewAsync(LinesType.Mini_Busses, "Minibusy", Line.MINI_BIT, this, LineSelectionChangedAsync);
-            await LinesViewManager.AddLineTypeToListViewAsync(LinesType.Others, "Inne", Line.AIRPORT_BIT, this, LineSelectionChangedAsync);
-
-            _LinesGridViews = LinesViewManager.GetLineTypesGridViewList();
+            _LinesGridViews = LinesListViewManager.GetLineTypesGridViewList();
         }
 
         private int GetBusBitsWithoutFastBus()
@@ -112,7 +130,7 @@ namespace RozkładJazdyv2.Pages.Lines
             return busBits;
         }
 
-        private async Task ShowLinePageAsync(ChangeLineParameter changeLineParameter)
+        private static async Task ShowLinePageAsync(ChangeLineParameter changeLineParameter)
         {
             await Task.Delay(100);
             MainFrameHelper.GetMainFrame().Navigate(typeof(LinePage), changeLineParameter);
@@ -127,22 +145,9 @@ namespace RozkładJazdyv2.Pages.Lines
             var line = gridView.SelectedItem as Line;
             line = await FillLineSchedulesAsync(line);
 
-            await ShowLinePageBySchedulesAsync(line, line.GridObjectInLinesList);
+            await ShowLinePageBySchedulesAsync(line, line.GridObjectInLinesList, ScheduleClickedAsync);
 
             ResetClickedGrids();
-        }
-
-        private async Task ShowLinePageBySchedulesAsync(Line line, Grid lineBackgroundGrid)
-        {
-            if (line.Schedules.Count() == 1)
-            {
-                if (line.Schedules[0].Name.Contains("zawie")) //line is stopped
-                    FlyoutHelper.ShowFlyOutLineIsStoppedAtLineGrid(lineBackgroundGrid, line);
-                else
-                    await ShowLinePageAsync(new ChangeLineParameter() { Line = line, SelectedSchedule = line.Schedules.ElementAt(0) });
-            }
-            else
-                FlyoutHelper.ShowFlyOutWithSchedulesAtLineGrid(lineBackgroundGrid, line, ScheduleClickedAsync);
         }
 
         private async Task<Line> FillLineSchedulesAsync(Line line)
@@ -153,10 +158,11 @@ namespace RozkładJazdyv2.Pages.Lines
             return line;
         }
 
-        private async void ScheduleClickedAsync(object sender, RoutedEventArgs e)
+        public static async void ScheduleClickedAsync(object sender, RoutedEventArgs e)
         {
             Button clickedButton = (Button)sender;
             Line selectedLine = (Line)(clickedButton.DataContext);
+
             Schedule selectedSchedule = selectedLine.Schedules.First(p => p.Name == (string)clickedButton.Content);
 
             await ShowLinePageAsync(
@@ -167,7 +173,7 @@ namespace RozkładJazdyv2.Pages.Lines
                 });
         }
 
-        private async Task<List<Schedule>> GetLineSchedules(Line line)
+        private static async Task<List<Schedule>> GetLineSchedules(Line line)
         {
             string query = $"SELECT * FROM Schedule WHERE idOfLine = {line.Id};";
             return await SQLServices.QueryTimetableAsync<Schedule>(query);
@@ -204,7 +210,7 @@ namespace RozkładJazdyv2.Pages.Lines
                     Text = p.EditedName
                 });
 
-                if (p.IsLineFavourite)
+                if (p.IsFavourite)
                 {
                     searchLineGrid.Children.Add(new TextBlock()
                     {

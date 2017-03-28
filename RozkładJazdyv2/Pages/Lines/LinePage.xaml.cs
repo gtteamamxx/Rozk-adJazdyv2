@@ -137,11 +137,11 @@ namespace RozkładJazdyv2.Pages.Lines
 
         private void UpdateFavouriteText()
         {
-            LineFavouriteButtonContentTextBlock.Text = _SelectedLine.IsLineFavourite ?
+            LineFavouriteButtonContentTextBlock.Text = _SelectedLine.IsFavourite ?
                 "Usuń linię z ulubionych" : "Dodaj linię do ulubionych";
-            LineFavouriteHeartSignTextBlock.Text = _SelectedLine.IsLineFavourite ? "\xE00C" : "\xE00B";
+            LineFavouriteHeartSignTextBlock.Text = _SelectedLine.IsFavourite ? "\xE00C" : "\xE00B";
 
-            LineFavouriteHeartSignTextBlock.Foreground = new SolidColorBrush(_SelectedLine.IsLineFavourite ?
+            LineFavouriteHeartSignTextBlock.Foreground = new SolidColorBrush(_SelectedLine.IsFavourite ?
                 Colors.GreenYellow : Colors.White);
         }
 
@@ -317,7 +317,7 @@ namespace RozkładJazdyv2.Pages.Lines
 
         private void LineFavouriteButton_Click(object sender, RoutedEventArgs e)
         {
-            _SelectedLine.IsLineFavourite = !_SelectedLine.IsLineFavourite;
+            _SelectedLine.IsFavourite = !_SelectedLine.IsFavourite;
             UpdateFavouriteText();
         }
 

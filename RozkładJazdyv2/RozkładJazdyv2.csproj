@@ -107,7 +107,7 @@
     <Compile Include="Model\LinesPage\ChangeBusStopParametr.cs" />
     <Compile Include="Model\LinesPage\ChangeLineParameter.cs" />
     <Compile Include="Model\LinesPage\FlyoutHelper.cs" />
-    <Compile Include="Model\LinesPage\LinesViewManager.cs" />
+    <Compile Include="Model\LinesPage\LinesListViewManager.cs" />
     <Compile Include="Model\LinesPage\LineViewBusStop.cs" />
     <Compile Include="Model\LinesPage\LineViewHour.cs" />
     <Compile Include="Model\MainMenu\ButtonHelper.cs" />

@@ -58,7 +58,7 @@
                     
                     <ComboBox Margin="10 0 0 0"
                               Name="BusStopsComboBox"
-                              ItemsSource="{x:Bind _BusStopsInTrack}"
+                              ItemsSource="{x:Bind _ListOfBusStopsInTrack}"
                               SelectionChanged="BusStopsComboBox_SelectionChanged">
                         
                         <ComboBox.ItemTemplate>
