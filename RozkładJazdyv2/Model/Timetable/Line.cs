@@ -73,7 +73,7 @@ namespace RozkładJazdyv2.Model
 
                 IsFavourite = value;
 
-                LinesViewPage.RefreshLineGridView(Pages.Lines.LinesViewPage.LinesType.Favourites, FAVOURITE_BIT);
+                LinesListPage.RefreshLineGridView(Pages.Lines.LinesListPage.LinesType.Favourites, FAVOURITE_BIT);
                 RefreshLineGridInLinesList();
             }
         }
@@ -102,7 +102,11 @@ namespace RozkładJazdyv2.Model
         }
 
         private void RefreshLineGridInLinesList()
-            => (this.GridObjectInLinesList.Children[1] as TextBlock).Text = this.FavouriteText; // how to force update bindings?
+        {
+            if(this.GridObjectInLinesList != null)
+                (this.GridObjectInLinesList.Children[1] as TextBlock).Text 
+                    = this.FavouriteText; // how to force update bindings?
+        }
 
         private async void RemoveLineFromFavouritesAsync()
             => await SQLServices.ExecuteFavouriteAsync($"DELETE FROM Line WHERE Name = '{this.EditedName}';");

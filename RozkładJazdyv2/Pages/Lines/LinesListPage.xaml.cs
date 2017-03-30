@@ -25,7 +25,7 @@ namespace RozkładJazdyv2.Pages.Lines
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
-    public sealed partial class LinesViewPage : Page
+    public sealed partial class LinesListPage : Page
     {
         public enum LinesType
         {
@@ -40,11 +40,11 @@ namespace RozkładJazdyv2.Pages.Lines
 
         private static List<Tuple<LinesType, GridView>> _LinesGridViews;
 
-        private bool _IsPageCached;
+        private static bool _IsPageCached;
 
         private ObservableCollection<Grid> _SearchLinesGrids;
 
-        public LinesViewPage()
+        public LinesListPage()
         {
             this.InitializeComponent();
             this.SetIsBackFromPageAllowed(true);
@@ -58,11 +58,13 @@ namespace RozkładJazdyv2.Pages.Lines
         }
 
         public static void RefreshLineGridView(LinesType type, int acceptedLinesSumBit)
-            => Model.LinesPage.LinesListViewManager.RefreshGridView(_LinesGridViews.First(p => p.Item1 == type).Item2, acceptedLinesSumBit);
+        {
+            if(_IsPageCached)
+                LinesListViewManager.RefreshGridView(_LinesGridViews.First(p => p.Item1 == type).Item2, acceptedLinesSumBit);
+        }
 
         private void RegisterHooks()
             => SearchLineAutoSuggestBox.SuggestionChosen += SearchLineAutoSuggestBox_SuggestionChosenAsync;
-
 
         private async void SearchLineAutoSuggestBox_SuggestionChosenAsync(AutoSuggestBox sender, AutoSuggestBoxSuggestionChosenEventArgs args)
         {

@@ -40,23 +40,24 @@ namespace RozkładJazdyv2.Pages.Favourites
 
         private void FavouritePage_Loaded(object sender, RoutedEventArgs e)
         {
-            bool areBussesInFavourites, areStopsInFavourites;
+            bool areLinesInFavourites, areStopsInFavourites;
 
             LoadingProgressRing.IsActive = true;
 
-            areBussesInFavourites = LoadFavouriteLines();
+            areLinesInFavourites = LoadFavouriteLines();
             areStopsInFavourites = LoadFavouriteStops();
 
-            if (areBussesInFavourites || areStopsInFavourites)
+            if (areLinesInFavourites || areStopsInFavourites)
             {
                 HideNoItemsInFavouritesInfo();
+                AlignBothColumns(areLinesInFavourites, areStopsInFavourites);
 
-                if (areBussesInFavourites) // if we have both busses & favourites, we have to show left border on busses grid
-                    ShowFavouritesBussesColumn(hideLeftBorder: !areStopsInFavourites);
+                if (areLinesInFavourites) // if we have both busses & favourites, we have to show left border on busses grid
+                    ShowFavouritesLinesColumn(hideLeftBorder: !areStopsInFavourites);
 
                 if (areStopsInFavourites)
                 {
-                    if (!areBussesInFavourites)
+                    if (!areLinesInFavourites)
                         ;
                     else
                         ;
@@ -69,6 +70,25 @@ namespace RozkładJazdyv2.Pages.Favourites
             }
 
             LoadingProgressRing.IsActive = false;
+        }
+
+        private void AlignBothColumns(bool linesColumn, bool busStopsColumn)
+        {
+            if (linesColumn && busStopsColumn)
+            {
+                Grid.SetColumnSpan(LinesColumnGrid, 1);
+                Grid.SetColumnSpan(BusStopsColumnGrid, 1);
+                Grid.SetColumn(LinesColumnGrid, 1);
+            }
+            else if (linesColumn && !busStopsColumn)
+            {
+                Grid.SetColumn(LinesColumnGrid, 0);
+                Grid.SetColumnSpan(LinesColumnGrid, 2);
+            }
+            else if (!linesColumn && busStopsColumn)
+            {
+                Grid.SetColumnSpan(BusStopsColumnGrid, 2);
+            }
         }
 
         private bool LoadFavouriteLines()
@@ -92,10 +112,10 @@ namespace RozkładJazdyv2.Pages.Favourites
             return false;
         }
 
-        private void ShowFavouritesBussesColumn(bool hideLeftBorder = true)
+        private void ShowFavouritesLinesColumn(bool hideLeftBorder = true)
         {
-            BusStopsColumnGrid.Visibility = Visibility.Visible;
-            BusStopsColumnGrid.BorderBrush = new SolidColorBrush(hideLeftBorder ? Colors.Transparent : Colors.White);
+            LinesColumnGrid.Visibility = Visibility.Visible;
+            LinesColumnGrid.BorderThickness = new Thickness(hideLeftBorder ? 0.0 : 1.0, 0, 0, 0);
         }
 
         private void HideFavouritesScheme()
@@ -107,8 +127,7 @@ namespace RozkładJazdyv2.Pages.Favourites
         private void ShowNoItemsInFavouritesInfo()
         {
             InfoStackPanelLogoTextBlock.Visibility = Visibility.Visible;
-            InfoStackPanelTextBlock.Text = $"Nie masz żadnej rzeczy w ulubionych." +
-                $"{Environment.NewLine}Wróć tu gdy już coś dodasz.";
+            InfoStackPanelTextBlock.Text = $"Nie masz żadnej rzeczy w ulubionych.{Environment.NewLine}Wróć tu gdy już coś dodasz.";
             InfoStackPanelTextBlock.Visibility = Visibility.Visible;
         }
 
@@ -137,7 +156,7 @@ namespace RozkładJazdyv2.Pages.Favourites
                                                     as GridViewItem)
                                                     .ContentTemplateRoot as Grid;
 
-            await Lines.LinesViewPage.ShowLinePageBySchedulesAsync(selectedLine, selectedLineGridInGridView, Lines.LinesViewPage.ScheduleClickedAsync);
+            await Lines.LinesListPage.ShowLinePageBySchedulesAsync(selectedLine, selectedLineGridInGridView, Lines.LinesListPage.ScheduleClickedAsync);
         }
 
     }

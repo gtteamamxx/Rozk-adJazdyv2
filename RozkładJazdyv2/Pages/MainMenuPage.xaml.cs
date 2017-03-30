@@ -76,7 +76,7 @@ namespace RozkładJazdyv2.Pages
             switch(clickedButton.Type)
             {
                 case MainMenuButton.ButtonType.Lines:
-                    MainFrameHelper.GetMainFrame().Navigate(typeof(Pages.Lines.LinesViewPage));
+                    MainFrameHelper.GetMainFrame().Navigate(typeof(Pages.Lines.LinesListPage));
                     break;
 
                 case MainMenuButton.ButtonType.Stops:

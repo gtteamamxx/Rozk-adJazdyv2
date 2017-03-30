@@ -12,8 +12,8 @@
     <Grid Background="Black">
         
         <Grid.ColumnDefinitions>
-            <ColumnDefinition />
-            <ColumnDefinition />
+            <ColumnDefinition Width="3*" />
+            <ColumnDefinition Width="3*"/>
         </Grid.ColumnDefinitions>
 
         <StackPanel HorizontalAlignment="Center"
@@ -42,7 +42,8 @@
                        Visibility="Collapsed"/>
         </StackPanel>
 
-        <Grid Name="BusStopsColumnGrid">
+        <Grid Name="BusStopsColumnGrid"
+              Visibility="Collapsed">
             <Grid>
 
                 <Grid.RowDefinitions>
@@ -63,9 +64,10 @@
             </Grid>
         </Grid>
 
-        <Grid Grid.Column="1"
-              Name="LinesColumnGrid"
+        <Grid Name="LinesColumnGrid"
               BorderBrush="White"
+              Grid.Column="1"
+              HorizontalAlignment="Center"
               BorderThickness="1 0 0 0">
 
             <Grid.RowDefinitions>
@@ -80,6 +82,7 @@
             </Grid>
 
             <GridView Name="FavouritesLinesGridView"
+                      HorizontalAlignment="Center"
                       ItemsSource="{x:Bind _FavouriteLines}"
                       SelectionChanged="FavouritesLinesGridView_SelectionChanged"
                       Padding="5"

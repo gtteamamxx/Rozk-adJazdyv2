@@ -20,7 +20,7 @@ namespace RozkładJazdyv2.Model.LinesPage
     {
         private LinesListViewManager() { }
 
-        private static List<Tuple<LinesViewPage.LinesType, GridView>> _LinesTypesGridView;
+        private static List<Tuple<LinesListPage.LinesType, GridView>> _LinesTypesGridView;
         private static ScrollViewer _LinesTypeScrollViewer;
         private static int _LastAcceptedLineBits;
 
@@ -30,7 +30,7 @@ namespace RozkładJazdyv2.Model.LinesPage
                 _LinesTypeScrollViewer = linesScrollViewer;
 
             if (_LinesTypesGridView == null)
-                _LinesTypesGridView = new List<Tuple<LinesViewPage.LinesType, GridView>>();
+                _LinesTypesGridView = new List<Tuple<LinesListPage.LinesType, GridView>>();
         }
 
         public static void RefreshGridView(GridView gridView, int acceptedLinesBit)
@@ -52,10 +52,10 @@ namespace RozkładJazdyv2.Model.LinesPage
             CheckIfLineIsEmptyAndHideGridViewIfItIs(contentGrid);
         }
 
-        public static List<Tuple<LinesViewPage.LinesType, GridView>> GetLineTypesGridViewList()
+        public static List<Tuple<LinesListPage.LinesType, GridView>> GetLineTypesGridViewList()
             => _LinesTypesGridView;
 
-        public static async Task AddLineTypeToListViewAsync(LinesViewPage.LinesType type, string name, int acceptedLinesBit,
+        public static async Task AddLineTypeToListViewAsync(LinesListPage.LinesType type, string name, int acceptedLinesBit,
                                                             SelectionChangedEventHandler selectionChangedFunction)
         {
             await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.High, async () =>
@@ -77,7 +77,7 @@ namespace RozkładJazdyv2.Model.LinesPage
         private static void SetContentGridVisible(Grid grid, Visibility visibleState)
             => grid.Visibility = visibleState;
 
-        private static async Task AddContentGridToPageAsync(Grid grid, GridView gridView, LinesViewPage.LinesType type)
+        private static async Task AddContentGridToPageAsync(Grid grid, GridView gridView, LinesListPage.LinesType type)
         {
             await CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.High, () =>
             {
@@ -85,7 +85,7 @@ namespace RozkładJazdyv2.Model.LinesPage
                 scrollViewerStacKPanel.Children.Add(grid);
 
                 gridView.DataContext = grid;
-                _LinesTypesGridView.Add(new Tuple<LinesViewPage.LinesType, GridView>(type, gridView));
+                _LinesTypesGridView.Add(new Tuple<LinesListPage.LinesType, GridView>(type, gridView));
             });
         }
 
