@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace RozkładJazdyv2.Model.Application
+namespace RozkładJazdyv2.Model.BusStopListPage
 {
-    public class Version
+    public class BusStopDependency
     {
-        public static readonly string VERSION = "v 0.2.4";
+        public Line Line { get; set; }
     }
 }

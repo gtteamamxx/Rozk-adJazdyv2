@@ -34,12 +34,20 @@ namespace RozkładJazdyv2.Model
             return busBits;
         }
 
+        public Line() { }
+
+        public Line(bool lockUpdateFavouriteSqlStatus = false)
+        {
+            _LockUpdateFavouriteSqlStatus = lockUpdateFavouriteSqlStatus;
+        }
+
         [PrimaryKey]
         [Indexed]
         public int Id { get; set; }
 
         public string Name { get; set; }
         public int Type { get; set; }
+        private bool _LockUpdateFavouriteSqlStatus { get; set; }
 
         [Ignore]
         public string Url { get; set; }
@@ -52,12 +60,18 @@ namespace RozkładJazdyv2.Model
         [Ignore]
         public string FavouriteText => IsFavourite ? "\xE00B" : "\x0000";
 
+        [Ignore]
         public bool IsFavourite
         {
             get => (this.Type & FAVOURITE_BIT) == FAVOURITE_BIT;
             set
             {
                 if ((!value && !IsFavourite) || (value && IsFavourite))
+                    return;
+
+                IsFavourite = value;
+
+                if (_LockUpdateFavouriteSqlStatus)
                     return;
 
                 if (!value)
@@ -70,9 +84,7 @@ namespace RozkładJazdyv2.Model
                     this.Type |= FAVOURITE_BIT;
                     AddLineToFavouriteAsync();
                 }
-
-                IsFavourite = value;
-
+                
                 LinesListPage.RefreshLineGridView(Pages.Lines.LinesListPage.LinesType.Favourites, FAVOURITE_BIT);
                 RefreshLineGridInLinesList();
             }

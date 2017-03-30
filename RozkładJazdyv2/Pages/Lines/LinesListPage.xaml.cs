@@ -90,6 +90,7 @@ namespace RozkładJazdyv2.Pages.Lines
         public static async Task ShowLinePageBySchedulesAsync(Line line, Grid lineBackgroundGrid, RoutedEventHandler scheduleClickedAsyncFunction)
         {
             await line.GetSchedules();
+
             if (line.Schedules.Count() == 1)
             {
                 if (line.Schedules[0].Name.Contains("zawie")) //line is stopped

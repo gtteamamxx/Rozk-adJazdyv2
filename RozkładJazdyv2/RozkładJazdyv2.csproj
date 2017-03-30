@@ -102,6 +102,7 @@
     <Compile Include="Model\Animation\AnimationHelper.cs" />
     <Compile Include="Model\Application\BackButtonManager.cs" />
     <Compile Include="Model\Application\Version.cs" />
+    <Compile Include="Model\BusStopListPage\BusStopDependency.cs" />
     <Compile Include="Model\Extensions\PageExtension.cs" />
     <Compile Include="Model\LinesPage\AdditionalInfo.cs" />
     <Compile Include="Model\LinesPage\ChangeBusStopParametr.cs" />
@@ -123,6 +124,9 @@
     <Compile Include="Model\Timetable\Names\LetterName.cs" />
     <Compile Include="Model\Timetable\Line.cs" />
     <Compile Include="Model\Extensions\ListExtension.cs" />
+    <Compile Include="Pages\BusStops\BusStopsListPage.xaml.cs">
+      <DependentUpon>BusStopsListPage.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Pages\Favourites\FavouritePage.xaml.cs">
       <DependentUpon>FavouritePage.xaml</DependentUpon>
     </Compile>
@@ -186,6 +190,10 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
+    <Page Include="Pages\BusStops\BusStopsListPage.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Pages\Favourites\FavouritePage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -224,13 +232,10 @@
     </Page>
   </ItemGroup>
   <ItemGroup>
-    <SDKReference Include="Microsoft.VCLibs, Version=14.0">
-      <Name>Visual C++ 2015 Runtime for Universal Windows Platform Apps</Name>
-    </SDKReference>
     <SDKReference Include="Microsoft.VCLibs.120, Version=14.0">
       <Name>Microsoft Visual C++ 2013 Runtime Package for Windows Universal</Name>
     </SDKReference>
-    <SDKReference Include="SQLite.WinRT, Version=3.17.0">
+    <SDKReference Include="SQLite.WinRT, Version=3.18.0">
       <Name>SQLite for Windows Runtime</Name>
     </SDKReference>
     <SDKReference Include="WindowsMobile, Version=10.0.10586.0">

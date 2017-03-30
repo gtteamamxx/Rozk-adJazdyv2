@@ -284,7 +284,7 @@ namespace RozkładJazdyv2.Model
                 await UpdateFavourites();
                 return true;
             }
-            catch
+            catch(Exception ex)
             {
                 return false;
             }

@@ -73,17 +73,19 @@ namespace RozkładJazdyv2.Pages
 
             await Task.Delay(100);
 
-            switch(clickedButton.Type)
+            var frame = MainFrameHelper.GetMainFrame();
+            switch (clickedButton.Type)
             {
                 case MainMenuButton.ButtonType.Lines:
-                    MainFrameHelper.GetMainFrame().Navigate(typeof(Pages.Lines.LinesListPage));
+                    frame.Navigate(typeof(Pages.Lines.LinesListPage));
                     break;
 
                 case MainMenuButton.ButtonType.Stops:
+                    frame.Navigate(typeof(Pages.BusStops.BusStopsListPage));
                     break;
 
                 case MainMenuButton.ButtonType.Favourites:
-                    MainFrameHelper.GetMainFrame().Navigate(typeof(Pages.Favourites.FavouritePage));
+                    frame.Navigate(typeof(Pages.Favourites.FavouritePage));
                     break;
 
                 case MainMenuButton.ButtonType.Communicates:
