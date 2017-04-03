@@ -30,8 +30,8 @@ namespace RozkładJazdyv2.Pages.Lines
     public sealed partial class LineBusStopPage : Page
     {
         private static BusStop _SelectedBusStop;
-        private static Line _SelectedLine => LinePage.ActualShowingLineParameters.Line;
-        private static Schedule _SelectedSchedule => LinePage.ActualShowingLineParameters.SelectedSchedule;
+        private static Line _SelectedLine;
+        private static Schedule _SelectedSchedule;
         private static Track _SelectedTrack;
 
         private static bool _IsRefreshingPageNeeded;
@@ -231,10 +231,12 @@ namespace RozkładJazdyv2.Pages.Lines
             if (selectedItem == null || selectedItem.BusStop.Id == _SelectedBusStop.Id)
                 return;
 
-            MainFrameHelper.GetMainFrame().Navigate(typeof(LineBusStopPage), new ChangeBusStopParametr()
+            MainFrameHelper.GetMainFrame().Navigate(typeof(LineBusStopPage), new    ChangeBusStopParametr()
             {
                 BusStop = selectedItem.BusStop,
-                Track = _SelectedTrack
+                Track = _SelectedTrack,
+                Line = _SelectedLine,
+                Schedule = _SelectedSchedule
             });
         }
 
@@ -247,6 +249,9 @@ namespace RozkładJazdyv2.Pages.Lines
             {
                 _SelectedBusStop = busStop;
                 _SelectedTrack = changeBusStopParametr.Track;
+                _SelectedLine = changeBusStopParametr.Line;
+                _SelectedSchedule = changeBusStopParametr.Schedule;
+
                 _IsRefreshingPageNeeded = true;
             }
             else if (busStop.Id != _SelectedBusStop.Id)
@@ -259,6 +264,9 @@ namespace RozkładJazdyv2.Pages.Lines
 
                 _SelectedTrack = changeBusStopParametr.Track;
                 _IsRefreshingPageNeeded = true;
+
+                _SelectedLine = changeBusStopParametr.Line;
+                _SelectedSchedule = changeBusStopParametr.Schedule;
 
                 if (isRefreshPage)
                     RefreshPage();

@@ -15,19 +15,41 @@
             <ColumnDefinition Width="Auto" />
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
-
-        <ListView Name="BusStopsListView"
-                  ItemsSource="{x:Bind _ListOfBusStopNames}"
-                  SelectionChanged="BusStopsListView_SelectionChanged">
-            <ListView.ItemTemplate>
-                <DataTemplate x:DataType="local:BusStopName">
-                    <Grid Margin="0 0 10 0">
-                        <TextBlock Text="{x:Bind Name}" />
-                    </Grid>
-                </DataTemplate>
-            </ListView.ItemTemplate>
-        </ListView>
-
+        
+        <Grid Width="250">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition />
+            </Grid.RowDefinitions>
+            <AutoSuggestBox Name="SearchAutoSuggestBox"
+                            QueryIcon="Zoom"
+                            TextChanged="SearchAutoSuggestBox_TextChanged" />
+            
+            <ListView Grid.Row="1"
+                      Name="BusStopsListView"
+                      ItemsSource="{x:Bind _ListOfBusStopNames}"
+                      SelectionChanged="BusStopsListView_SelectionChanged">
+                
+                <ListView.ItemTemplate>
+                    <DataTemplate x:DataType="local:BusStopName">
+                        <Grid Margin="0 0 10 0">
+                            <TextBlock Text="{x:Bind Name}"
+                                       TextWrapping="Wrap" />
+                        </Grid>
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+           
+             </ListView>
+        </Grid>
+        
+        <ProgressRing Grid.ColumnSpan="2"
+                      HorizontalAlignment="Center"
+                      Width="50"
+                      Height="50"
+                      VerticalAlignment="Center"
+                      IsActive="False"
+                      Name="LoadingBusStopDependenciesProgressRing" />
+        
         <ListView Grid.Column="1"
                   HorizontalAlignment="Center"
                   ItemsSource="{x:Bind _BusStopDependencies}"
@@ -37,27 +59,32 @@
                     <StackPanel Margin="10 5 0 5"
                                 Background="#04FFFFFF">
 
-                        <Button Background="#373A45"
-                                VerticalContentAlignment="Center"
-                                HorizontalContentAlignment="Center"
-                                Margin="0 0 0 5">
-                            <Grid Width="36"
-                                  Height="40">
-                                <TextBlock HorizontalAlignment="Center"
-                                           VerticalAlignment="Center"
-                                           Foreground="White"
-                                           Text="{x:Bind Line.Name}"/>
+                        <Grid>
+                            <Button Background="#373A45"
+                                    VerticalContentAlignment="Center"
+                                    HorizontalContentAlignment="Center"
+                                    Margin="0 0 0 5"
+                                    DataContext="{Binding}"
+                                    Click="Line_Click">
+                                <Grid Width="36"
+                                      Height="40">
+                                    <TextBlock HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"
+                                               Foreground="White"
+                                               Text="{x:Bind Line.Name}"/>
 
-                                <TextBlock HorizontalAlignment="Right"
-                                           VerticalAlignment="Top"
-                                           Foreground="GreenYellow"
-                                           FontFamily="Segoe MDL2 Assets"
-                                           FontSize="10"
-                                           Text="{x:Bind Line.FavouriteText}" />
-                            </Grid>
-                        </Button>
-
-                        <ListView ItemsSource="{x:Bind Line.Schedules}">
+                                    <TextBlock HorizontalAlignment="Right"
+                                               VerticalAlignment="Top"
+                                               Foreground="GreenYellow"
+                                               FontFamily="Segoe MDL2 Assets"
+                                               FontSize="10"
+                                               Text="{x:Bind Line.FavouriteText}" />
+                                </Grid>
+                            </Button>
+                        </Grid>
+                        
+                        <ListView ItemsSource="{x:Bind Line.Schedules}"
+                                  SelectionMode="None">
                             <ListView.ItemTemplate>
                                 <DataTemplate x:DataType="local:Schedule">
                                     <StackPanel Margin="10 0 0 0">
@@ -68,7 +95,8 @@
                                                 /><Run Text="{x:Bind Name}" />
                                         </TextBlock>
 
-                                        <ListView ItemsSource="{x:Bind Tracks}">
+                                        <ListView ItemsSource="{x:Bind Tracks}"
+                                                  SelectionChanged="Track_SelectionChanged">
                                             <ListView.ItemTemplate>
                                                 <DataTemplate x:DataType="local:Track">
                                                     <StackPanel Margin="10 0 0 0">

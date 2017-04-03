@@ -299,7 +299,9 @@ namespace RozkładJazdyv2.Pages.Lines
             => MainFrameHelper.GetMainFrame().Navigate(typeof(LineBusStopPage), new ChangeBusStopParametr()
             {
                 BusStop = busStop,
-                Track = track
+                Track = track,
+                Line = ActualShowingLineParameters.Line,
+                Schedule = ActualShowingLineParameters.SelectedSchedule
             });
 
         private void LineFavouriteButton_Click(object sender, RoutedEventArgs e)

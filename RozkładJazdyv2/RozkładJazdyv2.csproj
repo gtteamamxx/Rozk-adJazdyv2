@@ -103,6 +103,7 @@
     <Compile Include="Model\Application\BackButtonManager.cs" />
     <Compile Include="Model\Application\Version.cs" />
     <Compile Include="Model\BusStopListPage\BusStopDependency.cs" />
+    <Compile Include="Model\Extensions\IEnumerableExtension.cs" />
     <Compile Include="Model\Extensions\PageExtension.cs" />
     <Compile Include="Model\LinesPage\AdditionalInfo.cs" />
     <Compile Include="Model\LinesPage\ChangeBusStopParametr.cs" />
