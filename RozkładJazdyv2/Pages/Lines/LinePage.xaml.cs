@@ -64,7 +64,7 @@ namespace RozkładJazdyv2.Pages.Lines
                                     .Add<ListView>(LineSecondTrackListView);
 
             HookEvents();
-            this.Loaded += LinePage_LoadedAsync;
+            this.Loaded += LinePage_Loaded;
         }
 
         private async Task ShowLinePageAsync(ChangeLineParameter changeLineParameter)
@@ -73,10 +73,10 @@ namespace RozkładJazdyv2.Pages.Lines
             MainFrameHelper.GetMainFrame().Navigate(typeof(LinePage), changeLineParameter);
         }
 
-        private async void LinePage_LoadedAsync(object sender, RoutedEventArgs e)
+        private void LinePage_Loaded(object sender, RoutedEventArgs e)
         {
             if (_IsRefreshingPageNeeded == true)
-                await UpdateLineInfoAsync();
+                UpdateLineInfo();
         }
 
         private void LineScheduleNameButton_Click(object sender, RoutedEventArgs e)
@@ -104,15 +104,15 @@ namespace RozkładJazdyv2.Pages.Lines
             }
         }
 
-        private async Task UpdateLineInfoAsync()
+        private void UpdateLineInfo()
         {
             UpdateLineHeaderTexts();
-            await UpdateLineTracksAsync();
+            UpdateLineTracks();
 
             _IsRefreshingPageNeeded = false;
         }
 
-        private async Task UpdateLineTracksAsync()
+        private void UpdateLineTracks()
         {
             LineFirstTrackProgressRing.IsActive = true;
             LineSecondTrackProgressRing.IsActive = true;
@@ -120,10 +120,10 @@ namespace RozkładJazdyv2.Pages.Lines
             _LineFirstTrackBusStops.Clear();
             _LineSecondTrackBusStops.Clear();
 
-            await _SelectedSchedule.GetTracks();
+            _SelectedSchedule.GetTracks();
             SetTrackGridStyle(_SelectedSchedule.Tracks);
 
-            _SelectedSchedule = await GetTracksBusStopsAsync(_SelectedSchedule);
+            _SelectedSchedule = GetTracksBusStops(_SelectedSchedule);
         }
 
         private void UpdateLineHeaderTexts()
@@ -136,23 +136,16 @@ namespace RozkładJazdyv2.Pages.Lines
         }
 
         private void UpdateFavouriteText()
-        {
-            LineFavouriteButtonContentTextBlock.Text = _SelectedLine.IsFavourite ?
-                "Usuń linię z ulubionych" : "Dodaj linię do ulubionych";
-            LineFavouriteHeartSignTextBlock.Text = _SelectedLine.IsFavourite ? "\xE00C" : "\xE00B";
+            => LineFavouriteHeartSignTextBlock.Text = _SelectedLine.IsFavourite ? "\xE00C" : "\xE00B";
 
-            LineFavouriteHeartSignTextBlock.Foreground = new SolidColorBrush(_SelectedLine.IsFavourite ?
-                Colors.GreenYellow : Colors.White);
-        }
-
-        private async Task<Schedule> GetTracksBusStopsAsync(Schedule schedule)
+        private Schedule GetTracksBusStops(Schedule schedule)
         {
             string query = string.Empty;
             int trackNumber = 1;
 
             foreach (var track in schedule.Tracks)
             {
-                await track.GetBusStops();
+                track.GetBusStops();
 
                 AddStopsToViewByTrack(trackNumber++, track);
 
@@ -311,7 +304,7 @@ namespace RozkładJazdyv2.Pages.Lines
         }
 
         private void RefreshPage()
-            => LinePage_LoadedAsync(this, null);
+            => LinePage_Loaded(this, null);
 
         private void HookEvents()
             => HookBusStopGridPointerEntered();

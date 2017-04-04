@@ -30,19 +30,19 @@ namespace RozkładJazdyv2.Model
         [Ignore]
         public List<Hour> Hours { get; set; }
 
-        public async Task GetHours()
+        public void GetHours()
         {
             if (Hours != null)
                 return;
 
             string query = $"SELECT * FROM Hour WHERE IdOfBusStop = {this.Id};";
-            this.Hours = await SQLServices.QueryTimetableAsync<Hour>(query);
+            this.Hours = SQLServices.QueryTimetable<Hour>(query);
         }
 
-        public async Task<List<Letter>> GetLetters()
+        public List<Letter> GetLetters()
         {
             string query = $"SELECT * FROM Letter WHERE IdOfBusStop = {this.Id};";
-            List<Letter> letters = (await SQLServices.QueryTimetableAsync<Letter>(query))
+            List<Letter> letters = SQLServices.QueryTimetable<Letter>(query)
                                     .GroupBy(p => p.IdOfName)
                                     .Select(p => p.First())
                                     .ToList();
@@ -62,5 +62,8 @@ namespace RozkładJazdyv2.Model
 
             return editedName;
         }
+
+        public bool IsFavourite()
+            => Timetable.Instance.BusStopsNames.First(p => p.Id == this.IdOfName).IsFavourite;
     }
 }

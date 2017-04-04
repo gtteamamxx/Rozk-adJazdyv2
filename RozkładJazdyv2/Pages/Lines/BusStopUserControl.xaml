@@ -11,11 +11,18 @@
 
         <Grid HorizontalAlignment="Center"
               PointerExited="LineViewBusStop_PointerEntered">
-            
+
             <TextBlock FontSize="13"
                        Name="BusStopNameTextBlock"
                        Width="200"
                        TextAlignment="Left"
                        TextWrapping="Wrap" />
-        </Grid>
+
+            <TextBlock FontFamily="Segoe MDL2 Assets"
+                       HorizontalAlignment="Right"
+                       FontSize="10"
+                       VerticalAlignment="Top"
+                       Foreground="GreenYellow"
+                       Name="FauvoriteTextBlock" />
+    </Grid>
 </UserControl>

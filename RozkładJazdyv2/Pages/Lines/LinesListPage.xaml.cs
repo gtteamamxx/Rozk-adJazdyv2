@@ -89,8 +89,7 @@ namespace RozkładJazdyv2.Pages.Lines
 
         public static async Task ShowLinePageBySchedulesAsync(Line line, Grid lineBackgroundGrid, RoutedEventHandler scheduleClickedAsyncFunction)
         {
-            await line.GetSchedules();
-
+            line.GetSchedules();
             if (line.Schedules.Count() == 1)
             {
                 if (line.Schedules[0].Name.Contains("zawie")) //line is stopped
@@ -143,8 +142,8 @@ namespace RozkładJazdyv2.Pages.Lines
         {
             Button clickedButton = (Button)sender;
             Line selectedLine = (Line)(clickedButton.DataContext);
-            await selectedLine.GetSchedules();
 
+            selectedLine.GetSchedules();
             Schedule selectedSchedule = selectedLine.Schedules.First(p => p.Name == (string)clickedButton.Content);
 
             await ShowLinePageAsync(

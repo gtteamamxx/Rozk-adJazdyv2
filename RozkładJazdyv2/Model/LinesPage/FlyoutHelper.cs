@@ -120,7 +120,7 @@ namespace RozkładJazdyv2.Model.LinesPage
         {
             int schedulesCount = listOfSchedules.Count();
             for (int i = 0; i <= schedulesCount; i++)
-                contentGrid.RowDefinitions.Add( new RowDefinition() { Height = GridLength.Auto });
+                contentGrid.RowDefinitions.Add(new RowDefinition() { Height = GridLength.Auto });
         }
 
         private static Button GetLineGridInvisibleButton(Grid lineGrid)

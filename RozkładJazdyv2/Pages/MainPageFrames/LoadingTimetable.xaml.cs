@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using System.Threading.Tasks;
+using Windows.ApplicationModel.Core;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
@@ -38,14 +39,16 @@ namespace RozkładJazdyv2.Pages.MainPageFrames
         private void RegisterHooks()
             => EventHelper.OnSqlLoadingChanged += EventHelper_OnSqlLoadingChanged;
 
-        private void EventHelper_OnSqlLoadingChanged(int step, int maxSteps)
+        private async void EventHelper_OnSqlLoadingChanged(int step, int maxSteps)
         {
             double percent = ((step * 100.0) / maxSteps);
 
             _MainPageInstance.ChangeTextInInfoStackPanel(MainPage.InfoStackPanelTextIndex.Loading_Timetable, "Wczytywanie rozkładu jazdy... {0} / {1}", step, maxSteps);
-            LoadingInfoText.Text = string.Format("Trwa wczytywanie rozkładu [{0:00}%]", percent);
-
-            LoadingProgressBar.Value = percent;
+            await CoreApplication.MainView.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+            {
+                LoadingInfoText.Text = string.Format("Trwa wczytywanie rozkładu [{0:00}%]", percent);
+                LoadingProgressBar.Value = percent;
+            });
         }
 
         private async void LoadingTimetable_Loaded(object sender, RoutedEventArgs e)

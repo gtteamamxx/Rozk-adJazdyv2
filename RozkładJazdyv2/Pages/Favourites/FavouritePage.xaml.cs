@@ -16,6 +16,8 @@ using RozkładJazdyv2.Model;
 using System.Collections.ObjectModel;
 using Windows.UI;
 using System.Threading.Tasks;
+using System.Threading;
+using Windows.ApplicationModel.Core;
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
 namespace RozkładJazdyv2.Pages.Favourites
@@ -26,6 +28,7 @@ namespace RozkładJazdyv2.Pages.Favourites
     public sealed partial class FavouritePage : Page
     {
         private ObservableCollection<Line> _FavouriteLines;
+        private ObservableCollection<BusStopName> _FavouriteBusStops;
 
         public FavouritePage()
         {
@@ -33,19 +36,22 @@ namespace RozkładJazdyv2.Pages.Favourites
             this.SetIsBackFromPageAllowed(true);
 
             _FavouriteLines = new ObservableCollection<Line>();
+            _FavouriteBusStops = new ObservableCollection<BusStopName>();
             SetLinesGridViewStyle();
 
-            this.Loaded += FavouritePage_Loaded;
+            BusStopsListView.SelectionChanged += BusStopsListView_SelectionChanged;
+            this.Loaded += FavouritePage_LoadedAsync;
         }
 
-        private void FavouritePage_Loaded(object sender, RoutedEventArgs e)
+        private void FavouritePage_LoadedAsync(object sender, RoutedEventArgs e)
         {
-            bool areLinesInFavourites, areStopsInFavourites;
+            BusStopsColumnGrid.Visibility = Visibility.Collapsed;
+            BusStopsColumnGrid.Visibility = Visibility.Collapsed;
 
             LoadingProgressRing.IsActive = true;
 
-            areLinesInFavourites = LoadFavouriteLines();
-            areStopsInFavourites = LoadFavouriteStops();
+            var areLinesInFavourites = LoadFavouriteLines();
+            var areStopsInFavourites = LoadFavouriteStops();
 
             if (areLinesInFavourites || areStopsInFavourites)
             {
@@ -56,12 +62,7 @@ namespace RozkładJazdyv2.Pages.Favourites
                     ShowFavouritesLinesColumn(hideLeftBorder: !areStopsInFavourites);
 
                 if (areStopsInFavourites)
-                {
-                    if (!areLinesInFavourites)
-                        ;
-                    else
-                        ;
-                }
+                    ShowFavouritesBusStopsColumn();
             }
             else
             {
@@ -79,6 +80,7 @@ namespace RozkładJazdyv2.Pages.Favourites
                 Grid.SetColumnSpan(LinesColumnGrid, 1);
                 Grid.SetColumnSpan(BusStopsColumnGrid, 1);
                 Grid.SetColumn(LinesColumnGrid, 1);
+                Grid.SetColumn(BusStopsColumnGrid, 0);
             }
             else if (linesColumn && !busStopsColumn)
             {
@@ -88,6 +90,7 @@ namespace RozkładJazdyv2.Pages.Favourites
             else if (!linesColumn && busStopsColumn)
             {
                 Grid.SetColumnSpan(BusStopsColumnGrid, 2);
+                Grid.SetColumn(BusStopsColumnGrid, 0);
             }
         }
 
@@ -97,9 +100,6 @@ namespace RozkładJazdyv2.Pages.Favourites
 
             foreach (Line line in Timetable.Instance.Lines)
             {
-                if (_FavouriteLines.FirstOrDefault(p => p == line) != null)
-                    continue;
-
                 if (line.IsFavourite)
                     _FavouriteLines.Add(line);
             }
@@ -109,7 +109,38 @@ namespace RozkładJazdyv2.Pages.Favourites
 
         private bool LoadFavouriteStops()
         {
-            return false;
+            _FavouriteBusStops.Clear();
+
+            List<BusStopName> favBusStops = SQLServices.QueryFavourite<BusStopName>("SELECT * FROM BusStopName");
+            foreach (BusStopName favBusStopName in favBusStops)
+            {
+                var name = GetString(GetBytes(favBusStopName.Name));
+                BusStopName properBusStopName = Timetable.Instance.BusStopsNames.FirstOrDefault(p => p.Name == name);
+                if (properBusStopName == null)
+                    continue;
+                 _FavouriteBusStops.Add(properBusStopName);
+            }
+
+            return _FavouriteBusStops.Count() > 0;
+
+            byte[] GetBytes(string str)
+            {
+                var bytesString = str.Split(new char[] { ' ' });
+                byte[] bytes = bytesString.Select(p => (byte)int.Parse(p)).ToArray<byte>();
+                return bytes;
+            }
+
+            string GetString(byte[] bytes)
+            {
+                char[] chars = new char[bytes.Length / sizeof(char)];
+                System.Buffer.BlockCopy(bytes, 0, chars, 0, bytes.Length);
+                return new string(chars);
+            }
+        }
+
+        private void ShowFavouritesBusStopsColumn()
+        {
+            BusStopsColumnGrid.Visibility = Visibility.Visible;
         }
 
         private void ShowFavouritesLinesColumn(bool hideLeftBorder = true)
@@ -159,5 +190,16 @@ namespace RozkładJazdyv2.Pages.Favourites
             await Lines.LinesListPage.ShowLinePageBySchedulesAsync(selectedLine, selectedLineGridInGridView, Lines.LinesListPage.ScheduleClickedAsync);
         }
 
+        private void BusStopsListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (BusStopsListView.SelectedIndex == -1 || BusStopsListView.SelectedItem == null)
+                return;
+
+            BusStopName selectedBusStop = ((ListView)sender).SelectedItem as BusStopName;
+            MainFrameHelper.GetMainFrame().Navigate(typeof(Pages.BusStops.BusStopsListPage), 
+                new Model.BusStopListPage.ChangeBusStopParametr() { BusStopName = selectedBusStop });
+
+            BusStopsListView.SelectedIndex = -1;
+        }
     }
 }

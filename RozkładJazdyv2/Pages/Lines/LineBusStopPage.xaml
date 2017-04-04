@@ -42,6 +42,7 @@
                                        x:Name="LineNumberTextBlock"/>
                         </Button>
                     </Grid>
+
                 </StackPanel>
                 
                 <TextBlock TextWrapping="Wrap">
@@ -60,6 +61,7 @@
                     <TextBlock VerticalAlignment="Center">Przystanek:</TextBlock>
                     
                     <ComboBox Margin="10 0 0 0"
+                              VerticalAlignment="Center"
                               Name="BusStopsComboBox"
                               ItemsSource="{x:Bind _ListOfBusStopsInTrack}"
                               SelectionChanged="BusStopsComboBox_SelectionChanged">
@@ -72,6 +74,21 @@
                         
                     </ComboBox>
                     
+                    <Button VerticalAlignment="Center"
+                            Margin="10 0 0 0"
+                            Height="40"
+                            Name="BusStopFavouriteButton"
+                            Click="BusStopFavouriteButton_Click">
+
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock VerticalAlignment="Center"
+                                       FontFamily="Segoe MDL2 Assets"
+                                       Text="&#xE00B;"
+                                       Foreground="GreenYellow"
+                                       Name="BusStopFavouriteHeartSignTextBlock"
+                                       FontSize="20"/>
+                        </StackPanel>
+                    </Button>
                 </StackPanel>
             </StackPanel>
         </Grid>

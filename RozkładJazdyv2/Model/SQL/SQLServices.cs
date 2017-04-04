@@ -1,5 +1,4 @@
 ﻿using SQLite.Net;
-using SQLite.Net.Async;
 using SQLite.Net.Platform.WinRT;
 using System;
 using System.Collections.Generic;
@@ -23,8 +22,8 @@ namespace RozkładJazdyv2.Model
         public static string SQLTempFilePath => Path.Combine(ApplicationData.Current.LocalFolder.Path, _SQLTempFileName);
         public static string _SQLFavouriteFilePath => Path.Combine(ApplicationData.Current.LocalFolder.Path, _SQLFavouriteFileName);
 
-        private static SQLiteAsyncConnection _SQLTimetableConnection;
-        private static SQLiteAsyncConnection _SQLTimetableFavouriteConnection;
+        private static SQLiteConnection _SQLTimetableConnection;
+        private static SQLiteConnection _SQLTimetableFavouriteConnection;
 
         private static int _SAVING_STEPS = 14;
         private static int _LOADING_STEPS = 6;
@@ -36,12 +35,8 @@ namespace RozkładJazdyv2.Model
             RenameDownloadedSqlFile();
             CreateFavouriteDatabaseIfNotExist();
 
-            _SQLTimetableConnection = new SQLiteAsyncConnection(new Func<SQLiteConnectionWithLock>(
-                   () => new SQLiteConnectionWithLock(new SQLitePlatformWinRT(),
-                       new SQLiteConnectionString(SQLFilePath, false))));
-            _SQLTimetableFavouriteConnection = new SQLiteAsyncConnection(new Func<SQLiteConnectionWithLock>(
-                   () => new SQLiteConnectionWithLock(new SQLitePlatformWinRT(),
-                       new SQLiteConnectionString(_SQLFavouriteFilePath, false))));
+            _SQLTimetableConnection = new SQLiteConnection(new SQLitePlatformWinRT(), SQLFilePath);
+            _SQLTimetableFavouriteConnection = new SQLiteConnection(new SQLitePlatformWinRT(), _SQLFavouriteFilePath);
         }
 
         private static void RenameDownloadedSqlFile()
@@ -73,9 +68,8 @@ namespace RozkładJazdyv2.Model
         private static void CreateFavouriteDatabase(SQLiteConnection favSqlConnection)
         {
             favSqlConnection.CreateTable<Line>();
-            favSqlConnection.CreateTable<BusStop>();
+            favSqlConnection.CreateTable<BusStopName>();
             favSqlConnection.CreateTable<SQLiteStatus>();
-
             favSqlConnection.Insert(new SQLiteStatus() { Status = SQLiteStatus.LoadStatus.Succes });
         }
 
@@ -108,7 +102,7 @@ namespace RozkładJazdyv2.Model
             return true;
         }
 
-        public static async Task<bool> SaveTimetableDatabaseAsync()
+        public static bool SaveTimetableDatabase()
         {
             InvokeOnSqlSavingChanged(1, _SAVING_STEPS);
             if (IsTempTimetableDatabaseExist())
@@ -118,14 +112,11 @@ namespace RozkładJazdyv2.Model
                     return false;
             }
 
-            SQLiteAsyncConnection tempSqlConnection = new SQLiteAsyncConnection(new Func<SQLiteConnectionWithLock>(
-                () => new SQLiteConnectionWithLock(
-                    new SQLitePlatformWinRT(),
-                    new SQLiteConnectionString(SQLTempFilePath, storeDateTimeAsTicks: false))));
+            SQLiteConnection tempSqlConnection = new SQLiteConnection(new SQLitePlatformWinRT(), SQLTempFilePath);
 
-            if (!(await CreateTimetableDatabaseAsync(tempSqlConnection)))
+            if (!CreateTimetableDatabase(tempSqlConnection))
                 return false;
-            if (!(await InsertIntoTimetableDatabaseAsync(tempSqlConnection)))
+            if (!InsertIntoTimetableDatabase(tempSqlConnection))
                 return false;
 
             InvokeOnSqlSavingChanged(14, _SAVING_STEPS);
@@ -146,7 +137,7 @@ namespace RozkładJazdyv2.Model
             }
         }
 
-        private static async Task<bool> InsertIntoTimetableDatabaseAsync(SQLiteAsyncConnection sqlConnection)
+        private static bool InsertIntoTimetableDatabase(SQLiteConnection sqlConnection)
         {
             try
             {
@@ -156,39 +147,42 @@ namespace RozkładJazdyv2.Model
                 List<Hour> listOfHours = new List<Hour>();
 
                 InvokeOnSqlSavingChanged(4, _SAVING_STEPS);
-                bool areListGot = GetTimetableListsFromInstance(ref listOfSchedules, ref listOfTracks,
-                                                ref listOfBusStops, ref listOfHours);
+                bool areListGot = GetTimetableListsFromInstance(listOfSchedules, listOfTracks,
+                                                listOfBusStops, listOfHours);
                 if (!areListGot)
                     return false;
 
-                InvokeOnSqlSavingChanged(5, _SAVING_STEPS);
-                await sqlConnection.InsertAllAsync(Timetable.Instance.BusStopsNames);
+                new Task(() =>
+                {
+                    InvokeOnSqlSavingChanged(5, _SAVING_STEPS);
+                    sqlConnection.InsertAll(Timetable.Instance.BusStopsNames);
 
-                InvokeOnSqlSavingChanged(6, _SAVING_STEPS);
-                await sqlConnection.InsertAllAsync(Timetable.Instance.HoursNames);
+                    InvokeOnSqlSavingChanged(6, _SAVING_STEPS);
+                    sqlConnection.InsertAll(Timetable.Instance.HoursNames);
 
-                InvokeOnSqlSavingChanged(7, _SAVING_STEPS);
-                await sqlConnection.InsertAllAsync(Timetable.Instance.Letters);
+                    InvokeOnSqlSavingChanged(7, _SAVING_STEPS);
+                    sqlConnection.InsertAll(Timetable.Instance.Letters);
 
-                InvokeOnSqlSavingChanged(8, _SAVING_STEPS);
-                await sqlConnection.InsertAllAsync(Timetable.Instance.Lines);
+                    InvokeOnSqlSavingChanged(8, _SAVING_STEPS);
+                    sqlConnection.InsertAll(Timetable.Instance.Lines);
 
-                InvokeOnSqlSavingChanged(9, _SAVING_STEPS);
-                await sqlConnection.InsertAllAsync(Timetable.Instance.TracksNames);
-                await sqlConnection.InsertAllAsync(Timetable.Instance.LettersNames);
+                    InvokeOnSqlSavingChanged(9, _SAVING_STEPS);
+                    sqlConnection.InsertAll(Timetable.Instance.TracksNames);
+                    sqlConnection.InsertAll(Timetable.Instance.LettersNames);
 
-                InvokeOnSqlSavingChanged(10, _SAVING_STEPS);
-                await sqlConnection.InsertAllAsync(listOfSchedules);
+                    InvokeOnSqlSavingChanged(10, _SAVING_STEPS);
+                    sqlConnection.InsertAll(listOfSchedules);
 
-                InvokeOnSqlSavingChanged(11, _SAVING_STEPS);
-                await sqlConnection.InsertAllAsync(listOfTracks);
+                    InvokeOnSqlSavingChanged(11, _SAVING_STEPS);
+                    sqlConnection.InsertAll(listOfTracks);
 
-                InvokeOnSqlSavingChanged(12, _SAVING_STEPS);
-                await sqlConnection.InsertAllAsync(listOfBusStops);
+                    InvokeOnSqlSavingChanged(12, _SAVING_STEPS);
+                    sqlConnection.InsertAll(listOfBusStops);
 
-                InvokeOnSqlSavingChanged(13, _SAVING_STEPS);
-                await sqlConnection.InsertAllAsync(listOfHours);
-                await sqlConnection.InsertAsync(new SQLiteStatus() { Status = SQLiteStatus.LoadStatus.Succes });
+                    InvokeOnSqlSavingChanged(13, _SAVING_STEPS);
+                    sqlConnection.InsertAll(listOfHours);
+                    sqlConnection.Insert(new SQLiteStatus() { Status = SQLiteStatus.LoadStatus.Succes });
+                });
 
                 return true;
             }
@@ -197,8 +191,8 @@ namespace RozkładJazdyv2.Model
                 return false;
             }
         }
-        private static bool GetTimetableListsFromInstance(ref List<Schedule> listOfSchedules, ref List<Track> listOfTracks,
-                                                                    ref List<BusStop> listOfBusStops, ref List<Hour> listOfHours)
+        private static bool GetTimetableListsFromInstance(List<Schedule> listOfSchedules, List<Track> listOfTracks,
+                                                                    List<BusStop> listOfBusStops, List<Hour> listOfHours)
         {
             try
             {
@@ -214,22 +208,22 @@ namespace RozkładJazdyv2.Model
             }
         }
 
-        private static async Task<bool> CreateTimetableDatabaseAsync(SQLiteAsyncConnection sqlConnection)
+        private static bool CreateTimetableDatabase(SQLiteConnection sqlConnection)
         {
             try
             {
                 InvokeOnSqlSavingChanged(2, _SAVING_STEPS);
-                await sqlConnection.CreateTableAsync<Line>();
-                await sqlConnection.CreateTableAsync<BusStopName>();
-                await sqlConnection.CreateTableAsync<TrackName>();
-                await sqlConnection.CreateTableAsync<HourName>();
-                await sqlConnection.CreateTableAsync<Letter>();
-                await sqlConnection.CreateTableAsync<Schedule>();
-                await sqlConnection.CreateTableAsync<Track>();
-                await sqlConnection.CreateTableAsync<BusStop>();
-                await sqlConnection.CreateTableAsync<Hour>();
-                await sqlConnection.CreateTableAsync<LetterName>();
-                await sqlConnection.CreateTableAsync<SQLiteStatus>();
+                sqlConnection.CreateTable<Line>();
+                sqlConnection.CreateTable<BusStopName>();
+                sqlConnection.CreateTable<TrackName>();
+                sqlConnection.CreateTable<HourName>();
+                sqlConnection.CreateTable<Letter>();
+                sqlConnection.CreateTable<Schedule>();
+                sqlConnection.CreateTable<Track>();
+                sqlConnection.CreateTable<BusStop>();
+                sqlConnection.CreateTable<Hour>();
+                sqlConnection.CreateTable<LetterName>();
+                sqlConnection.CreateTable<SQLiteStatus>();
                 InvokeOnSqlSavingChanged(3, _SAVING_STEPS);
                 return true;
             }
@@ -262,26 +256,32 @@ namespace RozkładJazdyv2.Model
                 return false;
             try
             {
-                Timetable.Instance = new Timetable();
-                InvokeOnSqlLoadingChanged(1, _LOADING_STEPS);
-                Timetable.Instance.BusStopsNames = await _SQLTimetableConnection.Table<BusStopName>().ToListAsync();
+                Task task = new Task(() =>
+                {
+                    Timetable.Instance = new Timetable();
+                    InvokeOnSqlLoadingChanged(1, _LOADING_STEPS);
+                    Timetable.Instance.BusStopsNames = _SQLTimetableConnection.Table<BusStopName>().ToList();
 
-                InvokeOnSqlLoadingChanged(2, _LOADING_STEPS);
-                Timetable.Instance.HoursNames = await _SQLTimetableConnection.Table<HourName>().ToListAsync();
+                    InvokeOnSqlLoadingChanged(2, _LOADING_STEPS);
+                    Timetable.Instance.HoursNames = _SQLTimetableConnection.Table<HourName>().ToList();
 
-                InvokeOnSqlLoadingChanged(3, _LOADING_STEPS);
-                Timetable.Instance.LettersNames = await _SQLTimetableConnection.Table<LetterName>().ToListAsync();
+                    InvokeOnSqlLoadingChanged(3, _LOADING_STEPS);
+                    Timetable.Instance.LettersNames = _SQLTimetableConnection.Table<LetterName>().ToList();
 
-                InvokeOnSqlLoadingChanged(4, _LOADING_STEPS);
-                Timetable.Instance.TracksNames = await _SQLTimetableConnection.Table<TrackName>().ToListAsync();
+                    InvokeOnSqlLoadingChanged(4, _LOADING_STEPS);
+                    Timetable.Instance.TracksNames = _SQLTimetableConnection.Table<TrackName>().ToList();
 
-                InvokeOnSqlLoadingChanged(5, _LOADING_STEPS);
-                Timetable.Instance.Lines = await _SQLTimetableConnection.Table<Line>().ToListAsync();
+                    InvokeOnSqlLoadingChanged(5, _LOADING_STEPS);
+                    Timetable.Instance.Lines = _SQLTimetableConnection.Table<Line>().ToList();
 
-                InvokeOnSqlLoadingChanged(6, _LOADING_STEPS);
+                    InvokeOnSqlLoadingChanged(6, _LOADING_STEPS);
 
-                Timetable.Instance.Letters = new List<Letter>();
-                await UpdateFavourites();
+                    Timetable.Instance.Letters = new List<Letter>();
+                    UpdateFavourites();
+                });
+                task.Start();
+                await task.AsAsyncAction();
+
                 return true;
             }
             catch
@@ -290,39 +290,44 @@ namespace RozkładJazdyv2.Model
             }
         }
 
-        private static async Task UpdateFavourites()
+        private static void UpdateFavourites()
         {
-            var favLines = await _SQLTimetableFavouriteConnection.Table<Line>().ToListAsync();
-            foreach (var favLine in favLines)
-            {
-                var lineToUpdate = Timetable.Instance.Lines.FirstOrDefault(p => p.EditedName == favLine.Name);
-                if (lineToUpdate == null)
-                    continue;
+            UpdateFavouriteLines();
 
-                lineToUpdate.Type |= Line.FAVOURITE_BIT;
+            void UpdateFavouriteLines()
+            {
+                var favLines = _SQLTimetableFavouriteConnection.Table<Line>().ToList();
+                foreach (var favLine in favLines)
+                {
+                    var lineToUpdate = Timetable.Instance.Lines.FirstOrDefault(p => p.EditedName == favLine.Name);
+                    if (lineToUpdate == null)
+                        continue;
+
+                    lineToUpdate.Type |= Line.FAVOURITE_BIT;
+                }
             }
         }
 
-        public static async Task<List<T>> QueryTimetableAsync<T>(string query, params object[] args) where T : class
-            => await _SQLTimetableConnection.QueryAsync<T>(query, args);
+        public static List<T> QueryTimetable<T>(string query, params object[] args) where T : class
+            =>  _SQLTimetableConnection.Query<T>(query, args);
 
-        public static async Task ExecuteTimetableQueryAsync(string query, params object[] args)
-            => await _SQLTimetableConnection.ExecuteAsync(query, args);
+        public static void ExecuteTimetableQuery(string query, params object[] args)
+            =>  _SQLTimetableConnection.Execute(query, args);
 
-        public static async Task<T> ExecuteTimetableScalarAsync<T>(string query, params object[] args) where T : class
-            => await _SQLTimetableConnection.ExecuteScalarAsync<T>(query, args);
+        public static T ExecuteTimetableScalar<T>(string query, params object[] args) where T : class
+            =>  _SQLTimetableConnection.ExecuteScalar<T>(query, args);
 
-        public static async Task<List<T>> QueryFavouriteAsync<T>(string query, params object[] args) where T : class
-            => await _SQLTimetableFavouriteConnection.QueryAsync<T>(query, args);
+        public static List<T> QueryFavourite<T>(string query, params object[] args) where T : class
+            =>  _SQLTimetableFavouriteConnection.Query<T>(query, args);
+        
+        public static void ExecuteFavourite(string query, params object[] args)
+            =>  _SQLTimetableFavouriteConnection.Execute(query, args);
 
-        public static async Task ExecuteFavouriteAsync(string query, params object[] args)
-            => await _SQLTimetableFavouriteConnection.ExecuteAsync(query, args);
+        public static T ExecuteFavouriteScalar<T>(string query, params object[] args) where T : class
+            =>  _SQLTimetableFavouriteConnection.ExecuteScalar<T>(query, args);
 
-        public static async Task<T> ExecuteFavouriteScalarAsync<T>(string query, params object[] args) where T : class
-            => await _SQLTimetableFavouriteConnection.ExecuteScalarAsync<T>(query, args);
-
-        public static async Task InsertFavouriteAsync<T>(T item) where T : class
-            => await _SQLTimetableFavouriteConnection.InsertAsync(item);
+        public static List<T> TableFavourite<T>() where T : class
+            =>  _SQLTimetableFavouriteConnection.Table<T>().ToList();
 
         private static bool IsDatabaseFileExist(string path)
             => File.Exists(path);

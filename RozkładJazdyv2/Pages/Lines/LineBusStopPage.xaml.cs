@@ -59,14 +59,13 @@ namespace RozkładJazdyv2.Pages.Lines
                 _IsRefreshingPageNeeded = false;
 
                 ClearListViewItems();
-
                 UpdateLineHeaderInfo();
 
                 LoadingProgressRing.IsActive = true;
                 await UpdateHoursAsync();
                 LoadingProgressRing.IsActive = false;
 
-                await UpdateLettersAsync();
+                UpdateLetters();
             }
         }
 
@@ -86,6 +85,7 @@ namespace RozkładJazdyv2.Pages.Lines
             LineTrackNameTextBlock.Text = _SelectedTrack.Name;
 
             UpdateStopsInComboBox();
+            UpdateFavouriteSign();
         }
 
         private void UpdateStopsInComboBox()
@@ -109,8 +109,7 @@ namespace RozkładJazdyv2.Pages.Lines
 
         private async Task UpdateHoursAsync()
         {
-            await _SelectedBusStop.GetHours();
-
+            _SelectedBusStop.GetHours();
             if (_SelectedBusStop.Hours.Count > 0)
                 await AddAllHoursToViewAsync(_SelectedBusStop.Hours);
 
@@ -145,9 +144,9 @@ namespace RozkładJazdyv2.Pages.Lines
             });
         }
 
-        private async Task UpdateLettersAsync()
+        private void UpdateLetters()
         {
-            List<Letter> letters = await _SelectedBusStop.GetLetters();
+            List<Letter> letters = _SelectedBusStop.GetLetters();
             letters.ForEach(p => LettersListView.Items.Add(p));
         }
 
@@ -231,7 +230,7 @@ namespace RozkładJazdyv2.Pages.Lines
             if (selectedItem == null || selectedItem.BusStop.Id == _SelectedBusStop.Id)
                 return;
 
-            MainFrameHelper.GetMainFrame().Navigate(typeof(LineBusStopPage), new    ChangeBusStopParametr()
+            MainFrameHelper.GetMainFrame().Navigate(typeof(LineBusStopPage), new ChangeBusStopParametr()
             {
                 BusStop = selectedItem.BusStop,
                 Track = _SelectedTrack,
@@ -293,5 +292,19 @@ namespace RozkładJazdyv2.Pages.Lines
 
         private void RefreshPage()
             => LineBusStopPage_LoadedAsync(this, null);
+
+        private void UpdateFavouriteSign()
+            => BusStopFavouriteHeartSignTextBlock.Text = _SelectedBusStop.IsFavourite() ? "\xE00C" : "\xE00B";
+
+        private async void BusStopFavouriteButton_Click(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            button.IsEnabled = false;
+
+            Timetable.Instance.BusStopsNames.First(p => p.Id == _SelectedBusStop.IdOfName).IsFavourite = !_SelectedBusStop.IsFavourite();
+            await Task.Delay(250);
+            UpdateFavouriteSign();
+            button.IsEnabled = true;
+        }
     }
 }

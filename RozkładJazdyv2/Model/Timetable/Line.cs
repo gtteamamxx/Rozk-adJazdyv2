@@ -69,8 +69,6 @@ namespace RozkładJazdyv2.Model
                 if ((!value && !IsFavourite) || (value && IsFavourite))
                     return;
 
-                IsFavourite = value;
-
                 if (_LockUpdateFavouriteSqlStatus)
                     return;
 
@@ -105,12 +103,12 @@ namespace RozkładJazdyv2.Model
             return "\xE806";
         }
 
-        public async Task GetSchedules()
+        public void GetSchedules()
         {
             if (this.Schedules != null)
                 return;
             string query = $"SELECT * FROM Schedule WHERE idOfLine = {this.Id};";
-            this.Schedules = await SQLServices.QueryTimetableAsync<Schedule>(query);
+            this.Schedules = SQLServices.QueryTimetable<Schedule>(query);
         }
 
         private void RefreshLineGridInLinesList()
@@ -120,11 +118,11 @@ namespace RozkładJazdyv2.Model
                     = this.FavouriteText; // how to force update bindings?
         }
 
-        private async void RemoveLineFromFavouritesAsync()
-            => await SQLServices.ExecuteFavouriteAsync($"DELETE FROM Line WHERE Name = '{this.EditedName}';");
+        private void RemoveLineFromFavouritesAsync()
+            => SQLServices.ExecuteFavourite($"DELETE FROM Line WHERE Name = '{this.EditedName}';");
 
-        private async void AddLineToFavouriteAsync()
-            => await SQLServices.ExecuteFavouriteAsync($"INSERT INTO Line(Id, Name) VALUES(NULL,'{this.EditedName}');");
+        private void AddLineToFavouriteAsync()
+            => SQLServices.ExecuteFavourite($"INSERT INTO Line(Id, Name) VALUES(NULL,'{this.EditedName}');");
 
         #endregion
     }

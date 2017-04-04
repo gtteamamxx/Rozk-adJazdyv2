@@ -10,6 +10,7 @@ using Windows.UI.ViewManagement;
 using Windows.UI.Text;
 using Windows.UI.Core;
 using Windows.UI.Xaml.Navigation;
+using Windows.ApplicationModel.Core;
 
 namespace RozkładJazdyv2
 {
@@ -68,21 +69,24 @@ namespace RozkładJazdyv2
             MainFrameHelper.SetMainFrame(this.Frame);
         }
 
-        public void ChangeTextInInfoStackPanel(InfoStackPanelTextIndex index, string text, params object[] args)
+        public async void ChangeTextInInfoStackPanel(InfoStackPanelTextIndex index, string text, params object[] args)
         {
-            bool editText = InfoStackPanel.Children.Count() - 1 >= (int)index;
+            await CoreApplication.MainView.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
+            {
+                bool editText = InfoStackPanel.Children.Count() - 1 >= (int)index;
 
-            if (editText)
-                ((TextBlock)InfoStackPanel.Children[(int)index]).Text = string.Format(text, args);
-            else
-                InfoStackPanel.Children.Add(new TextBlock()
-                {
-                    Text = string.Format(text, args),
-                    FontSize = 12,
-                    FontWeight = FontWeights.Light,
-                    Foreground = new SolidColorBrush(_INFOSTACKPANEL_TEXTCOLOR),
-                    TextAlignment = TextAlignment.Left
-                });
+                if (editText)
+                    ((TextBlock)InfoStackPanel.Children[(int)index]).Text = string.Format(text, args);
+                else
+                    InfoStackPanel.Children.Add(new TextBlock()
+                    {
+                        Text = string.Format(text, args),
+                        FontSize = 12,
+                        FontWeight = FontWeights.Light,
+                        Foreground = new SolidColorBrush(_INFOSTACKPANEL_TEXTCOLOR),
+                        TextAlignment = TextAlignment.Left
+                    });
+            });
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)

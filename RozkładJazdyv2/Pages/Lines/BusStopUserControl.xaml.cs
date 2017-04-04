@@ -43,7 +43,7 @@ namespace RozkładJazdyv2.Pages.Lines
 
             UpdateBusStopName(lineViewBusStop);
 
-            SetDefaultStyle();
+            SetDefaultStyle(busStop);
             SetBusStopStyle(busStop);
         }
 
@@ -71,10 +71,11 @@ namespace RozkładJazdyv2.Pages.Lines
             BusStopNameTextBlock.FontWeight = FontWeights.ExtraBold;
         }
 
-        private void SetDefaultStyle()
+        private void SetDefaultStyle(BusStop busStop)
         {
             BusStopNameTextBlock.Foreground = new SolidColorBrush(Colors.White);
             BusStopNameTextBlock.FontWeight = FontWeights.Normal;
+            FauvoriteTextBlock.Text = busStop.IsFavourite() ? "\xE00B" : "";
         }
 
         private void SetIsBusStopZoneStyle()

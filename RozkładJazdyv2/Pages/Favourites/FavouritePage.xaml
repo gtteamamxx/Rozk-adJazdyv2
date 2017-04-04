@@ -3,6 +3,7 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:RozkładJazdyv2.Pages.Favourites"
+    xmlns:local2="using:RozkładJazdyv2.Model"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     NavigationCacheMode="Required"
@@ -57,17 +58,39 @@
                                HorizontalAlignment="Center"/>
                 </Grid>
 
-                <ListView Name="FavouritesBusStopsListView"
-                          Grid.Row="1">
-                    
+                <ListView Grid.Row="1"
+                          Name="BusStopsListView"
+                          ItemsSource="{x:Bind _FavouriteBusStops}">
+                    <ListView.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <ItemsWrapGrid HorizontalAlignment="Center" />
+                        </ItemsPanelTemplate>
+                    </ListView.ItemsPanel>
+                    <ListView.ItemTemplate>
+                        <DataTemplate x:DataType="local2:BusStopName">
+                            <Grid Margin="0 0 10 0"
+                                  Width="210">
+                                <TextBlock Text="{x:Bind Name}"
+                                           TextWrapping="Wrap" />
+
+                                <TextBlock HorizontalAlignment="Right"
+                                           VerticalAlignment="Top"
+                                           Foreground="GreenYellow"
+                                           FontFamily="Segoe MDL2 Assets"
+                                           FontSize="10"
+                                           Text="{Binding FavouriteText}" />
+                            </Grid>
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+
                 </ListView>
             </Grid>
         </Grid>
 
         <Grid Name="LinesColumnGrid"
               BorderBrush="White"
+              Visibility="Collapsed"
               Grid.Column="1"
-              HorizontalAlignment="Center"
               BorderThickness="1 0 0 0">
 
             <Grid.RowDefinitions>
@@ -88,7 +111,6 @@
                       Padding="5"
                       Grid.Row="1">
             </GridView>
-
         </Grid>
     </Grid>
 </Page>

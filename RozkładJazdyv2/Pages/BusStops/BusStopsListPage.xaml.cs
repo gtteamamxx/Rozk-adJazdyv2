@@ -28,12 +28,13 @@ namespace RozkładJazdyv2.Pages.BusStops
     public sealed partial class BusStopsListPage : Page
     {
         private ObservableCollection<BusStopName> _ListOfBusStopNames;
+        private ObservableCollection<BusStopDependency> _BusStopDependencies;
+
         private bool _LoadingDependencyLines;
         private BusStopName _LastClickedBusStop;
 
-        private ObservableCollection<BusStopDependency> _BusStopDependencies;
-
-
+        private BusStopName _SelectedBusStop;
+        
         public BusStopsListPage()
         {
             this.InitializeComponent();
@@ -41,12 +42,31 @@ namespace RozkładJazdyv2.Pages.BusStops
 
             _BusStopDependencies = new ObservableCollection<BusStopDependency>();
             _ListOfBusStopNames = Timetable.Instance.BusStopsNames.OrderBy(p => p.Name).ToObservableCollection();
+
+            this.Loaded += BusStopsListPage_Loaded;
         }
 
-        private async void BusStopsListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void BusStopsListPage_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (_SelectedBusStop != null)
+            {
+                _ListOfBusStopNames = Timetable.Instance.BusStopsNames.OrderBy(p => p.Name).ToObservableCollection();
+                BusStopsListView.SelectionChanged += BusStopsListView_SelectionChanged1;
+                BusStopsListView.SelectedItem = _SelectedBusStop;
+                _SelectedBusStop = null;
+            }
+
+            async void BusStopsListView_SelectionChanged1(object s, SelectionChangedEventArgs f)
+            {
+                BusStopsListView.SelectionChanged -= BusStopsListView_SelectionChanged1;
+                await Task.Delay(150);
+                BusStopsListView.ScrollIntoView(BusStopsListView.SelectedItem);
+            }
+        }
+
+        private void BusStopsListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var selectedBusStopName = BusStopsListView.SelectedItem as BusStopName;
-
             if (selectedBusStopName == null || selectedBusStopName == _LastClickedBusStop)
                 return;
 
@@ -61,19 +81,19 @@ namespace RozkładJazdyv2.Pages.BusStops
 
             _BusStopDependencies.Clear();
 
-            List<BusStop> selectedBusStopsList = await SQLServices.QueryTimetableAsync<BusStop>($"SELECT * FROM BusStop WHERE IdOfName = {selectedBusStopName.Id};");
-            await AddDependencyLinesToView(selectedBusStopsList);
+            List<BusStop> selectedBusStopsList = SQLServices.QueryTimetable<BusStop>($"SELECT * FROM BusStop WHERE IdOfName = {selectedBusStopName.Id};");
+            AddDependencyLinesToView(selectedBusStopsList);
 
             SetLoadingStatus(false);
         }
 
-        private async Task AddDependencyLinesToView(List<BusStop> busStops)
+        private void AddDependencyLinesToView(List<BusStop> busStops)
         {
             foreach (BusStop busStop in busStops)
             {
                 Line line = Timetable.Instance.Lines.First(p => p.Id == busStop.IdOfLine);
-                Schedule schedule = (await SQLServices.QueryTimetableAsync<Schedule>($"SELECT * FROM Schedule WHERE Id = {busStop.IdOfSchedule};")).First();
-                Track track = (await SQLServices.QueryTimetableAsync<Track>($"SELECT * FROM Track WHERE Id = {busStop.IdOfTrack};")).First();
+                Schedule schedule = SQLServices.QueryTimetable<Schedule>($"SELECT * FROM Schedule WHERE Id = {busStop.IdOfSchedule};").First();
+                Track track = SQLServices.QueryTimetable<Track>($"SELECT * FROM Track WHERE Id = {busStop.IdOfTrack};").First();
 
                 track.BusStops = new List<BusStop>().Add<BusStop>(busStop);
                 schedule.Tracks = new List<Track>().Add<Track>(track);
@@ -129,17 +149,17 @@ namespace RozkładJazdyv2.Pages.BusStops
             LoadingBusStopDependenciesProgressRing.IsActive = status;
         }
 
-        private async void Line_Click(object sender, RoutedEventArgs e)
+        private void Line_Click(object sender, RoutedEventArgs e)
         {
             Button button = (Button)sender;
             Line selectedLine = Timetable.Instance.Lines.First(p => 
                 p.Id == ((BusStopDependency)(button.DataContext)).Line.Id);
-            await selectedLine.GetSchedules();
+            selectedLine.GetSchedules();
             RozkładJazdyv2.Model.LinesPage.FlyoutHelper.ShowFlyOutWithSchedulesAtLineGrid
                 ((Grid)button.Parent, selectedLine, RozkładJazdyv2.Pages.Lines.LinesListPage.ScheduleClickedAsync);
         }
 
-        private async void Track_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private void Track_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ListView listView = (ListView)sender;
             if (listView.SelectedIndex == -1)
@@ -147,13 +167,13 @@ namespace RozkładJazdyv2.Pages.BusStops
             
             Track selectedTrackDependency = listView.SelectedItem as Track;
             Line selectedLine = Timetable.Instance.Lines.First(p => p.Id == selectedTrackDependency.IdOfLine);
-            await selectedLine.GetSchedules();
+            selectedLine.GetSchedules();
 
             Schedule selectedSchedule = selectedLine.Schedules.First(p => p.Id == selectedTrackDependency.IdOfSchedule);
-            await selectedSchedule.GetTracks();
+            selectedSchedule.GetTracks();
 
             Track selectedTrack = selectedSchedule.Tracks.First(p => p.Id == selectedTrackDependency.Id);
-            await selectedTrack.GetBusStops();
+            selectedTrack.GetBusStops();
 
             ShowBusStopPage(selectedLine, selectedTrack, selectedSchedule);
             listView.SelectedIndex = -1;
@@ -161,7 +181,7 @@ namespace RozkładJazdyv2.Pages.BusStops
 
         private void ShowBusStopPage(Line line, Track track, Schedule schedule)
         {
-            ChangeBusStopParametr pageBusStopParametr = new ChangeBusStopParametr()
+            Model.LinesPage.ChangeBusStopParametr pageBusStopParametr = new Model.LinesPage.ChangeBusStopParametr()
             {
                 BusStop = track.BusStops.First(p => p.IdOfName == _LastClickedBusStop.Id),
                 Track = track,
@@ -170,6 +190,14 @@ namespace RozkładJazdyv2.Pages.BusStops
             };
 
             MainFrameHelper.GetMainFrame().Navigate(typeof(Pages.Lines.LineBusStopPage), pageBusStopParametr);
+        }
+
+        protected override void OnNavigatedTo(NavigationEventArgs e)
+        {
+            var changeBusStopParametr = e.Parameter as Model.BusStopListPage.ChangeBusStopParametr;
+            if (changeBusStopParametr == null)
+                return;
+            _SelectedBusStop = changeBusStopParametr.BusStopName;
         }
     }
 }

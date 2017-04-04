@@ -31,7 +31,7 @@ namespace RozkładJazdyv2.Pages.MainPageFrames
             this.InitializeComponent();
             HookEvents();
 
-            this.Loaded += async (s, e) => await SaveTimetableAsync();
+            this.Loaded += (s, e) => SaveTimetableAsync();
         }
 
         protected override void OnNavigatedTo(NavigationEventArgs e)
@@ -41,7 +41,7 @@ namespace RozkładJazdyv2.Pages.MainPageFrames
         {
             EventHelper.OnSqlSavingChanged += EventHelper_OnSqlSavingChanged;
             EventHelper.OnSqlSaved += async () => await EventHelper_OnSqlSavedAsync();
-            SavingRetryButton.Click += async (s, e) => await SaveTimetableAsync();
+            SavingRetryButton.Click += (s, e) => SaveTimetableAsync();
         }
 
         private async Task EventHelper_OnSqlSavedAsync()
@@ -66,7 +66,7 @@ namespace RozkładJazdyv2.Pages.MainPageFrames
             SavingProgressBar.Value = percent;
         }
 
-        private async Task SaveTimetableAsync()
+        private void SaveTimetableAsync()
         {
             _MainPageInstance.ChangeTextInInfoStackPanel(MainPage.InfoStackPanelTextIndex.Saving_Timetable, 
                                                             "Zapisywanie rozkładu...");
@@ -75,7 +75,7 @@ namespace RozkładJazdyv2.Pages.MainPageFrames
             SetSavingRetryButtonVisibility(Visibility.Collapsed);
             SetSavingTimetableInfoVisibility(Visibility.Visible);
 
-            var isTimetableSaved = await SQLServices.SaveTimetableDatabaseAsync();
+            var isTimetableSaved = SQLServices.SaveTimetableDatabase();
             if(!isTimetableSaved)
             {
                 SetSavingTimetableInfoVisibility(Visibility.Collapsed);
