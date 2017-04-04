@@ -273,6 +273,11 @@ namespace RozkładJazdyv2.Pages.Lines
             }
         }
 
+        private void LineButton_Click(object sender, RoutedEventArgs e)
+        {
+            Grid grid = ((Button)sender).Parent as Grid;
+            FlyoutHelper.ShowFlyOutWithSchedulesAtLineGrid(grid, _SelectedLine, Pages.Lines.LinesListPage.ScheduleClickedAsync);
+        }
 
         private void AddLastStopInfo()
             => AdditionalInfoListView.Items.Add(new AdditionalInfo()

@@ -10,11 +10,9 @@
     mc:Ignorable="d">
 
     <Page.Resources>
-        
         <DataTemplate x:Key="BusStopListViewStyle" x:DataType="local:LineViewBusStop">
             <local1:BusStopUserControl DataContext="{Binding}" />
         </DataTemplate>
-        
     </Page.Resources>
     
     <Grid Background="Black">
