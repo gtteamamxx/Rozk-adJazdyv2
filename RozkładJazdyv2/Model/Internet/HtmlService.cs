@@ -11,7 +11,7 @@ namespace RozkładJazdyv2.Model
     {
         private HtmlService() {}
 
-        public static async Task<string> GetHtmlFromSite(string url)
+        public static async ValueTask<string> GetHtmlFromSite(string url)
         {
             try
             {
