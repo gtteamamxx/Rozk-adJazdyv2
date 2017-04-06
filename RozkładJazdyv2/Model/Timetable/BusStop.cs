@@ -30,22 +30,22 @@ namespace RozkładJazdyv2.Model
         [Ignore]
         public List<Hour> Hours { get; set; }
 
-        public void GetHours()
+        public async Task GetHours()
         {
             if (Hours != null)
                 return;
 
             string query = $"SELECT * FROM Hour WHERE IdOfBusStop = {this.Id};";
-            this.Hours = SQLServices.QueryTimetable<Hour>(query);
+            await Task.Run( () => this.Hours = SQLServices.QueryTimetable<Hour>(query));
         }
 
-        public List<Letter> GetLetters()
+        public async Task<List<Letter>> GetLetters()
         {
             string query = $"SELECT * FROM Letter WHERE IdOfBusStop = {this.Id};";
-            List<Letter> letters = SQLServices.QueryTimetable<Letter>(query)
+            List<Letter> letters = await Task.Run( () => SQLServices.QueryTimetable<Letter>(query)
                                     .GroupBy(p => p.IdOfName)
                                     .Select(p => p.First())
-                                    .ToList();
+                                    .ToList());
             return letters;
         }
 

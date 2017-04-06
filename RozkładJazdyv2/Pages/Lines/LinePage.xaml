@@ -41,7 +41,6 @@
                         <TextBlock VerticalAlignment="Center"
                                    FontSize="30"
                                    Foreground="White"
-                                   Text="722"
                                    Margin="10 0 0 0"
                                    x:Name="LineNumberTextBlock"/>
                         

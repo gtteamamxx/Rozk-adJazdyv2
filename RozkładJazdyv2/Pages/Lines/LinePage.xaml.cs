@@ -112,7 +112,7 @@ namespace RozkładJazdyv2.Pages.Lines
             _IsRefreshingPageNeeded = false;
         }
 
-        private void UpdateLineTracks()
+        private async void UpdateLineTracks()
         {
             LineFirstTrackProgressRing.IsActive = true;
             LineSecondTrackProgressRing.IsActive = true;
@@ -120,10 +120,10 @@ namespace RozkładJazdyv2.Pages.Lines
             _LineFirstTrackBusStops.Clear();
             _LineSecondTrackBusStops.Clear();
 
-            _SelectedSchedule.GetTracks();
+            await _SelectedSchedule.GetTracks();
             SetTrackGridStyle(_SelectedSchedule.Tracks);
 
-            _SelectedSchedule = GetTracksBusStops(_SelectedSchedule);
+            _SelectedSchedule = await GetTracksBusStops(_SelectedSchedule);
         }
 
         private void UpdateLineHeaderTexts()
@@ -138,14 +138,14 @@ namespace RozkładJazdyv2.Pages.Lines
         private void UpdateFavouriteText()
             => LineFavouriteHeartSignTextBlock.Text = _SelectedLine.IsFavourite ? "\xE00C" : "\xE00B";
 
-        private Schedule GetTracksBusStops(Schedule schedule)
+        private async Task<Schedule> GetTracksBusStops(Schedule schedule)
         {
             string query = string.Empty;
             int trackNumber = 1;
 
             foreach (var track in schedule.Tracks)
             {
-                track.GetBusStops();
+                await track.GetBusStops();
 
                 AddStopsToViewByTrack(trackNumber++, track);
 

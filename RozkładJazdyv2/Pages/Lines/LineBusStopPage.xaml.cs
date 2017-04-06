@@ -65,7 +65,7 @@ namespace RozkładJazdyv2.Pages.Lines
                 await UpdateHoursAsync();
                 LoadingProgressRing.IsActive = false;
 
-                UpdateLetters();
+                await UpdateLetters();
             }
         }
 
@@ -109,7 +109,7 @@ namespace RozkładJazdyv2.Pages.Lines
 
         private async Task UpdateHoursAsync()
         {
-            _SelectedBusStop.GetHours();
+            await _SelectedBusStop.GetHours();
             if (_SelectedBusStop.Hours.Count > 0)
                 await AddAllHoursToViewAsync(_SelectedBusStop.Hours);
 
@@ -144,10 +144,13 @@ namespace RozkładJazdyv2.Pages.Lines
             });
         }
 
-        private void UpdateLetters()
+        private async Task UpdateLetters()
         {
-            List<Letter> letters = _SelectedBusStop.GetLetters();
-            letters.ForEach(p => LettersListView.Items.Add(p));
+            List<Letter> letters = await _SelectedBusStop.GetLetters();
+            letters.ForEach(async p => await CoreApplication.MainView.Dispatcher.RunAsync(
+                Windows.UI.Core.CoreDispatcherPriority.Normal,
+                () => LettersListView.Items.Add(p)
+            ));
         }
 
         private void HourGridView_ContainerContentChanging(ListViewBase sender, ContainerContentChangingEventArgs args)

@@ -103,12 +103,12 @@ namespace RozkładJazdyv2.Model
             return "\xE806";
         }
 
-        public void GetSchedules()
+        public async Task GetSchedules()
         {
             if (this.Schedules != null)
                 return;
             string query = $"SELECT * FROM Schedule WHERE idOfLine = {this.Id};";
-            this.Schedules = SQLServices.QueryTimetable<Schedule>(query);
+            await Task.Run( () => this.Schedules = SQLServices.QueryTimetable<Schedule>(query));
         }
 
         private void RefreshLineGridInLinesList()

@@ -17,6 +17,7 @@ using RozkładJazdyv2.Model.BusStopListPage;
 using System.Collections.ObjectModel;
 using System.Threading.Tasks;
 using RozkładJazdyv2.Model.LinesPage;
+using Windows.ApplicationModel.Core;
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=234238
 
@@ -64,7 +65,7 @@ namespace RozkładJazdyv2.Pages.BusStops
             }
         }
 
-        private void BusStopsListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private async void BusStopsListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             var selectedBusStopName = BusStopsListView.SelectedItem as BusStopName;
             if (selectedBusStopName == null || selectedBusStopName == _LastClickedBusStop)
@@ -81,15 +82,16 @@ namespace RozkładJazdyv2.Pages.BusStops
 
             _BusStopDependencies.Clear();
 
-            List<BusStop> selectedBusStopsList = SQLServices.QueryTimetable<BusStop>($"SELECT * FROM BusStop WHERE IdOfName = {selectedBusStopName.Id};");
-            AddDependencyLinesToView(selectedBusStopsList);
+            await AddDependencyLinesToView(selectedBusStopName.Id);
 
             SetLoadingStatus(false);
         }
 
-        private void AddDependencyLinesToView(List<BusStop> busStops)
+        private async Task AddDependencyLinesToView(int busStopId)
         {
-            foreach (BusStop busStop in busStops)
+            List<BusStop> selectedBusStopsList = await Task.Run( () => SQLServices.QueryTimetable<BusStop>($"SELECT * FROM BusStop WHERE IdOfName = {busStopId};"));
+
+            foreach (BusStop busStop in selectedBusStopsList)
             {
                 Line line = Timetable.Instance.Lines.First(p => p.Id == busStop.IdOfLine);
                 Schedule schedule = SQLServices.QueryTimetable<Schedule>($"SELECT * FROM Schedule WHERE Id = {busStop.IdOfSchedule};").First();
@@ -98,11 +100,11 @@ namespace RozkładJazdyv2.Pages.BusStops
                 track.BusStops = new List<BusStop>().Add<BusStop>(busStop);
                 schedule.Tracks = new List<Track>().Add<Track>(track);
 
-                AddDependencyLineToList(line, schedule, track);
+                await AddDependencyLineToList(line, schedule, track);
             }
         }
 
-        private void AddDependencyLineToList(Line line, Schedule schedule, Track track)
+        private async Task AddDependencyLineToList(Line line, Schedule schedule, Track track)
         {
             BusStopDependency tempDependency = null;
             if ((tempDependency = _BusStopDependencies.FirstOrDefault(p => p.Line.Id == line.Id)) == null)
@@ -120,7 +122,8 @@ namespace RozkładJazdyv2.Pages.BusStops
                 {
                     Line = dependencyLine
                 };
-                _BusStopDependencies.Add(busStopDependency);
+                await CoreApplication.MainView.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, 
+                    () => _BusStopDependencies.Add(busStopDependency));
                 return;
             }
 
@@ -149,17 +152,17 @@ namespace RozkładJazdyv2.Pages.BusStops
             LoadingBusStopDependenciesProgressRing.IsActive = status;
         }
 
-        private void Line_Click(object sender, RoutedEventArgs e)
+        private async void Line_Click(object sender, RoutedEventArgs e)
         {
             Button button = (Button)sender;
             Line selectedLine = Timetable.Instance.Lines.First(p => 
                 p.Id == ((BusStopDependency)(button.DataContext)).Line.Id);
-            selectedLine.GetSchedules();
+            await selectedLine.GetSchedules();
             RozkładJazdyv2.Model.LinesPage.FlyoutHelper.ShowFlyOutWithSchedulesAtLineGrid
                 ((Grid)button.Parent, selectedLine, RozkładJazdyv2.Pages.Lines.LinesListPage.ScheduleClickedAsync);
         }
 
-        private void Track_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        private async void Track_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ListView listView = (ListView)sender;
             if (listView.SelectedIndex == -1)
@@ -167,13 +170,13 @@ namespace RozkładJazdyv2.Pages.BusStops
             
             Track selectedTrackDependency = listView.SelectedItem as Track;
             Line selectedLine = Timetable.Instance.Lines.First(p => p.Id == selectedTrackDependency.IdOfLine);
-            selectedLine.GetSchedules();
+            await selectedLine.GetSchedules();
 
             Schedule selectedSchedule = selectedLine.Schedules.First(p => p.Id == selectedTrackDependency.IdOfSchedule);
-            selectedSchedule.GetTracks();
+            await selectedSchedule.GetTracks();
 
             Track selectedTrack = selectedSchedule.Tracks.First(p => p.Id == selectedTrackDependency.Id);
-            selectedTrack.GetBusStops();
+            await selectedTrack.GetBusStops();
 
             ShowBusStopPage(selectedLine, selectedTrack, selectedSchedule);
             listView.SelectedIndex = -1;

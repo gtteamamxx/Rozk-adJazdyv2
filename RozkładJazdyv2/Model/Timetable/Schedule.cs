@@ -22,13 +22,13 @@ namespace RozkładJazdyv2.Model
         [Ignore]
         public List<Track> Tracks { get; set; }
 
-        public void GetTracks()
+        public async Task GetTracks()
         {
             if (this.Tracks != null)
                 return;
 
             string query = $"SELECT * FROM Track WHERE IdOfSchedule = {this.Id};";
-            this.Tracks = SQLServices.QueryTimetable<Track>(query);
+            await Task.Run( () => this.Tracks = SQLServices.QueryTimetable<Track>(query) );
         }
     }
 }
