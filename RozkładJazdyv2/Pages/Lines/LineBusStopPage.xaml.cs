@@ -297,7 +297,11 @@ namespace RozkładJazdyv2.Pages.Lines
             => LineBusStopPage_LoadedAsync(this, null);
 
         private void UpdateFavouriteSign()
-            => BusStopFavouriteHeartSignTextBlock.Text = _SelectedBusStop.IsFavourite() ? "\xE00C" : "\xE00B";
+        {
+            BusStopFavouriteHeartSignTextBlock.Text = _SelectedBusStop.IsFavourite() ? "\xE00C" : "\xE00B";
+            BusStopsComboBox.IsDropDownOpen = true;
+            BusStopsComboBox.IsDropDownOpen = false;
+        }
 
         private async void BusStopFavouriteButton_Click(object sender, RoutedEventArgs e)
         {

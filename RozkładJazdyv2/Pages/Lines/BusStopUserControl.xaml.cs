@@ -75,7 +75,19 @@ namespace RozkładJazdyv2.Pages.Lines
         {
             BusStopNameTextBlock.Foreground = new SolidColorBrush(Colors.White);
             BusStopNameTextBlock.FontWeight = FontWeights.Normal;
-            FauvoriteTextBlock.Text = busStop.IsFavourite() ? "\xE00B" : "";
+            UpdateFavouriteStyle(busStop);
+        }
+
+        private void UpdateFavouriteStyle(BusStop busStop, bool? fav = null)
+        {
+            bool isFavBusStop = false;
+            if (fav == null)
+                isFavBusStop = busStop.IsFavourite();
+            else
+                isFavBusStop = fav ?? false;
+
+            this.FavouriteFlyoutTextBlock.Text = (isFavBusStop ? "Usuń z ulubionych" : "Dodaj do ulubionych");
+            FauvoriteTextBlock.Text = isFavBusStop ? "\xE00B" : "";
         }
 
         private void SetIsBusStopZoneStyle()
@@ -89,5 +101,22 @@ namespace RozkładJazdyv2.Pages.Lines
 
         private void LineViewBusStop_PointerEntered(object sender, PointerRoutedEventArgs e)
             => OnBusStopGridPointerEntered?.Invoke(sender, e);
+
+        private void Favourite_Click(object sender, RoutedEventArgs e)
+        {
+            BusStop busStop = ((sender as MenuFlyoutItem).DataContext as LineViewBusStop).BusStop;
+            bool isBusStopFavourite = busStop.IsFavourite();
+            Timetable.Instance.BusStopsNames.First(p => p.Id == busStop.IdOfName).IsFavourite = (isBusStopFavourite = !isBusStopFavourite);
+            UpdateFavouriteStyle(busStop, isBusStopFavourite);
+        }
+
+        private void Grid_Holding(object sender, HoldingRoutedEventArgs e)
+            => ShowFlyoutAtGrid(sender);
+
+        private void Grid_RightTapped(object sender, RightTappedRoutedEventArgs e)
+            => ShowFlyoutAtGrid(sender);
+
+        private void ShowFlyoutAtGrid(object sender)
+            => FlyoutBase.ShowAttachedFlyout((FrameworkElement) sender);
     }
 }

@@ -201,5 +201,28 @@ namespace RozkładJazdyv2.Pages.Favourites
 
             BusStopsListView.SelectedIndex = -1;
         }
+
+        private void BusStop_Holding(object sender, HoldingRoutedEventArgs e)
+            => ShowFlyoutAtGrid(sender);
+
+        private void BusStop_RightTapped(object sender, RightTappedRoutedEventArgs e)
+            => ShowFlyoutAtGrid(sender);
+
+        private void ShowFlyoutAtGrid(object sender)
+            => FlyoutBase.ShowAttachedFlyout((FrameworkElement)sender);
+
+        private void BusStopFlyout_Click(object sender, RoutedEventArgs e)
+        {
+            BusStopName busStopName = ((sender as MenuFlyoutItem).DataContext as BusStopName);
+            busStopName.IsFavourite = false;
+            _FavouriteBusStops.Remove(busStopName);
+        }
+
+        private void MenuFlyoutBusStopItem_Loaded(object sender, RoutedEventArgs e)
+        {
+            MenuFlyoutItem textBlock = (sender as MenuFlyoutItem);
+            BusStopName busStopName = textBlock.DataContext as BusStopName;
+            textBlock.Text = "Usuń z ulubionych";
+        }
     }
 }

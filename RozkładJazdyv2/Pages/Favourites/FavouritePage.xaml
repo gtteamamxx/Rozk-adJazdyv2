@@ -69,7 +69,17 @@
                     <ListView.ItemTemplate>
                         <DataTemplate x:DataType="local2:BusStopName">
                             <Grid Margin="0 0 10 0"
-                                  Width="210">
+                                  Width="210"
+                                  Holding="BusStop_Holding"
+                                  RightTapped="BusStop_RightTapped">
+                                
+                                <FlyoutBase.AttachedFlyout>
+                                    <MenuFlyout>
+                                        <MenuFlyoutItem Click="BusStopFlyout_Click"
+                                                        Loaded="MenuFlyoutBusStopItem_Loaded"/>
+                                    </MenuFlyout>    
+                                </FlyoutBase.AttachedFlyout>
+                                
                                 <TextBlock Text="{x:Bind Name}"
                                            TextWrapping="Wrap" />
 

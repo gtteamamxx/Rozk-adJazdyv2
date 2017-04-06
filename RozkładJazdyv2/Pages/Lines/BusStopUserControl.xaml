@@ -9,20 +9,29 @@
     d:DesignHeight="300"
     d:DesignWidth="400">
 
-        <Grid HorizontalAlignment="Center"
-              PointerExited="LineViewBusStop_PointerEntered">
+    <Grid HorizontalAlignment="Center"
+          PointerExited="LineViewBusStop_PointerEntered"
+          Holding="Grid_Holding"
+          RightTapped="Grid_RightTapped">
+        
+        <FlyoutBase.AttachedFlyout>
+            <MenuFlyout>
+                <MenuFlyoutItem Click="Favourite_Click"
+                                x:Name="FavouriteFlyoutTextBlock" />
+            </MenuFlyout>
+        </FlyoutBase.AttachedFlyout>
+        
+        <TextBlock FontSize="13"
+                   Name="BusStopNameTextBlock"
+                   Width="200"
+                   TextAlignment="Left"
+                   TextWrapping="Wrap" />
 
-            <TextBlock FontSize="13"
-                       Name="BusStopNameTextBlock"
-                       Width="200"
-                       TextAlignment="Left"
-                       TextWrapping="Wrap" />
-
-            <TextBlock FontFamily="Segoe MDL2 Assets"
-                       HorizontalAlignment="Right"
-                       FontSize="10"
-                       VerticalAlignment="Top"
-                       Foreground="GreenYellow"
-                       Name="FauvoriteTextBlock" />
+        <TextBlock FontFamily="Segoe MDL2 Assets"
+                   HorizontalAlignment="Right"
+                   FontSize="10"
+                   VerticalAlignment="Top"
+                   Foreground="GreenYellow"
+                   Name="FauvoriteTextBlock" />
     </Grid>
 </UserControl>
