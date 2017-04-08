@@ -45,7 +45,7 @@ namespace RozkładJazdyv2.Pages.Favourites
         }
 
         private void RegisterEvents()
-            => Pages.Lines.LineUserControl.OnLineFavouriteChanged += (Line line) =>
+            => Pages.Lines.LineUserControl.OnLineFavouriteChanged += async (Line line) =>
             {
                 if (line.IsFavourite)
                     _FavouriteLines.Add(line);
@@ -53,14 +53,17 @@ namespace RozkładJazdyv2.Pages.Favourites
                 {
                     _FavouriteLines.Remove(line);
                     if (_FavouriteLines.Count() == 0)
+                    {
+                        await Task.Delay(100);
                         FavouritePage_LoadedAsync(null, null);
+                    }
                 }
             };
 
         private void FavouritePage_LoadedAsync(object sender, RoutedEventArgs e)
         {
             BusStopsColumnGrid.Visibility = Visibility.Collapsed;
-            BusStopsColumnGrid.Visibility = Visibility.Collapsed;
+            LinesColumnGrid.Visibility = Visibility.Collapsed;
 
             LoadingProgressRing.IsActive = true;
 

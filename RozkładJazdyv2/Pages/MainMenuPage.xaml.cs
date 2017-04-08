@@ -89,6 +89,7 @@ namespace RozkładJazdyv2.Pages
                     break;
 
                 case MainMenuButton.ButtonType.Communicates:
+                    frame.Navigate(typeof(Pages.RSS.CommunicatesPage));
                     break;
 
                 default:

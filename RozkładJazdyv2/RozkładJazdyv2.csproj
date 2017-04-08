@@ -106,6 +106,7 @@
     <Compile Include="Model\BusStopListPage\ChangeBusStopParametr.cs" />
     <Compile Include="Model\Extensions\IEnumerableExtension.cs" />
     <Compile Include="Model\Extensions\PageExtension.cs" />
+    <Compile Include="Model\Internet\RssService.cs" />
     <Compile Include="Model\LinesPage\AdditionalInfo.cs" />
     <Compile Include="Model\LinesPage\ChangeBusStopParametr.cs" />
     <Compile Include="Model\LinesPage\ChangeLineParameter.cs" />
@@ -115,6 +116,7 @@
     <Compile Include="Model\LinesPage\LineViewHour.cs" />
     <Compile Include="Model\MainMenu\ButtonHelper.cs" />
     <Compile Include="Model\MainMenu\MainMenuButton.cs" />
+    <Compile Include="Model\RSS\RssItem.cs" />
     <Compile Include="Model\Timetable\BusStop.cs" />
     <Compile Include="Model\Timetable\Names\BusStopName.cs" />
     <Compile Include="Model\Events\EventHelper.cs" />
@@ -167,6 +169,9 @@
     </Compile>
     <Compile Include="Pages\MainPageFrames\SavingTimetable.xaml.cs">
       <DependentUpon>SavingTimetable.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Pages\RSS\CommunicatesPage.xaml.cs">
+      <DependentUpon>CommunicatesPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
@@ -236,6 +241,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Pages\MainPageFrames\SavingTimetable.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Pages\RSS\CommunicatesPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
