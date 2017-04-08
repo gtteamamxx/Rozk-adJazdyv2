@@ -126,7 +126,7 @@ namespace RozkładJazdyv2.Model.LinesPage
 
         private static void LinesGridView_ContainerContentChanging(ListViewBase sender, ContainerContentChangingEventArgs args)
         {
-            Grid gridOfLine = ((Grid)args.ItemContainer.ContentTemplateRoot);
+            Grid gridOfLine = ((Grid)((Pages.Lines.LineUserControl)args.ItemContainer.ContentTemplateRoot).Content);
 
             if ((_LastAcceptedLineBits & Line.FAVOURITE_BIT) == Line.FAVOURITE_BIT)
                 return;

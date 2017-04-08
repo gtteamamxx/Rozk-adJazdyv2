@@ -39,9 +39,23 @@ namespace RozkładJazdyv2.Pages.Favourites
             _FavouriteBusStops = new ObservableCollection<BusStopName>();
             SetLinesGridViewStyle();
 
+            RegisterEvents();
             BusStopsListView.SelectionChanged += BusStopsListView_SelectionChanged;
             this.Loaded += FavouritePage_LoadedAsync;
         }
+
+        private void RegisterEvents()
+            => Pages.Lines.LineUserControl.OnLineFavouriteChanged += (Line line) =>
+            {
+                if (line.IsFavourite)
+                    _FavouriteLines.Add(line);
+                else
+                {
+                    _FavouriteLines.Remove(line);
+                    if (_FavouriteLines.Count() == 0)
+                        FavouritePage_LoadedAsync(null, null);
+                }
+            };
 
         private void FavouritePage_LoadedAsync(object sender, RoutedEventArgs e)
         {
@@ -50,8 +64,8 @@ namespace RozkładJazdyv2.Pages.Favourites
 
             LoadingProgressRing.IsActive = true;
 
-            var areLinesInFavourites = LoadFavouriteLines();
-            var areStopsInFavourites = LoadFavouriteStops();
+            bool areLinesInFavourites = LoadFavouriteLines();
+            bool areStopsInFavourites = LoadFavouriteStops();
 
             if (areLinesInFavourites || areStopsInFavourites)
             {
@@ -216,6 +230,8 @@ namespace RozkładJazdyv2.Pages.Favourites
             BusStopName busStopName = ((sender as MenuFlyoutItem).DataContext as BusStopName);
             busStopName.IsFavourite = false;
             _FavouriteBusStops.Remove(busStopName);
+            if (_FavouriteBusStops.Count() == 0)
+                FavouritePage_LoadedAsync(null, null);
         }
 
         private void MenuFlyoutBusStopItem_Loaded(object sender, RoutedEventArgs e)
