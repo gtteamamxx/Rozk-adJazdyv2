@@ -30,6 +30,7 @@ namespace RozkładJazdyv2.Pages.BusStops
     {
         private ObservableCollection<BusStopName> _ListOfBusStopNames;
         private ObservableCollection<BusStopDependency> _BusStopDependencies;
+        private Dictionary<BusStopName, Grid> _BusStopNamesDict;
 
         private bool _LoadingDependencyLines;
         private BusStopName _LastClickedBusStop;
@@ -42,6 +43,7 @@ namespace RozkładJazdyv2.Pages.BusStops
             this.SetIsBackFromPageAllowed(true);
 
             _BusStopDependencies = new ObservableCollection<BusStopDependency>();
+            _BusStopNamesDict = new Dictionary<BusStopName, Grid>();
             _ListOfBusStopNames = Timetable.Instance.BusStopsNames.OrderBy(p => p.Name).ToObservableCollection();
 
             this.Loaded += BusStopsListPage_Loaded;
@@ -201,6 +203,44 @@ namespace RozkładJazdyv2.Pages.BusStops
             if (changeBusStopParametr == null)
                 return;
             _SelectedBusStop = changeBusStopParametr.BusStopName;
+        }
+
+        private void BusStopMenuFlyoutItem_Click(object sender, RoutedEventArgs e)
+        {
+            BusStopName busStop = (sender as MenuFlyoutItem).DataContext as BusStopName;
+            busStop.IsFavourite = !busStop.IsFavourite;
+            Grid grid = _BusStopNamesDict.First(p => p.Key == busStop).Value;
+            ChangeBusStopFavouriteSign(
+                grid.Children.ElementAt(1) as TextBlock,
+                busStop.FavouriteText); 
+        }
+
+        private void BusStopMenuFlyoutItem_Loading(FrameworkElement sender, object args)
+        {
+            var textBlock = (sender as MenuFlyoutItem);
+            BusStopName busStop = textBlock.DataContext as BusStopName;
+            textBlock.Text = busStop.IsFavourite ? "Usuń z ulubionych" : "Dodaj do ulubionych";
+        }
+
+        private void ChangeBusStopFavouriteSign(TextBlock textBlock, string value)
+            => textBlock.Text = value;
+
+        private void BusStopGrid_RightTapped(object sender, RightTappedRoutedEventArgs e)
+            => ShowAttachedFlyout(sender);
+
+        private void BusStopGrid_Holding(object sender, HoldingRoutedEventArgs e)
+            => ShowAttachedFlyout(sender);
+
+        private void ShowAttachedFlyout(object sender)
+            => FlyoutBase.ShowAttachedFlyout((FrameworkElement)sender);
+
+        private void BusStopsListView_ContainerContentChanging(ListViewBase sender, ContainerContentChangingEventArgs args)
+        {
+            BusStopName busStopName = args.Item as BusStopName;
+            if (_BusStopNamesDict.Any(p => p.Key == busStopName))
+                return;
+            Grid grid = (args.ItemContainer as ListViewItem).ContentTemplateRoot as Grid;
+            _BusStopNamesDict.Add(busStopName, grid);
         }
     }
 }

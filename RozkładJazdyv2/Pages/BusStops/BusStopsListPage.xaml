@@ -28,13 +28,25 @@
             <ListView Grid.Row="1"
                       Name="BusStopsListView"
                       ItemsSource="{x:Bind _ListOfBusStopNames}"
-                      SelectionChanged="BusStopsListView_SelectionChanged">
+                      SelectionChanged="BusStopsListView_SelectionChanged"
+                      ContainerContentChanging="BusStopsListView_ContainerContentChanging">
                 
                 <ListView.ItemTemplate>
                     <DataTemplate x:DataType="local:BusStopName">
                         <Grid Margin="0 0 10 0"
-                              Width="210">
+                              Width="210"
+                              RightTapped="BusStopGrid_RightTapped"
+                              Holding="BusStopGrid_Holding">
+
+                            <FlyoutBase.AttachedFlyout>
+                                <MenuFlyout>
+                                    <MenuFlyoutItem Click="BusStopMenuFlyoutItem_Click"
+                                                    Loading="BusStopMenuFlyoutItem_Loading"/>
+                                </MenuFlyout>
+                            </FlyoutBase.AttachedFlyout>
+                            
                             <TextBlock Text="{x:Bind Name}"
+                                       Width="200"
                                        TextWrapping="Wrap" />
 
                             <TextBlock HorizontalAlignment="Right"
@@ -66,7 +78,6 @@
                 <DataTemplate x:DataType="dep:BusStopDependency">
                     <StackPanel Margin="10 5 0 5"
                                 Background="#04FFFFFF">
-
                         <Grid>
                             <Button Background="#373A45"
                                     VerticalContentAlignment="Center"
@@ -77,7 +88,7 @@
                                 <Grid Width="36"
                                       Height="40">
                                     <TextBlock HorizontalAlignment="Center"
-                                                VerticalAlignment="Center"
+                                               VerticalAlignment="Center"
                                                Foreground="White"
                                                Text="{x:Bind Line.Name}"/>
 
