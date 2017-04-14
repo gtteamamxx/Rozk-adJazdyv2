@@ -16,7 +16,7 @@
             <ColumnDefinition />
         </Grid.ColumnDefinitions>
         
-        <Grid Width="250">
+        <Grid Width="150">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition />
@@ -34,7 +34,6 @@
                 <ListView.ItemTemplate>
                     <DataTemplate x:DataType="local:BusStopName">
                         <Grid Margin="0 0 10 0"
-                              Width="210"
                               RightTapped="BusStopGrid_RightTapped"
                               Holding="BusStopGrid_Holding">
 
@@ -46,7 +45,8 @@
                             </FlyoutBase.AttachedFlyout>
                             
                             <TextBlock Text="{x:Bind Name}"
-                                       Width="200"
+                                       FontSize="11"
+                                       Margin="0 0 15 0"
                                        TextWrapping="Wrap" />
 
                             <TextBlock HorizontalAlignment="Right"
