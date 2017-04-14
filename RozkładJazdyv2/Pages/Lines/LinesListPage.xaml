@@ -24,6 +24,14 @@
                             Name="SearchLineAutoSuggestBox"/>
         </Grid>
 
+        <Grid Grid.Row="1">
+
+            <ScrollViewer Name="LinesScrollViewer">
+                <StackPanel />
+            </ScrollViewer>
+
+        </Grid>
+
         <StackPanel HorizontalAlignment="Center"
                     VerticalAlignment="Center"
                     Grid.RowSpan="2"
@@ -39,13 +47,5 @@
                        Name="LoadingTextBlock"
                        Text="Dodawanie linii do widoku..." />
         </StackPanel>
-
-        <Grid Grid.Row="1">
-
-            <ScrollViewer Name="LinesScrollViewer">
-                <StackPanel />
-            </ScrollViewer>
-
-        </Grid>
     </Grid>
 </Page>
