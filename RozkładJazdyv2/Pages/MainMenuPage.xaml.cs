@@ -79,7 +79,8 @@ namespace RozkładJazdyv2.Pages
             if (clickedButton == null)
                 return;
 
-            await Task.Delay(100);
+            ResetButtonSelected();
+            await Task.Delay(250);
 
             Frame frame = MainFrameHelper.GetMainFrame();
             switch (clickedButton.Type)

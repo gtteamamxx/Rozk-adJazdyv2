@@ -69,7 +69,7 @@ namespace RozkładJazdyv2.Pages.Lines
 
         private async Task ShowLinePageAsync(ChangeLineParameter changeLineParameter)
         {
-            await Task.Delay(100);
+            await Task.Delay(250);
             MainFrameHelper.GetMainFrame().Navigate(typeof(LinePage), changeLineParameter);
         }
 
@@ -243,11 +243,9 @@ namespace RozkładJazdyv2.Pages.Lines
             var selectedTrack = listView.Name.Contains("First")
                 ? _SelectedSchedule.Tracks[0] : _SelectedSchedule.Tracks[1];
 
-            await Task.Delay(100);
-
-            ChangePageToBusPage(selectedBusStopInListView.BusStop, selectedTrack);
-
             listView.SelectedItem = -1;
+            await Task.Delay(250);
+            ChangePageToBusPage(selectedBusStopInListView.BusStop, selectedTrack);
         }
 
         private void LineViewBusStop_PointerEntered(object sender, PointerRoutedEventArgs e)

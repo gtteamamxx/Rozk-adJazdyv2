@@ -122,7 +122,7 @@ namespace RozkładJazdyv2.Pages.Lines
 
         private static async Task ShowLinePageAsync(ChangeLineParameter changeLineParameter)
         {
-            await Task.Delay(100);
+            await Task.Delay(250);
             MainFrameHelper.GetMainFrame().Navigate(typeof(LinePage), changeLineParameter);
         }
 
@@ -133,9 +133,9 @@ namespace RozkładJazdyv2.Pages.Lines
                 return;
 
             Line line = gridView.SelectedItem as Line;
-
-            await ShowLinePageBySchedulesAsync(line, line.GridObjectInLinesList, ScheduleClickedAsync);
             ResetClickedGrids();
+            await Task.Delay(250);
+            await ShowLinePageBySchedulesAsync(line, line.GridObjectInLinesList, ScheduleClickedAsync);
         }
 
         public static async void ScheduleClickedAsync(object sender, RoutedEventArgs e)
