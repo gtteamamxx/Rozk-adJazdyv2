@@ -303,14 +303,32 @@ namespace RozkładJazdyv2.Pages.Lines
             BusStopsComboBox.IsDropDownOpen = false;
         }
 
-        private async void BusStopFavouriteButton_Click(object sender, RoutedEventArgs e)
+        private async void BusStopFavouriteButton_ClickAsync(object sender, RoutedEventArgs e)
         {
             Button button = sender as Button;
             button.IsEnabled = false;
 
-            Timetable.Instance.BusStopsNames.First(p => p.Id == _SelectedBusStop.IdOfName).IsFavourite = !_SelectedBusStop.IsFavourite();
+            Timetable.Instance.BusStopsNames
+                .First(p => p.Id == _SelectedBusStop.IdOfName).IsFavourite = !_SelectedBusStop.IsFavourite();
             await Task.Delay(250);
+
             UpdateFavouriteSign();
+            button.IsEnabled = true;
+        }
+
+        private async void BusStopGoToBusStopPageButton_ClickAsync(object sender, RoutedEventArgs e)
+        {
+            Button button = sender as Button;
+            if (!button.IsEnabled)
+                return;
+
+            button.IsEnabled = false;
+            await Task.Delay(250);
+
+            BusStopName selectedBusStopName = Timetable.Instance.BusStopsNames.First(p => p.Id == _SelectedBusStop.IdOfName);
+            MainFrameHelper.GetMainFrame().Navigate(typeof(Pages.BusStops.BusStopsListPage),
+                new Model.BusStopListPage.ChangeBusStopParametr() { BusStopName = selectedBusStopName });
+
             button.IsEnabled = true;
         }
     }

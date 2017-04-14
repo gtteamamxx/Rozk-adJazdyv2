@@ -77,16 +77,27 @@
                             Margin="10 0 0 0"
                             Height="40"
                             Name="BusStopFavouriteButton"
-                            Click="BusStopFavouriteButton_Click">
+                            Click="BusStopFavouriteButton_ClickAsync">
 
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock VerticalAlignment="Center"
-                                       FontFamily="Segoe MDL2 Assets"
-                                       Text="&#xE00B;"
-                                       Foreground="GreenYellow"
-                                       Name="BusStopFavouriteHeartSignTextBlock"
-                                       FontSize="20"/>
-                        </StackPanel>
+                        <TextBlock VerticalAlignment="Center"
+                                   FontFamily="Segoe MDL2 Assets"
+                                   Text="&#xE00B;"
+                                   Foreground="GreenYellow"
+                                   Name="BusStopFavouriteHeartSignTextBlock"
+                                   FontSize="20"/>
+                    </Button>
+
+
+                    <Button VerticalAlignment="Center"
+                            Margin="10 0 0 0"
+                            Height="40"
+                            Name="BusStopGoToBusStopPageButton"
+                            Click="BusStopGoToBusStopPageButton_ClickAsync">
+
+                        <TextBlock VerticalAlignment="Center"
+                                   Text="Pokaż"
+                                   Name="BusStopGoToBusStopPageTextBlock"
+                                   FontSize="20"/>
                     </Button>
                 </StackPanel>
             </StackPanel>

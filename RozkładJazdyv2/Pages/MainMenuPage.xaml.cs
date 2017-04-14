@@ -42,8 +42,16 @@ namespace RozkładJazdyv2.Pages
             
             AddButtonsToPage();
             RegisterButtonHooks();
+    
+            this.Loaded += (s, e) =>
+            {
+                ButtonListGridView.InvalidateMeasure(); //update layout
+                ButtonListGridView.UpdateLayout();
+                ButtonListGridView.InvalidateArrange();
 
-            this.Loaded += (s, e) => ChangeSizeOfButtons(this.ActualHeight, this.ActualWidth);
+                ChangeSizeOfButtons(this.ActualHeight, this.ActualWidth);
+            };
+
             this.SizeChanged += MainMenu_SizeChanged;
         }
 
@@ -52,7 +60,7 @@ namespace RozkładJazdyv2.Pages
             double size = ((width / _SizeMultiplier) + (height / _SizeMultiplier)) / 2;
             double multiplier = 1;
 
-            foreach (var buttonGrid in _ListOfGrid)
+            foreach (Grid buttonGrid in _ListOfGrid)
             {
                 multiplier = size / buttonGrid.Width;
                 if (buttonGrid.Width * multiplier > _MaxSizeOfButton)
@@ -73,7 +81,7 @@ namespace RozkładJazdyv2.Pages
 
             await Task.Delay(100);
 
-            var frame = MainFrameHelper.GetMainFrame();
+            Frame frame = MainFrameHelper.GetMainFrame();
             switch (clickedButton.Type)
             {
                 case MainMenuButton.ButtonType.Lines:
@@ -100,7 +108,7 @@ namespace RozkładJazdyv2.Pages
         private void AddButtonsToPage()
         {
             ButtonHelper.CreateButtonList(ButtonListGridView);
-            var backgroundColor = new Color() { R = 121, G = 124, B = 129, A = 255 }; //"gray"
+            Color backgroundColor = new Color() { R = 121, G = 124, B = 129, A = 255 }; //"gray"
 
             ButtonHelper.AddButton("Zobacz listę linii", "Linie", "\xE806", backgroundColor, MainMenuButton.ButtonType.Lines);
             ButtonHelper.AddButton("Zobacz listę przystanków", "Przystanki", "\xE174", backgroundColor, MainMenuButton.ButtonType.Stops);
@@ -110,7 +118,7 @@ namespace RozkładJazdyv2.Pages
 
         private void ButtonListGridViewContentChanged(ListViewBase sender, ContainerContentChangingEventArgs args)
         {
-            var gridOfButton = ((Grid)args.ItemContainer.ContentTemplateRoot);
+            Grid gridOfButton = ((Grid)args.ItemContainer.ContentTemplateRoot);
             bool isGridInList = _ListOfGrid.FirstOrDefault(p => p == gridOfButton) != null;
 
             if (!isGridInList)
